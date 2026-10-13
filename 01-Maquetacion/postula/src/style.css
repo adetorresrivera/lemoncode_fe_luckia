@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  /* Marca "Brote" — claro: 50 fondo, 500 botones, 900 texto */
+  --color-brote-50: #f0fdfa;
+  --color-brote-300: #5eead4;
+  --color-brote-500: #0f766e;
+  --color-brote-900: #134e4a;
+  --color-brote-950: #042f2e;
+
+  /* Acento: 500 en tema claro, 400 en tema oscuro; texto encima siempre brote-950 */
+  --color-coral-400: #fb923c;
+  --color-coral-500: #f97316;
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
