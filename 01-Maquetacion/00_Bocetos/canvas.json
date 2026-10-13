@@ -1,0 +1,25 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-13T10:00:00Z" },
+  "title": "Postula · Bocetos del laboratorio 1",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 3500, "title": "Landing · escritorio", "expand": "fill", "is_interactive": true },
+    "LandingMovil.dc.html": { "x": 1360, "y": 0, "w": 390, "h": 2500, "title": "Landing · móvil" },
+    "Dashboard.dc.html": { "x": 0, "y": 3900, "w": 1280, "h": 1100, "title": "App · Panel", "expand": "fill", "is_interactive": true },
+    "Candidaturas.dc.html": { "x": 1360, "y": 3900, "w": 1280, "h": 1000, "title": "App · Candidaturas (tabla)", "expand": "fill", "is_interactive": true },
+    "Kanban.dc.html": { "x": 2720, "y": 3900, "w": 1280, "h": 1000, "title": "App · Candidaturas (kanban)", "expand": "fill", "is_interactive": true }
+  },
+  "order": ["Main.dc.html", "LandingMovil.dc.html", "Dashboard.dc.html", "Candidaturas.dc.html", "Kanban.dc.html"],
+  "notes": {
+    "t_publica": { "x": 0, "y": -300, "text": "Parte pública", "kind": "title1", "maxW": 1750 },
+    "t_app": { "x": 0, "y": 3600, "text": "La app (tras iniciar sesión)", "kind": "title1", "maxW": 4000 },
+    "n_landing": { "x": 1830, "y": 0, "w": 460, "fill": "orange", "size": "m", "text": "Landing → piezas del lab 1\n\nO3 Cabecera: flex + justify-between.\nO4 Hero: 1 columna en móvil, 2 desde md:.\nO6 Cómo funciona: flex-col md:flex-row.\nO5 Funcionalidades: 6 tarjetas, grid 1 → sm:2 → lg:3.\nP3 Planes: Pro destacado, etiqueta con absolute sobre relative.\nP4 FAQ: details + summary, flecha con group-open:rotate-180.\nO7 Pie: 3 columnas + línea de copyright con border-t.\nP5 Newsletter: label, invalid:, peer-invalid:block." },
+    "n_movil": { "x": 1830, "y": 700, "w": 460, "fill": "blue", "size": "m", "text": "Móvil\n\nTodo en una columna. El menú se esconde tras el botón de menú: buen sitio para el desafío D1 (checkbox + peer-checked:, sin JS).\n\nPlanes, FAQ y pie siguen igual, apilados." },
+    "n_dash": { "x": 0, "y": 5100, "w": 600, "fill": "orange", "size": "m", "text": "Panel → D5 (layout de aplicación)\n\nGrid con áreas: barra lateral + contenido. En móvil la barra pasa arriba.\nEstadísticas: equivalen a los planes con destacado (la de entrevistas resaltada).\nSolo scrollea la zona de contenido." },
+    "n_tabla": { "x": 1360, "y": 5000, "w": 600, "fill": "orange", "size": "m", "text": "Tabla\n\nEl selector Tabla | Kanban son dos enlaces a dos pantallas (en React será estado).\nLa tabla va dentro de un contenedor con overflow-x-auto para el móvil.\nEl estado se lee por el texto de la etiqueta, no solo por el color (O8)." },
+    "n_kanban": { "x": 2720, "y": 5000, "w": 600, "fill": "orange", "size": "m", "text": "Kanban\n\nColumnas con flex y overflow-x-auto: en móvil se desliza en horizontal.\nSin arrastrar y soltar en el lab 1: eso llega con React.\nCada tarjeta es un article con su h3." }
+  },
+  "designSystems": []
+}

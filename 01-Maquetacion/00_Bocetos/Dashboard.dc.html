@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Postula · Panel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F2328}a:hover{color:#2457C5}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1F2328; background: #F7F7F5; min-height: 100vh; display: flex; flex-wrap: wrap">
+
+  <aside style="flex: 1 1 220px; background: #FFFFFF; border-right: 1px solid #D0D4DA; padding: 20px 16px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 20px">
+      <span style="width: 28px; height: 28px; border-radius: 7px; background: #2457C5; display: inline-block"></span>
+      Postula
+    </a>
+    <nav aria-label="Aplicación">
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+        <li><a href="Dashboard.dc.html" aria-current="page" style="display: block; padding: 10px 12px; border-radius: 8px; background: #E3EBFA; color: #1D4596; font-weight: 600; text-decoration: none">Panel</a></li>
+        <li><a href="Candidaturas.dc.html" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Candidaturas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Empresas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Contactos</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">CV y cartas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Ajustes</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <div>
+        <h1 style="margin: 0; font-size: 28px">Hola, [Nombre]</h1>
+        <p style="margin: 4px 0 0; color: #5B616B">Así va tu búsqueda este mes.</p>
+      </div>
+      <a href="#" style="padding: 12px 18px; border-radius: 8px; background: #2457C5; color: #FFFFFF; text-decoration: none; font-weight: 600">Nueva candidatura</a>
+    </div>
+
+    <section aria-labelledby="stats-titulo">
+      <h2 id="stats-titulo" style="margin: 0 0 12px; font-size: 18px">Resumen</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
+        <article style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 500; color: #5B616B">Enviadas</h3>
+          <p style="margin: 0; font-size: 36px; font-weight: 700">18</p>
+        </article>
+        <article style="background: #2457C5; color: #FFFFFF; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 500">En entrevista</h3>
+          <p style="margin: 0; font-size: 36px; font-weight: 700">4</p>
+          <p style="margin: 0; font-size: 13px">2 esta semana</p>
+        </article>
+        <article style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 500; color: #5B616B">Ofertas</h3>
+          <p style="margin: 0; font-size: 36px; font-weight: 700">1</p>
+        </article>
+        <article style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 500; color: #5B616B">Tasa de respuesta</h3>
+          <p style="margin: 0; font-size: 36px; font-weight: 700">33 %</p>
+        </article>
+      </div>
+    </section>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start">
+      <section aria-labelledby="prox-titulo" style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+        <h2 id="prox-titulo" style="margin: 0; font-size: 18px">Próximos pasos</h2>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+          <sc-for list="{{next}}" as="n" hint-placeholder-count="3">
+            <li style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #ECEEF1">
+              <span><strong>{{n.what}}</strong><br><span style="color: #5B616B; font-size: 14px">{{n.where}}</span></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; white-space: nowrap">{{n.when}}</span>
+            </li>
+          </sc-for>
+        </ul>
+      </section>
+
+      <section aria-labelledby="cv-titulo" style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+        <h2 id="cv-titulo" style="margin: 0; font-size: 18px">Entrevistas por versión de CV</h2>
+        <sc-for list="{{cvs}}" as="cv" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{cv.name}}</span><span style="font-family: 'IBM Plex Mono', monospace">{{cv.label}}</span></div>
+            <div style="height: 10px; border-radius: 999px; background: #ECEEF1; overflow: hidden"><div style="height: 100%; width: {{cv.pct}}; background: #2457C5"></div></div>
+          </div>
+        </sc-for>
+      </section>
+    </div>
+
+    <section aria-labelledby="ult-titulo" style="display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 id="ult-titulo" style="margin: 0; font-size: 18px">Últimas candidaturas</h2>
+        <a href="Candidaturas.dc.html" style="font-weight: 600">Ver todas</a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px">
+        <sc-for list="{{recent}}" as="r" hint-placeholder-count="3">
+          <article style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+            <h3 style="margin: 0; font-size: 16px">{{r.role}}</h3>
+            <p style="margin: 0; color: #5B616B; font-size: 14px">{{r.company}}</p>
+            <span style="align-self: flex-start; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{r.bg}}; color: {{r.fg}}">{{r.status}}</span>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const badge = {
+      Enviada: { bg: '#E3EBFA', fg: '#1D4596' },
+      Entrevista: { bg: '#FCE9D6', fg: '#8A4300' },
+      Oferta: { bg: '#DDF0E2', fg: '#1D6B35' }
+    };
+    const recent = [
+      { role: 'Frontend Developer', company: 'Brisa Software', status: 'Entrevista' },
+      { role: 'Desarrolladora React', company: 'Kora Health', status: 'Enviada' },
+      { role: 'Junior Web Developer', company: 'Talaia Studio', status: 'Oferta' }
+    ].map((r) => ({ ...r, ...badge[r.status] }));
+    return {
+      recent,
+      next: [
+        { what: 'Prueba técnica', where: 'Brisa Software', when: 'jue 15/10' },
+        { what: 'Llamada con RR. HH.', where: 'Mareta Pagos', when: 'lun 19/10' },
+        { what: 'Escribir para seguimiento', where: 'Ondina Games', when: 'mié 21/10' }
+      ],
+      cvs: [
+        { name: 'CV frontend v3', label: '3 de 8', pct: '38%' },
+        { name: 'CV generalista v1', label: '1 de 7', pct: '14%' },
+        { name: 'CV React v2', label: '0 de 3', pct: '0%' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

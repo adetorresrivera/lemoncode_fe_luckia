@@ -45,3 +45,4 @@ inventados escritos en el HTML, sin backend ni lógica.
 - Si dudas entre dos enfoques, pregúntame antes de elegir.
 - Todas las soluciones deben funcionar con DevContainers. No instales dependencies en local sin confirmar antes.
 - El proyecto está estructurado en laboratorios entregables dentro de cada carpeta (lab.md) que irán desarrollandose hasta el producto final. Cada uno es una fase distinta del proyecto. No modifiques varios entregables a la vez.
+- Para cada entregable asegurate de que exite un fichero readme.md con instrucciones sobre como lanzar el proyecto.

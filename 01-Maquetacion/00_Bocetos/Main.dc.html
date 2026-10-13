@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Postula · Landing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F2328}a:hover{color:#2457C5}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1F2328; background: #F7F7F5; min-height: 100vh">
+
+  <header style="background: #FFFFFF; border-bottom: 1px solid #D0D4DA">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 22px">
+        <span style="width: 32px; height: 32px; border-radius: 8px; background: {{accent}}; display: inline-block"></span>
+        Postula
+      </a>
+      <nav aria-label="Principal">
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; font-size: 15px">
+          <li><a href="#como" style="text-decoration: none">Cómo funciona</a></li>
+          <li><a href="#planes" style="text-decoration: none">Planes</a></li>
+          <li><a href="#faq" style="text-decoration: none">Preguntas</a></li>
+          <li><a href="Dashboard.dc.html" style="text-decoration: none">Entrar</a></li>
+          <li><a href="Dashboard.dc.html" style="display: inline-block; padding: 10px 18px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-weight: 600">Crear cuenta</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="hero-titulo" style="max-width: 1120px; margin: 0 auto; padding: 72px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 48px; align-items: center">
+      <div style="display: flex; flex-direction: column; gap: 20px; max-width: 34rem">
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5B616B; text-transform: uppercase; letter-spacing: 0.06em">Gestor de candidaturas</p>
+        <h1 id="hero-titulo" style="margin: 0; font-size: 48px; line-height: 1.1; font-weight: 700">Toda tu búsqueda de empleo, en un solo sitio.</h1>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #444A53">Guarda cada oferta, apunta qué CV enviaste y a quién, y sabe en qué punto está cada proceso sin perderte entre correos.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px">
+          <a href="Dashboard.dc.html" style="padding: 14px 22px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-weight: 600">Empieza gratis</a>
+          <a href="#como" style="padding: 14px 22px; border-radius: 8px; border: 1px solid #1F2328; text-decoration: none; font-weight: 600">Ver cómo funciona</a>
+        </div>
+      </div>
+      <div style="aspect-ratio: 4 / 3; border: 2px dashed #9AA1AB; border-radius: 16px; background: #E6E8EB; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #5B616B; font-family: 'IBM Plex Mono', monospace; font-size: 14px">Imagen: captura del tablero kanban de la app</div>
+    </section>
+
+    <section id="como" aria-labelledby="como-titulo" style="background: #FFFFFF; border-top: 1px solid #D0D4DA; border-bottom: 1px solid #D0D4DA">
+      <div style="max-width: 1120px; margin: 0 auto; padding: 64px 24px; display: flex; flex-direction: column; gap: 40px">
+        <h2 id="como-titulo" style="margin: 0; font-size: 32px; text-align: center">Cómo funciona</h2>
+        <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 24px">
+          <sc-for list="{{steps}}" as="step" hint-placeholder-count="3">
+            <li style="flex: 1 1 240px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 16px">
+              <span style="width: 48px; height: 48px; border-radius: 999px; border: 2px solid {{accent}}; color: {{accent}}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px">{{step.n}}</span>
+              <h3 style="margin: 0; font-size: 20px">{{step.title}}</h3>
+              <p style="margin: 0; color: #444A53; line-height: 1.5; max-width: 22rem">{{step.text}}</p>
+            </li>
+          </sc-for>
+        </ol>
+      </div>
+    </section>
+
+    <section aria-labelledby="func-titulo" style="max-width: 1120px; margin: 0 auto; padding: 64px 24px; display: flex; flex-direction: column; gap: 32px">
+      <h2 id="func-titulo" style="margin: 0; font-size: 32px">Qué puedes hacer</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px">
+        <sc-for list="{{features}}" as="f" hint-placeholder-count="6">
+          <article style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+            <div style="aspect-ratio: 16 / 9; background: #E6E8EB; border-bottom: 1px dashed #9AA1AB; display: flex; align-items: center; justify-content: center; color: #5B616B; font-family: 'IBM Plex Mono', monospace; font-size: 13px">Imagen</div>
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1">
+              <h3 style="margin: 0; font-size: 19px">{{f.title}}</h3>
+              <p style="margin: 0; color: #444A53; line-height: 1.5; flex-grow: 1">{{f.text}}</p>
+              <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #1F2328">{{f.tag}}</p>
+              <a href="#" style="align-self: flex-start; font-weight: 600">Saber más</a>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+
+    <section id="planes" aria-labelledby="planes-titulo" style="background: #FFFFFF; border-top: 1px solid #D0D4DA; border-bottom: 1px solid #D0D4DA">
+      <div style="max-width: 1120px; margin: 0 auto; padding: 64px 24px; display: flex; flex-direction: column; gap: 40px">
+        <h2 id="planes-titulo" style="margin: 0; font-size: 32px; text-align: center">Planes</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; align-items: stretch">
+          <article style="border: 1px solid #D0D4DA; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+            <h3 style="margin: 0; font-size: 20px">Gratis</h3>
+            <p style="margin: 0; font-size: 32px; font-weight: 700">0 €</p>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.8; color: #444A53; flex-grow: 1"><li>Hasta [N] candidaturas activas</li><li>Vista tabla y kanban</li><li>1 versión de CV</li></ul>
+            <a href="#" style="text-align: center; padding: 12px; border-radius: 8px; border: 1px solid #1F2328; text-decoration: none; font-weight: 600">Empezar</a>
+          </article>
+          <article style="position: relative; border: 2px solid {{accent}}; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px; background: #F3F6FD">
+            <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: {{accent}}; color: #FFFFFF; font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 999px; white-space: nowrap">Más popular</span>
+            <h3 style="margin: 0; font-size: 20px">Pro</h3>
+            <p style="margin: 0; font-size: 32px; font-weight: 700">[PRECIO] €<span style="font-size: 16px; font-weight: 400; color: #444A53"> / mes</span></p>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.8; color: #444A53; flex-grow: 1"><li>Candidaturas ilimitadas</li><li>Versiones de CV y carta sin límite</li><li>Contactos por empresa</li><li>Estadísticas por CV</li></ul>
+            <a href="#" style="text-align: center; padding: 12px; border-radius: 8px; background: {{accent}}; color: #FFFFFF; text-decoration: none; font-weight: 600">Probar Pro</a>
+          </article>
+          <article style="border: 1px solid #D0D4DA; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+            <h3 style="margin: 0; font-size: 20px">Escuelas</h3>
+            <p style="margin: 0; font-size: 32px; font-weight: 700">A medida</p>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.8; color: #444A53; flex-grow: 1"><li>Para bootcamps y másteres</li><li>Cuentas para todo el grupo</li><li>Panel para orientadores</li></ul>
+            <a href="#" style="text-align: center; padding: 12px; border-radius: 8px; border: 1px solid #1F2328; text-decoration: none; font-weight: 600">Contactar</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-titulo" style="max-width: 760px; margin: 0 auto; padding: 64px 24px; display: flex; flex-direction: column; gap: 24px">
+      <h2 id="faq-titulo" style="margin: 0; font-size: 32px">Preguntas frecuentes</h2>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <sc-for list="{{faqs}}" as="q" hint-placeholder-count="4">
+          <details style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 10px; padding: 16px 20px">
+            <summary style="cursor: pointer; font-weight: 600">{{q.q}}</summary>
+            <p style="margin: 12px 0 0; color: #444A53; line-height: 1.6">{{q.a}}</p>
+          </details>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+
+  <footer style="background: #1F2328; color: #E6E8EB">
+    <div style="max-width: 1120px; margin: 0 auto; padding: 56px 24px 24px; display: flex; flex-direction: column; gap: 40px">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <h2 style="margin: 0; font-size: 16px; color: #FFFFFF">Producto</h2>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px"><li>Cómo funciona</li><li>Planes</li><li>Preguntas</li></ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <h2 style="margin: 0; font-size: 16px; color: #FFFFFF">Recursos</h2>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px"><li>Guía para preparar entrevistas</li><li>Plantillas de carta</li><li>Contacto</li></ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <h2 style="margin: 0; font-size: 16px; color: #FFFFFF">Síguenos</h2>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px"><li>LinkedIn</li><li>GitHub</li><li>Instagram</li></ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <h2 style="margin: 0; font-size: 16px; color: #FFFFFF">Consejos cada mes</h2>
+          <label for="news-email" style="font-size: 14px">Tu correo</label>
+          <div style="display: flex; gap: 8px">
+            <input id="news-email" type="email" placeholder="nombre@correo.com" style="flex: 1; min-width: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #9AA1AB; font: inherit">
+            <button type="button" style="padding: 10px 16px; border-radius: 8px; border: 0; background: #FFFFFF; color: #1F2328; font: inherit; font-weight: 600; cursor: pointer">Apuntarme</button>
+          </div>
+        </div>
+      </div>
+      <p style="margin: 0; padding-top: 20px; border-top: 1px solid #444A53; font-size: 14px; color: #C9CDD3">© 2026 Postula · Proyecto del máster</p>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#2457C5","options":["#2457C5","#B4501E","#1D6B35","#5B3FB0"]},"$preview":{"width":1280,"height":3500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      accent: this.props.accent ?? '#2457C5',
+      steps: [
+        { n: '1', title: 'Guarda la oferta', text: 'Apunta la empresa, el puesto y el enlace en cuanto la veas.' },
+        { n: '2', title: 'Postula con el CV adecuado', text: 'Elige qué versión de tu CV y carta envías a cada una.' },
+        { n: '3', title: 'Sigue cada proceso', text: 'Mueve la candidatura de estado y anota entrevistas y contactos.' }
+      ],
+      features: [
+        { title: 'Tabla y kanban', text: 'Cambia de vista según te convenga: filtros en la tabla, visión global en el tablero.', tag: '2 vistas' },
+        { title: 'Versiones de CV', text: 'Guarda cada versión de tu CV y carta y mira cuál consigue más entrevistas.', tag: 'CV y cartas' },
+        { title: 'Contactos por empresa', text: 'Recruiters, entrevistadores y referidos, ligados a cada candidatura.', tag: 'Contactos' },
+        { title: 'Historial de cada proceso', text: 'Una línea de tiempo con cada llamada, prueba técnica y entrevista.', tag: 'Línea de tiempo' },
+        { title: 'Estadísticas', text: 'Cuántas has enviado, cuántas responden y en qué fase se quedan.', tag: 'Panel' },
+        { title: 'Notas de preparación', text: 'Preguntas que te hicieron y lo que quieres preguntar tú.', tag: 'Notas' }
+      ],
+      faqs: [
+        { q: '¿Es gratis?', a: 'Sí, el plan Gratis cubre una búsqueda normal. Pro añade versiones ilimitadas y estadísticas.' },
+        { q: '¿Puedo importar mis candidaturas?', a: '[RESPUESTA: por definir, por ejemplo desde una hoja de cálculo en CSV].' },
+        { q: '¿Quién ve mis datos?', a: 'Solo tú. Tus candidaturas y contactos no se comparten.' },
+        { q: '¿Funciona en el móvil?', a: 'Sí, la web se adapta a cualquier pantalla.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

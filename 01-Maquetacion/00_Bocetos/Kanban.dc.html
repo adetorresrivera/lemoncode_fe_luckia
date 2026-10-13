@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Postula · Candidaturas en kanban</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F2328}a:hover{color:#2457C5}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1F2328; background: #F7F7F5; min-height: 100vh; display: flex; flex-wrap: wrap">
+
+  <aside style="flex: 1 1 220px; background: #FFFFFF; border-right: 1px solid #D0D4DA; padding: 20px 16px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 20px">
+      <span style="width: 28px; height: 28px; border-radius: 7px; background: #2457C5; display: inline-block"></span>
+      Postula
+    </a>
+    <nav aria-label="Aplicación">
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+        <li><a href="Dashboard.dc.html" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Panel</a></li>
+        <li><a href="Candidaturas.dc.html" aria-current="page" style="display: block; padding: 10px 12px; border-radius: 8px; background: #E3EBFA; color: #1D4596; font-weight: 600; text-decoration: none">Candidaturas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Empresas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Contactos</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">CV y cartas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Ajustes</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <h1 style="margin: 0; font-size: 28px">Candidaturas</h1>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+        <nav aria-label="Vista" style="display: flex; border: 1px solid #D0D4DA; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+          <a href="Candidaturas.dc.html" style="padding: 10px 16px; text-decoration: none">Tabla</a>
+          <a href="Kanban.dc.html" aria-current="page" style="padding: 10px 16px; background: #1F2328; color: #FFFFFF; text-decoration: none; font-weight: 600">Kanban</a>
+        </nav>
+        <a href="#" style="padding: 10px 16px; border-radius: 8px; background: #2457C5; color: #FFFFFF; text-decoration: none; font-weight: 600">Nueva candidatura</a>
+      </div>
+    </div>
+
+    <div style="overflow-x: auto; padding-bottom: 8px">
+      <div style="display: flex; gap: 16px; align-items: flex-start; min-width: 1100px">
+        <sc-for list="{{cols}}" as="col" hint-placeholder-count="5">
+          <section style="flex: 1 1 0; min-width: 210px; background: #ECEEF1; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px">
+            <h2 style="margin: 0; padding: 4px 4px 8px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{col.line}}">
+              <span>{{col.name}}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: #444A53">{{col.count}}</span>
+            </h2>
+            <sc-for list="{{col.cards}}" as="c" hint-placeholder-count="2">
+              <article style="background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+                <h3 style="margin: 0; font-size: 15px"><a href="#" style="text-decoration: none">{{c.role}}</a></h3>
+                <p style="margin: 0; font-size: 14px; color: #444A53">{{c.company}}</p>
+                <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #5B616B">
+                  <span>{{c.cv}}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace">{{c.date}}</span>
+                </div>
+              </article>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const cols = [
+      { name: 'Guardada', line: '#9AA1AB', cards: [
+        { role: 'Desarrollador frontend', company: 'Faro Logística', cv: 'Sin enviar', date: '01/10' },
+        { role: 'Frontend Developer Jr.', company: 'Nimbo Cloud', cv: 'Sin enviar', date: '30/09' }
+      ] },
+      { name: 'Enviada', line: '#2457C5', cards: [
+        { role: 'Desarrolladora React', company: 'Kora Health', cv: 'CV React v2', date: '09/10' },
+        { role: 'UI Developer', company: 'Ondina Games', cv: 'CV generalista v1', date: '05/10' }
+      ] },
+      { name: 'Entrevista', line: '#B4501E', cards: [
+        { role: 'Frontend Developer', company: 'Brisa Software', cv: 'CV frontend v3', date: '12/10' },
+        { role: 'Frontend Engineer', company: 'Mareta Pagos', cv: 'CV frontend v3', date: '08/10' }
+      ] },
+      { name: 'Oferta', line: '#1D6B35', cards: [
+        { role: 'Junior Web Developer', company: 'Talaia Studio', cv: 'CV frontend v3', date: '10/10' }
+      ] },
+      { name: 'Descartada', line: '#555555', cards: [
+        { role: 'Web Developer', company: 'Garnacha Tech', cv: 'CV generalista v1', date: '02/10' }
+      ] }
+    ].map((c) => ({ ...c, count: String(c.cards.length) }));
+    return { cols };
+  }
+}
+</script>
+</body>
+</html>

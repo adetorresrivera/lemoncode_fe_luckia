@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Postula · Candidaturas en tabla</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F2328}a:hover{color:#2457C5}
+</style>
+</helmet>
+<div style="font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1F2328; background: #F7F7F5; min-height: 100vh; display: flex; flex-wrap: wrap">
+
+  <aside style="flex: 1 1 220px; background: #FFFFFF; border-right: 1px solid #D0D4DA; padding: 20px 16px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 20px">
+      <span style="width: 28px; height: 28px; border-radius: 7px; background: #2457C5; display: inline-block"></span>
+      Postula
+    </a>
+    <nav aria-label="Aplicación">
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+        <li><a href="Dashboard.dc.html" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Panel</a></li>
+        <li><a href="Candidaturas.dc.html" aria-current="page" style="display: block; padding: 10px 12px; border-radius: 8px; background: #E3EBFA; color: #1D4596; font-weight: 600; text-decoration: none">Candidaturas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Empresas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Contactos</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">CV y cartas</a></li>
+        <li><a href="#" style="display: block; padding: 10px 12px; border-radius: 8px; text-decoration: none">Ajustes</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <h1 style="margin: 0; font-size: 28px">Candidaturas</h1>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+        <nav aria-label="Vista" style="display: flex; border: 1px solid #D0D4DA; border-radius: 8px; overflow: hidden; background: #FFFFFF">
+          <a href="Candidaturas.dc.html" aria-current="page" style="padding: 10px 16px; background: #1F2328; color: #FFFFFF; text-decoration: none; font-weight: 600">Tabla</a>
+          <a href="Kanban.dc.html" style="padding: 10px 16px; text-decoration: none">Kanban</a>
+        </nav>
+        <a href="#" style="padding: 10px 16px; border-radius: 8px; background: #2457C5; color: #FFFFFF; text-decoration: none; font-weight: 600">Nueva candidatura</a>
+      </div>
+    </div>
+
+    <div role="search" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px; padding: 16px">
+      <div style="flex: 2 1 220px; display: flex; flex-direction: column; gap: 6px">
+        <label for="buscar" style="font-size: 14px; font-weight: 500">Buscar</label>
+        <input id="buscar" type="search" placeholder="Empresa o puesto" style="padding: 10px 12px; border: 1px solid #9AA1AB; border-radius: 8px; font: inherit">
+      </div>
+      <div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 6px">
+        <label for="estado" style="font-size: 14px; font-weight: 500">Estado</label>
+        <select id="estado" style="padding: 10px 12px; border: 1px solid #9AA1AB; border-radius: 8px; font: inherit; background: #FFFFFF"><option>Todos</option><option>Guardada</option><option>Enviada</option><option>Entrevista</option><option>Oferta</option><option>Descartada</option></select>
+      </div>
+      <div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 6px">
+        <label for="cv" style="font-size: 14px; font-weight: 500">CV usado</label>
+        <select id="cv" style="padding: 10px 12px; border: 1px solid #9AA1AB; border-radius: 8px; font: inherit; background: #FFFFFF"><option>Cualquiera</option><option>CV frontend v3</option><option>CV generalista v1</option><option>CV React v2</option></select>
+      </div>
+    </div>
+
+    <div style="overflow-x: auto; background: #FFFFFF; border: 1px solid #D0D4DA; border-radius: 12px">
+      <table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 15px">
+        <thead>
+          <tr style="text-align: left; background: #F2F3F5">
+            <th scope="col" style="padding: 12px 16px; font-weight: 600">Empresa</th>
+            <th scope="col" style="padding: 12px 16px; font-weight: 600">Puesto</th>
+            <th scope="col" style="padding: 12px 16px; font-weight: 600">Estado</th>
+            <th scope="col" style="padding: 12px 16px; font-weight: 600">CV</th>
+            <th scope="col" style="padding: 12px 16px; font-weight: 600">Contacto</th>
+            <th scope="col" style="padding: 12px 16px; font-weight: 600">Actualizada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+            <tr style="border-top: 1px solid #ECEEF1">
+              <td style="padding: 14px 16px; font-weight: 600"><a href="#">{{r.company}}</a></td>
+              <td style="padding: 14px 16px">{{r.role}}</td>
+              <td style="padding: 14px 16px"><span style="font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{r.bg}}; color: {{r.fg}}; white-space: nowrap">{{r.status}}</span></td>
+              <td style="padding: 14px 16px; color: #444A53">{{r.cv}}</td>
+              <td style="padding: 14px 16px; color: #444A53">{{r.contact}}</td>
+              <td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; white-space: nowrap">{{r.date}}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const badge = {
+      Guardada: { bg: '#F2F3F5', fg: '#444A53' },
+      Enviada: { bg: '#E3EBFA', fg: '#1D4596' },
+      Entrevista: { bg: '#FCE9D6', fg: '#8A4300' },
+      Oferta: { bg: '#DDF0E2', fg: '#1D6B35' },
+      Descartada: { bg: '#ECECEC', fg: '#555555' }
+    };
+    const rows = [
+      { company: 'Brisa Software', role: 'Frontend Developer', status: 'Entrevista', cv: 'CV frontend v3', contact: 'Laura M. (RR. HH.)', date: '12/10/2026' },
+      { company: 'Talaia Studio', role: 'Junior Web Developer', status: 'Oferta', cv: 'CV frontend v3', contact: 'Iker S.', date: '10/10/2026' },
+      { company: 'Kora Health', role: 'Desarrolladora React', status: 'Enviada', cv: 'CV React v2', contact: '—', date: '09/10/2026' },
+      { company: 'Mareta Pagos', role: 'Frontend Engineer', status: 'Entrevista', cv: 'CV frontend v3', contact: 'Paula R.', date: '08/10/2026' },
+      { company: 'Ondina Games', role: 'UI Developer', status: 'Enviada', cv: 'CV generalista v1', contact: '—', date: '05/10/2026' },
+      { company: 'Garnacha Tech', role: 'Web Developer', status: 'Descartada', cv: 'CV generalista v1', contact: 'Jorge P.', date: '02/10/2026' },
+      { company: 'Faro Logística', role: 'Desarrollador frontend', status: 'Guardada', cv: '—', contact: '—', date: '01/10/2026' },
+      { company: 'Nimbo Cloud', role: 'Frontend Developer Jr.', status: 'Guardada', cv: '—', contact: '—', date: '30/09/2026' }
+    ].map((r) => ({ ...r, ...badge[r.status] }));
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>
