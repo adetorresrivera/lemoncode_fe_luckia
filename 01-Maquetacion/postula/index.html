@@ -17,17 +17,57 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <header>
-      <a href="/">Postula</a>
-      <nav aria-label="Principal">
-        <ul>
-          <li><a href="#como-funciona">Cómo funciona</a></li>
-          <li><a href="#funciones">Funciones</a></li>
-          <li><a href="#planes">Planes</a></li>
-          <li><a href="#faq">Preguntas</a></li>
-          <li><a href="/app/panel.html">Crear cuenta</a></li>
-        </ul>
-      </nav>
+    <header class="border-b border-brote-900/10 bg-white">
+      <div
+        class="mx-auto flex max-w-6xl flex-col items-start gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+      >
+        <a
+          href="/"
+          class="flex items-center gap-2 rounded-md font-display text-2xl font-extrabold text-brote-900 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500"
+        >
+          <span class="size-8 rounded-lg bg-brote-500" aria-hidden="true"></span>
+          Postula
+        </a>
+        <nav aria-label="Principal">
+          <ul class="flex flex-wrap items-center gap-x-6 gap-y-3 font-sans text-sm font-medium text-brote-900">
+            <li>
+              <a
+                href="#como-funciona"
+                class="rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500"
+                >Cómo funciona</a
+              >
+            </li>
+            <li>
+              <a
+                href="#planes"
+                class="rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500"
+                >Planes</a
+              >
+            </li>
+            <li>
+              <a
+                href="#faq"
+                class="rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500"
+                >Preguntas</a
+              >
+            </li>
+            <li>
+              <a
+                href="/app/panel.html"
+                class="rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500"
+                >Entrar</a
+              >
+            </li>
+            <li>
+              <a
+                href="/app/panel.html"
+                class="inline-block rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500"
+                >Crear cuenta</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
     </header>
 
     <main>
