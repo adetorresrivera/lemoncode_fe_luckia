@@ -15,3 +15,14 @@
   --font-display: "Bricolage Grotesque", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
 }
+
+/* En la capa components para que una utilidad en el HTML pueda sobrescribirlas */
+@layer components {
+  .nav-link {
+    @apply rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500;
+  }
+
+  .btn-primary {
+    @apply inline-block rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500;
+  }
+}

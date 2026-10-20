@@ -15,3 +15,22 @@ pase debajo del logo."
 
 - Usa blanco en el background del header `bg-white` en vez de el color de la paleta `bg-brote-50`.
 - En el prompt no incluí la sección de `Qué puedes hacer` así que la incluí a mano.
+- Agrupar las clases de Tailwind en clases dentro de utilities para hacerlo más facil de leer
+
+### Prompt
+
+"Maqueta el hero: etiqueta pequeña "Gestor de candidaturas", h1 "Toda tu
+búsqueda de empleo, en un solo sitio.", un párrafo, dos botones (principal
+"Empieza gratis" y secundario "Ver cómo funciona") y una imagen. En móvil, una
+columna; desde md:, texto e imagen lado a lado. Limita el ancho del texto con
+max-w-prose o max-w-xl. Explícame por qué eliges flex o grid."
+
+### Qué me dio
+
+- Texto mal traducido
+> Guarda cada oferta, apunta qué CV enviaste y a quién, y sabe en qué punto está cada proceso sin perderte entre correos.
+- Botones sin clases de utility
+
+### Qué corregí y por qué
+- Sustituidas clases redundantes por 'btn-primary'
+- Arreglado texto en el Hero
