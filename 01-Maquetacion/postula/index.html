@@ -123,46 +123,46 @@
         aria-labelledby="como-funciona-titulo"
         class="border-y border-brote-900/10 bg-brote-50"
       >
-        <div class="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-12 sm:px-6 md:py-20">
+        <div class="section-container">
           <h2
             id="como-funciona-titulo"
-            class="text-center font-display text-3xl font-extrabold text-brote-900 md:text-4xl"
+            class="section-title text-center"
           >
             Cómo funciona
           </h2>
           <ol class="flex flex-col gap-10 md:flex-row md:gap-8">
-            <li class="flex flex-col items-center gap-3 text-center md:flex-1">
+            <li class="step">
               <span
-                class="flex size-12 items-center justify-center rounded-full border-2 border-brote-500 font-display text-xl font-extrabold text-brote-500"
+                class="step-number"
                 aria-hidden="true"
                 >1</span
               >
-              <h3 class="font-display text-xl font-semibold text-brote-900">Guarda la oferta</h3>
-              <p class="max-w-sm font-sans leading-relaxed text-brote-900">
+              <h3 class="item-title">Guarda la oferta</h3>
+              <p class="item-text max-w-sm">
                 Apunta la empresa, el puesto y el enlace en cuanto la veas.
               </p>
             </li>
-            <li class="flex flex-col items-center gap-3 text-center md:flex-1">
+            <li class="step">
               <span
-                class="flex size-12 items-center justify-center rounded-full border-2 border-brote-500 font-display text-xl font-extrabold text-brote-500"
+                class="step-number"
                 aria-hidden="true"
                 >2</span
               >
-              <h3 class="font-display text-xl font-semibold text-brote-900">
+              <h3 class="item-title">
                 Postula con el CV adecuado
               </h3>
-              <p class="max-w-sm font-sans leading-relaxed text-brote-900">
+              <p class="item-text max-w-sm">
                 Elige qué versión de tu CV y carta envías a cada una.
               </p>
             </li>
-            <li class="flex flex-col items-center gap-3 text-center md:flex-1">
+            <li class="step">
               <span
-                class="flex size-12 items-center justify-center rounded-full border-2 border-brote-500 font-display text-xl font-extrabold text-brote-500"
+                class="step-number"
                 aria-hidden="true"
                 >3</span
               >
-              <h3 class="font-display text-xl font-semibold text-brote-900">Sigue cada proceso</h3>
-              <p class="max-w-sm font-sans leading-relaxed text-brote-900">
+              <h3 class="item-title">Sigue cada proceso</h3>
+              <p class="item-text max-w-sm">
                 Cambia el estado y anota entrevistas y contactos.
               </p>
             </li>
@@ -171,7 +171,222 @@
       </section>
 
       <section id="funciones" aria-labelledby="funciones-titulo">
-        <h2 id="funciones-titulo">Qué puedes hacer</h2>
+        <div class="section-container">
+          <h2
+            id="funciones-titulo"
+            class="section-title"
+          >
+            Qué puedes hacer
+          </h2>
+          <div class="grid grid-cols-1 gap-6 sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-3">
+            <article
+              class="card group"
+            >
+              <div class="card-media">
+                <img
+                  src="/img/funciones/tabla-kanban.svg"
+                  alt=""
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="item-title">Tabla y kanban</h3>
+                <p class="item-text">
+                  Consulta tus candidaturas en una tabla con filtros o míralas por columnas según
+                  su estado.
+                </p>
+                <div class="card-footer">
+                  <p class="tag">
+                    5 estados
+                  </p>
+                  <a
+                    href="/app/candidaturas.html"
+                    class="link card-link"
+                    ><span class="card-link-text">Saber más&nbsp;</span
+                    ><span class="sr-only"> sobre tabla y kanban</span
+                    ><span aria-hidden="true">→</span></a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card group"
+            >
+              <div class="card-media">
+                <img
+                  src="/img/funciones/versiones-cv.svg"
+                  alt=""
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="item-title">Versiones de CV</h3>
+                <p class="item-text">
+                  Guarda varias versiones de tu CV y tu carta y apunta cuál enviaste a cada oferta.
+                </p>
+                <div class="card-footer">
+                  <p class="tag">
+                    Ilimitadas en Pro
+                  </p>
+                  <a
+                    href="/app/panel.html"
+                    class="link card-link"
+                    ><span class="card-link-text">Saber más&nbsp;</span
+                    ><span class="sr-only"> sobre versiones de CV</span
+                    ><span aria-hidden="true">→</span></a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card group"
+            >
+              <div class="card-media">
+                <img
+                  src="/img/funciones/contactos.svg"
+                  alt=""
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="item-title">
+                  Contactos por empresa
+                </h3>
+                <p class="item-text">
+                  Apunta quién te entrevistó, quién te recomendó y cómo contactar con cada persona.
+                </p>
+                <div class="card-footer">
+                  <p class="tag">
+                    Sin límite de contactos
+                  </p>
+                  <a
+                    href="/app/candidaturas.html"
+                    class="link card-link"
+                    ><span class="card-link-text">Saber más&nbsp;</span
+                    ><span class="sr-only"> sobre contactos por empresa</span
+                    ><span aria-hidden="true">→</span></a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card group"
+            >
+              <div class="card-media">
+                <img
+                  src="/img/funciones/historial.svg"
+                  alt=""
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="item-title">
+                  Historial de cada proceso
+                </h3>
+                <p class="item-text">
+                  Cada cambio de estado queda registrado con su fecha, para que sepas cuánto tiempo
+                  lleva parado cada proceso y cuándo toca escribir para hacer seguimiento.
+                </p>
+                <div class="card-footer">
+                  <p class="tag">
+                    Fecha de cada cambio
+                  </p>
+                  <a
+                    href="/app/kanban.html"
+                    class="link card-link"
+                    ><span class="card-link-text">Saber más&nbsp;</span
+                    ><span class="sr-only"> sobre el historial de cada proceso</span
+                    ><span aria-hidden="true">→</span></a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card group"
+            >
+              <div class="card-media">
+                <img
+                  src="/img/funciones/estadisticas.svg"
+                  alt=""
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="item-title">Estadísticas</h3>
+                <p class="item-text">
+                  Descubre qué versión de tu CV consigue más entrevistas.
+                </p>
+                <div class="card-footer">
+                  <p class="tag">
+                    Entrevistas por CV
+                  </p>
+                  <a
+                    href="/app/panel.html"
+                    class="link card-link"
+                    ><span class="card-link-text">Saber más&nbsp;</span
+                    ><span class="sr-only"> sobre estadísticas</span
+                    ><span aria-hidden="true">→</span></a
+                  >
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="card group"
+            >
+              <div class="card-media">
+                <img
+                  src="/img/funciones/notas.svg"
+                  alt=""
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                  class="card-img"
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="item-title">
+                  Notas de preparación
+                </h3>
+                <p class="item-text">
+                  Prepara cada entrevista con tus notas sobre la empresa, el puesto y las preguntas
+                  que quieres hacer.
+                </p>
+                <div class="card-footer">
+                  <p class="tag">
+                    Ligadas a cada entrevista
+                  </p>
+                  <a
+                    href="/app/panel.html"
+                    class="link card-link"
+                    ><span class="card-link-text">Saber más&nbsp;</span
+                    ><span class="sr-only"> sobre notas de preparación</span
+                    ><span aria-hidden="true">→</span></a
+                  >
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
       </section>
 
       <section id="planes" aria-labelledby="planes-titulo">

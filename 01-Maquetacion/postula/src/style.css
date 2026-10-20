@@ -25,4 +25,74 @@
   .btn-primary {
     @apply inline-block rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500;
   }
+
+  .link {
+    @apply rounded-sm font-semibold text-brote-500 underline-offset-4 hover:text-brote-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500;
+  }
+
+  /* Secciones de la landing */
+  .section-container {
+    @apply mx-auto flex max-w-6xl flex-col gap-10 px-4 py-12 sm:px-6 md:py-20;
+  }
+
+  .section-title {
+    @apply font-display text-3xl font-extrabold text-brote-900 md:text-4xl;
+  }
+
+  /* h3 y texto de los pasos y de las tarjetas */
+  .item-title {
+    @apply font-display text-xl font-semibold text-brote-900;
+  }
+
+  .item-text {
+    @apply leading-relaxed text-brote-900;
+  }
+
+  /* Pasos de "Cómo funciona" */
+  .step {
+    @apply flex flex-col items-center gap-3 text-center md:flex-1;
+  }
+
+  .step-number {
+    @apply flex size-12 items-center justify-center rounded-full border-2 border-brote-500 font-display text-xl font-extrabold text-brote-500;
+  }
+
+  /* Tarjetas: el article necesita además la clase "group" en el HTML */
+  .card {
+    @apply flex flex-col overflow-hidden rounded-2xl border border-brote-900/10 shadow-sm shadow-brote-900/10 transition duration-200 hover:shadow-lg motion-safe:hover:-translate-y-1;
+  }
+
+  .card-media {
+    @apply overflow-hidden;
+  }
+
+  .card-img {
+    @apply aspect-video w-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105;
+  }
+
+  .card-body {
+    @apply flex flex-1 flex-col gap-3 p-6;
+  }
+
+  .card-footer {
+    @apply mt-auto flex items-center gap-3 pt-3;
+  }
+
+  /* El enlace puede encogerse hasta dejar solo la flecha */
+  .card-link {
+    @apply ml-auto flex min-w-0 items-center;
+  }
+
+  /*
+   * Una línea de alto con overflow-hidden y flex-wrap. El ::before ocupa la primera
+   * línea, así que si "Saber más" no cabe salta a la segunda y queda oculto.
+   * Sigue en el HTML, por lo que el lector de pantalla lo lee igual.
+   */
+  .card-link-text {
+    @apply flex h-6 min-w-0 flex-wrap overflow-hidden before:h-6;
+  }
+
+  .tag {
+    @apply shrink-0 rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900;
+  }
 }
