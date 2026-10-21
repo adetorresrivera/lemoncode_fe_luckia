@@ -291,4 +291,45 @@
   .status-descartada {
     @apply border-dashed border-brote-900/40 text-brote-900/80 dark:border-brote-50/40 dark:text-brote-50/80;
   }
+
+  /* Selector Tabla | Kanban: control segmentado, la vista activa lleva aria-current="page" */
+  .view-switch {
+    @apply flex gap-1 self-start rounded-lg border border-brote-900/10 p-1 dark:border-brote-50/10;
+  }
+
+  .view-link {
+    @apply block rounded-md px-4 py-1.5 font-medium text-brote-900 hover:bg-brote-900/10 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 current-page:bg-brote-900 current-page:font-semibold current-page:text-brote-50 dark:text-brote-50 dark:hover:bg-brote-50/10 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300 dark:current-page:bg-brote-50 dark:current-page:text-brote-950;
+  }
+
+  /* Filtros: mismos estados que la newsletter (borde en focus, opacidad en disabled).
+     El borde de foco es brote-500 y no brote-300 porque aquí el fondo es claro */
+  .filter-field {
+    @apply flex flex-col gap-1.5 md:flex-1 md:basis-40;
+  }
+
+  .filter-label {
+    @apply text-sm font-medium;
+  }
+
+  .filter-input {
+    @apply w-full rounded-lg border-2 border-brote-900/30 bg-brote-50 px-3 py-2 text-brote-950 placeholder:text-brote-500 focus:border-brote-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-brote-50/20 dark:bg-brote-950 dark:text-brote-50 dark:placeholder:text-brote-300 dark:focus:border-brote-300;
+  }
+
+  /* border-2 transparente: mide lo mismo que los campos y queda alineado con ellos */
+  .filter-button {
+    @apply rounded-lg border-2 border-transparent bg-brote-500 px-4 py-2 font-semibold text-brote-50 enabled:hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-coral-400 dark:text-brote-950 dark:enabled:hover:bg-coral-500 dark:focus-visible:outline-brote-300;
+  }
+
+  /* Celdas de la tabla de candidaturas */
+  .cell-head {
+    @apply px-4 py-3 text-left text-sm font-semibold whitespace-nowrap;
+  }
+
+  .cell {
+    @apply px-4 py-3 text-left align-top;
+  }
+
+  .cell-meta {
+    @apply text-brote-900/80 dark:text-brote-50/80;
+  }
 }

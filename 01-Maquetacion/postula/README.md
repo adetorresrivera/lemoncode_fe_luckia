@@ -12,7 +12,8 @@
    cd 01-Maquetacion/postula
    npm run dev
    ```
-4. Abre http://localhost:5173 (landing) o http://localhost:5173/app/panel.html (panel).
+4. Abre http://localhost:5173 (landing), http://localhost:5173/app/panel.html (panel)
+   o http://localhost:5173/app/candidaturas.html (candidaturas en tabla).
 
 `npm run build` genera en `dist/` todas las páginas listadas en
 `build.rollupOptions.input` de `vite.config.js`: Vite solo construye por
