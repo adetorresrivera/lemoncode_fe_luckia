@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Modo oscuro por clase (no por el sistema): src/theme.js pone o quita .dark en <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Marca "Brote" — claro: 50 fondo, 500 botones, 900 texto */
   --color-brote-50: #f0fdfa;
@@ -29,29 +32,41 @@
 /* En la capa components para que una utilidad en el HTML pueda sobrescribirlas */
 @layer components {
   .nav-link {
-    @apply rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500;
+    @apply rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300;
   }
 
   /* Menú móvil (details/summary): mismo truco que .faq-summary para quitar el marcador */
   .menu-toggle {
-    @apply flex size-11 cursor-pointer list-none items-center justify-center rounded-lg text-2xl text-brote-900 hover:bg-brote-900/10 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 [&::-webkit-details-marker]:hidden;
+    @apply flex size-11 cursor-pointer list-none items-center justify-center rounded-lg text-2xl text-brote-900 hover:bg-brote-900/10 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 dark:text-brote-50 dark:hover:bg-brote-50/10 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300 [&::-webkit-details-marker]:hidden;
+  }
+
+  /* Botón de tema: mismo tamaño y aspecto que el ☰ (44 px de diana táctil) */
+  .theme-toggle {
+    @apply flex size-11 cursor-pointer items-center justify-center rounded-lg text-brote-900 hover:bg-brote-900/10 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 dark:text-brote-50 dark:hover:bg-brote-50/10 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300;
+  }
+
+  .theme-icon {
+    @apply size-6 fill-none stroke-current stroke-2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   /* Sin "relative" en el details: el panel se ancla al header sticky y ocupa todo el ancho */
   .menu-panel {
-    @apply absolute inset-x-0 top-full border-b border-brote-900/10 bg-brote-50 px-4 py-4 shadow-lg shadow-brote-900/10 motion-safe:animate-menu-in;
+    @apply absolute inset-x-0 top-full border-b border-brote-900/10 bg-brote-50 px-4 py-4 shadow-lg shadow-brote-900/10 motion-safe:animate-menu-in dark:border-brote-50/10 dark:bg-brote-950;
   }
 
+  /* En oscuro el botón principal usa el acento coral-400, como el del newsletter (brote-500 no destaca sobre brote-950) */
   .btn-primary {
-    @apply inline-block rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500;
+    @apply inline-block rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 dark:bg-coral-400 dark:text-brote-950 dark:hover:bg-coral-500 dark:focus-visible:outline-brote-300;
   }
 
   .btn-secondary {
-    @apply inline-block rounded-lg border border-brote-900 px-4 py-2 font-semibold text-brote-900 hover:bg-brote-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500;
+    @apply inline-block rounded-lg border border-brote-900 px-4 py-2 font-semibold text-brote-900 hover:bg-brote-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 dark:border-brote-50 dark:text-brote-50 dark:hover:bg-brote-50/10 dark:focus-visible:outline-brote-300;
   }
 
   .link {
-    @apply rounded-sm font-semibold text-brote-500 underline-offset-4 hover:text-brote-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500;
+    @apply rounded-sm font-semibold text-brote-500 underline-offset-4 hover:text-brote-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500 dark:text-brote-300 dark:hover:text-brote-50 dark:focus-visible:outline-brote-300;
   }
 
   /* Secciones de la landing */
@@ -60,16 +75,16 @@
   }
 
   .section-title {
-    @apply font-display text-3xl font-extrabold text-brote-900 md:text-4xl;
+    @apply font-display text-3xl font-extrabold text-brote-900 md:text-4xl dark:text-brote-50;
   }
 
   /* h3 y texto de los pasos y de las tarjetas */
   .item-title {
-    @apply font-display text-xl font-semibold text-brote-900;
+    @apply font-display text-xl font-semibold text-brote-900 dark:text-brote-50;
   }
 
   .item-text {
-    @apply leading-relaxed text-brote-900;
+    @apply leading-relaxed text-brote-900 dark:text-brote-50;
   }
 
   /* Pasos de "Cómo funciona" */
@@ -78,12 +93,12 @@
   }
 
   .step-number {
-    @apply flex size-12 items-center justify-center rounded-full border-2 border-brote-500 font-display text-xl font-extrabold text-brote-500;
+    @apply flex size-12 items-center justify-center rounded-full border-2 border-brote-500 font-display text-xl font-extrabold text-brote-500 dark:border-brote-300 dark:text-brote-300;
   }
 
   /* Tarjetas: el article necesita además la clase "group" en el HTML */
   .card {
-    @apply flex flex-col overflow-hidden rounded-2xl border border-brote-900/10 shadow-sm shadow-brote-900/10 transition duration-200 hover:shadow-lg motion-safe:hover:-translate-y-1;
+    @apply flex flex-col overflow-hidden rounded-2xl border border-brote-900/10 shadow-sm shadow-brote-900/10 transition duration-200 hover:shadow-lg motion-safe:hover:-translate-y-1 dark:border-brote-50/10 dark:bg-brote-900;
   }
 
   .card-media {
@@ -104,11 +119,11 @@
 
   /* Planes: sin overflow-hidden (a diferencia de .card) para no recortar la etiqueta "Más popular" */
   .plan-card {
-    @apply flex flex-col gap-4 rounded-2xl border border-brote-900/10 p-6;
+    @apply flex flex-col gap-4 rounded-2xl border border-brote-900/10 p-6 dark:border-brote-50/10;
   }
 
   .plan-price {
-    @apply flex items-baseline gap-1 font-display text-4xl font-extrabold text-brote-900;
+    @apply flex items-baseline gap-1 font-display text-4xl font-extrabold text-brote-900 dark:text-brote-50;
   }
 
   .plan-period {
@@ -116,12 +131,12 @@
   }
 
   .plan-features {
-    @apply list-disc leading-relaxed text-brote-900 space-y-2 pl-5 marker:text-brote-500;
+    @apply list-disc leading-relaxed text-brote-900 space-y-2 pl-5 marker:text-brote-500 dark:text-brote-50 dark:marker:text-brote-300;
   }
 
   /* Preguntas frecuentes: el details necesita además la clase "group" en el HTML */
   .faq-list {
-    @apply mx-auto w-full max-w-3xl divide-y divide-brote-900/10 border-y border-brote-900/10;
+    @apply mx-auto w-full max-w-3xl divide-y divide-brote-900/10 border-y border-brote-900/10 dark:divide-brote-50/10 dark:border-brote-50/10;
   }
 
   .faq-item {
@@ -130,16 +145,16 @@
 
   /* flex + list-none quitan el marcador en Chrome/Firefox; la variante webkit, en Safari */
   .faq-summary {
-    @apply flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg px-4 py-3 font-display text-lg font-semibold text-brote-900 hover:bg-brote-50 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 [&::-webkit-details-marker]:hidden;
+    @apply flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg px-4 py-3 font-display text-lg font-semibold text-brote-900 hover:bg-brote-50 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 dark:text-brote-50 dark:hover:bg-brote-900 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300 [&::-webkit-details-marker]:hidden;
   }
 
   /* El giro se aplica siempre; solo la animación depende de motion-safe */
   .faq-icon {
-    @apply size-5 shrink-0 text-brote-500 group-open:rotate-180 motion-safe:transition-transform motion-safe:duration-200;
+    @apply size-5 shrink-0 text-brote-500 group-open:rotate-180 dark:text-brote-300 motion-safe:transition-transform motion-safe:duration-200;
   }
 
   .faq-answer {
-    @apply max-w-prose leading-relaxed text-brote-900 px-4 pt-1 pb-4;
+    @apply max-w-prose leading-relaxed text-brote-900 px-4 pt-1 pb-4 dark:text-brote-50;
   }
 
   /* Pie: fondo brote-950, así que el foco usa brote-300 (brote-500 no contrasta) */
@@ -180,6 +195,6 @@
   }
 
   .tag {
-    @apply self-start rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900;
+    @apply self-start rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900 dark:bg-brote-950 dark:text-brote-50;
   }
 }
