@@ -75,24 +75,10 @@
   }
 
   .card-footer {
-    @apply mt-auto flex items-center gap-3 pt-3;
-  }
-
-  /* El enlace puede encogerse hasta dejar solo la flecha */
-  .card-link {
-    @apply ml-auto flex min-w-0 items-center;
-  }
-
-  /*
-   * Una línea de alto con overflow-hidden y flex-wrap. El ::before ocupa la primera
-   * línea, así que si "Saber más" no cabe salta a la segunda y queda oculto.
-   * Sigue en el HTML, por lo que el lector de pantalla lo lee igual.
-   */
-  .card-link-text {
-    @apply flex h-6 min-w-0 flex-wrap overflow-hidden before:h-6;
+    @apply mt-auto pt-3;
   }
 
   .tag {
-    @apply shrink-0 rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900;
+    @apply self-start rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900;
   }
 }

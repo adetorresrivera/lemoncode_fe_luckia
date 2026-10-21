@@ -78,3 +78,35 @@ Si "Saber más" cabe en el hueco que queda, se coloca en esa primera línea junt
 Sin el ::before, el texto sería el primer elemento y nunca saltaría: se cortaría a medias ("Sab…").
 &nbsp; separa el texto de la flecha. Va dentro del mismo span, así que cuando el texto se oculta el espacio también desaparece y la flecha cabe incluso a 320 px.
 Accesibilidad: el texto oculto por overflow-hidden sigue en el HTML, así que el lector de pantalla lee "Saber más sobre notas de preparación" aunque solo se vea la flecha.
+### Cambio posterior: etiqueta bajo el título
+
+El truco de `.card-link-text` funcionaba, pero era frágil (depende de que `h-6`
+coincida con el alto de línea), difícil de defender y en tarjetas estrechas
+dejaba solo una flecha como objetivo de clic, demasiado pequeño.
+
+Opciones que valoré:
+
+- A. Convertir toda la tarjeta en enlace (enlace en el h3 con `after:absolute after:inset-0`). Encaja con el hover que ya levanta la tarjeta, pero es un cambio más grande.
+- B. Sacar la etiqueta del pie para que el enlace no tenga que competir por el espacio.
+- C. Container query (`@container` + `@max-xs:sr-only`). Más limpio que el truco, pero sigue dejando solo la flecha.
+
+Elegí B. Primero probé la etiqueta encima del título y después la moví debajo
+del h3, para que el lector de pantalla lea primero el título y luego el dato.
+
+```html
+<div class="card-body">
+  <h3 class="item-title">Tabla y kanban</h3>
+  <p class="tag">5 estados</p>
+  <p class="item-text">…</p>
+  <div class="card-footer">
+    <a href="…" class="link"
+      >Saber más<span class="sr-only"> sobre tabla y kanban</span>&nbsp;<span aria-hidden="true">→</span></a
+    >
+  </div>
+</div>
+```
+
+- Eliminadas `.card-link` y `.card-link-text`: ya no hace falta que el enlace se encoja.
+- `.card-footer` pasa a `mt-auto pt-3`: ya no es una fila flex porque solo contiene el enlace; `mt-auto` lo sigue empujando al fondo para que los enlaces queden alineados.
+- `.tag` cambia `shrink-0` por `self-start`: `.card-body` es `flex flex-col` y por defecto estira a sus hijos a todo el ancho; `self-start` mantiene la píldora a su ancho natural.
+- `&nbsp;` antes de la flecha para que "→" no salte sola a otra línea.
