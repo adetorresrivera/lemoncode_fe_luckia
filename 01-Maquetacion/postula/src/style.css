@@ -14,12 +14,32 @@
 
   --font-display: "Bricolage Grotesque", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Apertura del menú móvil: se reproduce cada vez que el <details> pasa a abierto */
+  --animate-menu-in: menu-in 200ms ease-out;
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+  }
 }
 
 /* En la capa components para que una utilidad en el HTML pueda sobrescribirlas */
 @layer components {
   .nav-link {
     @apply rounded-sm underline-offset-4 hover:text-brote-500 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500;
+  }
+
+  /* Menú móvil (details/summary): mismo truco que .faq-summary para quitar el marcador */
+  .menu-toggle {
+    @apply flex size-11 cursor-pointer list-none items-center justify-center rounded-lg text-2xl text-brote-900 hover:bg-brote-900/10 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 [&::-webkit-details-marker]:hidden;
+  }
+
+  /* Sin "relative" en el details: el panel se ancla al header sticky y ocupa todo el ancho */
+  .menu-panel {
+    @apply absolute inset-x-0 top-full border-b border-brote-900/10 bg-brote-50 px-4 py-4 shadow-lg shadow-brote-900/10 motion-safe:animate-menu-in;
   }
 
   .btn-primary {
