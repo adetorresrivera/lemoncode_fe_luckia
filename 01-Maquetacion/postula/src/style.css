@@ -99,6 +99,29 @@
     @apply list-disc leading-relaxed text-brote-900 space-y-2 pl-5 marker:text-brote-500;
   }
 
+  /* Preguntas frecuentes: el details necesita además la clase "group" en el HTML */
+  .faq-list {
+    @apply mx-auto w-full max-w-3xl divide-y divide-brote-900/10 border-y border-brote-900/10;
+  }
+
+  .faq-item {
+    @apply py-2;
+  }
+
+  /* flex + list-none quitan el marcador en Chrome/Firefox; la variante webkit, en Safari */
+  .faq-summary {
+    @apply flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg px-4 py-3 font-display text-lg font-semibold text-brote-900 hover:bg-brote-50 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 [&::-webkit-details-marker]:hidden;
+  }
+
+  /* El giro se aplica siempre; solo la animación depende de motion-safe */
+  .faq-icon {
+    @apply size-5 shrink-0 text-brote-500 group-open:rotate-180 motion-safe:transition-transform motion-safe:duration-200;
+  }
+
+  .faq-answer {
+    @apply max-w-prose leading-relaxed text-brote-900 px-4 pt-1 pb-4;
+  }
+
   .tag {
     @apply self-start rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900;
   }
