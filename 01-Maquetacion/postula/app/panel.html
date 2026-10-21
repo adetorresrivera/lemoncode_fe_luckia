@@ -69,13 +69,14 @@
       <ul class="flex gap-1 overflow-x-auto px-4 py-2 sm:px-6 md:flex-col md:p-4">
         <li><a href="/app/panel.html" aria-current="page" class="app-nav-link">Panel</a></li>
         <li><a href="/app/candidaturas.html" class="app-nav-link">Candidaturas</a></li>
-        <li><a href="/app/kanban.html" class="app-nav-link">Kanban</a></li>
         <li><a href="#" class="app-nav-link">Contactos</a></li>
         <li><a href="#" class="app-nav-link">CV y cartas</a></li>
       </ul>
     </nav>
 
-    <main id="contenido" class="overflow-y-auto area-main">
+    <!-- relative: los sr-only de dentro (position: absolute) se colocan respecto a main y no a la
+         ventana; si no, desbordan el documento y en móvil aparece un scroll en blanco bajo main -->
+    <main id="contenido" class="relative overflow-y-auto area-main">
       <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 md:p-8">
         <div>
           <h1 class="font-display text-3xl font-extrabold md:text-4xl">Resumen</h1>
@@ -179,41 +180,57 @@
               <h2 id="ultimas-titulo" class="panel-title">Últimas candidaturas</h2>
               <a href="/app/candidaturas.html" class="link text-sm">Ver todas</a>
             </div>
-            <ul class="divide-y divide-brote-900/10 dark:divide-brote-50/10">
-              <li class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p class="font-semibold">Frontend Developer</p>
-                  <p class="panel-meta">Brisa Software · <time datetime="2026-10-19">19/10</time></p>
-                </div>
-                <span class="status status-entrevista">Entrevista</span>
+            <!-- La misma tarjeta que en el kanban: aquí la lista es ancha y se pone en horizontal (D2) -->
+            <ul class="@container flex flex-col gap-3">
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Frontend Developer</a></h3>
+                    <p class="panel-meta">Brisa Software</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV frontend v3</span> <time datetime="2026-10-19">19/10</time></p>
+                  <span class="status status-entrevista">Entrevista</span>
+                </article>
               </li>
-              <li class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p class="font-semibold">Desarrolladora React</p>
-                  <p class="panel-meta">Kora Health · <time datetime="2026-10-17">17/10</time></p>
-                </div>
-                <span class="status status-enviada">Enviada</span>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Desarrolladora React</a></h3>
+                    <p class="panel-meta">Kora Health</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV React v2</span> <time datetime="2026-10-17">17/10</time></p>
+                  <span class="status status-enviada">Enviada</span>
+                </article>
               </li>
-              <li class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p class="font-semibold">Junior Web Developer</p>
-                  <p class="panel-meta">Talaia Studio · <time datetime="2026-10-14">14/10</time></p>
-                </div>
-                <span class="status status-oferta">Oferta</span>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Junior Web Developer</a></h3>
+                    <p class="panel-meta">Talaia Studio</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV frontend v3</span> <time datetime="2026-10-14">14/10</time></p>
+                  <span class="status status-oferta">Oferta</span>
+                </article>
               </li>
-              <li class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p class="font-semibold">Maquetador/a HTML y CSS</p>
-                  <p class="panel-meta">Nube Alta · <time datetime="2026-10-12">12/10</time></p>
-                </div>
-                <span class="status status-guardada">Guardada</span>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Maquetador/a HTML y CSS</a></h3>
+                    <p class="panel-meta">Nube Alta</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>Sin enviar</span> <time datetime="2026-10-12">12/10</time></p>
+                  <span class="status status-guardada">Guardada</span>
+                </article>
               </li>
-              <li class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div>
-                  <p class="font-semibold">Desarrollador/a Vue</p>
-                  <p class="panel-meta">Ondina Games · <time datetime="2026-10-08">08/10</time></p>
-                </div>
-                <span class="status status-descartada">Descartada</span>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Desarrollador/a Vue</a></h3>
+                    <p class="panel-meta">Ondina Games</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV generalista v1</span> <time datetime="2026-10-08">08/10</time></p>
+                  <span class="status status-descartada">Descartada</span>
+                </article>
               </li>
             </ul>
           </section>

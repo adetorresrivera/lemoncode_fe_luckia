@@ -66,13 +66,14 @@
       <ul class="flex gap-1 overflow-x-auto px-4 py-2 sm:px-6 md:flex-col md:p-4">
         <li><a href="/app/panel.html" class="app-nav-link">Panel</a></li>
         <li><a href="/app/candidaturas.html" aria-current="page" class="app-nav-link">Candidaturas</a></li>
-        <li><a href="/app/kanban.html" class="app-nav-link">Kanban</a></li>
         <li><a href="#" class="app-nav-link">Contactos</a></li>
         <li><a href="#" class="app-nav-link">CV y cartas</a></li>
       </ul>
     </nav>
 
-    <main id="contenido" class="overflow-y-auto area-main">
+    <!-- relative: los sr-only de dentro (position: absolute) se colocan respecto a main y no a la
+         ventana; si no, desbordan el documento y en móvil aparece un scroll en blanco bajo main -->
+    <main id="contenido" class="relative overflow-y-auto area-main">
       <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 md:p-8">
         <!-- Título y selector de vista: apilados en móvil, en los extremos de una fila desde sm -->
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

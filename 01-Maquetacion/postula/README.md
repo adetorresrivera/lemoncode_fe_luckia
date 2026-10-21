@@ -13,7 +13,8 @@
    npm run dev
    ```
 4. Abre http://localhost:5173 (landing), http://localhost:5173/app/panel.html (panel)
-   o http://localhost:5173/app/candidaturas.html (candidaturas en tabla).
+   , http://localhost:5173/app/candidaturas.html (candidaturas en tabla)
+   o http://localhost:5173/app/kanban.html (candidaturas en kanban).
 
 `npm run build` genera en `dist/` todas las páginas listadas en
 `build.rollupOptions.input` de `vite.config.js`: Vite solo construye por
@@ -64,3 +65,9 @@ Las ilustraciones van en `<img>`, así que las clases `dark:` no llegan a sus co
 
 ## Panel: layout de aplicación
 `<body>` es una rejilla con áreas con nombre definidas con `@utility` en `src/style.css` (`app-layout` en móvil y `md:app-layout-sidebar` desde `md:`), así que en el HTML no hay valores arbitrarios. Tiene `h-dvh` y la última fila es `minmax(0, 1fr)`: con `1fr` a secas (`minmax(auto, 1fr)`) la fila crecería con el contenido y haría scroll toda la página; así solo lo hace `main` con `overflow-y-auto`, y la cabecera y la barra lateral se quedan fijas sin `sticky` ni `fixed`. En móvil la barra lateral pasa arriba como una fila de enlaces con scroll horizontal; no uso el `<details>` de la landing porque obligaría a duplicar el `<nav>`. El enlace de la página actual lleva `aria-current="page"` y se pinta con la variante propia `current-page:` (`@custom-variant`).
+
+## Kanban y tarjeta con container queries (D2)
+El tablero es un `flex` (una sola fila, una dimensión). En móvil cada columna tiene ancho fijo (`w-4/5`, `sm:w-72`) y `shrink-0`, así que no caben y el contenedor hace scroll horizontal; `snap-x snap-mandatory` en el contenedor y `snap-start` en cada columna hacen que al soltar el dedo la columna quede alineada al borde. Como la tabla, el contenedor tiene `tabindex="0"` y `role="region"` con nombre para poder desplazarlo con las flechas. Desde `lg:` las columnas pasan a `flex-1` y se reparten el ancho. No uso `grid-cols-5` porque sus columnas son `minmax(0, 1fr)` y, si no cupiera el contenido, se saldría de la columna; con `flex-1` el mínimo es el contenido y, en el peor caso, vuelve a aparecer el scroll.
+
+La tarjeta de candidatura (`.job-card`) es la misma en el kanban y en «Últimas candidaturas» del panel. La `ul` que la contiene lleva `@container` y la tarjeta `@md:flex-row`: pasa a horizontal cuando **su lista** mide 28rem o más, mida lo que mida la ventana.
+

@@ -1,17 +1,250 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="dark:scheme-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tus candidaturas de empleo en un tablero kanban, en columnas por estado." />
     <title>Kanban · Postula</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap"
+    />
     <link rel="stylesheet" href="/src/style.css" />
+    <!-- Igual que en la landing: pone .dark antes del primer pintado para que no parpadee el tema claro -->
+    <script>
+      let theme = null;
+      try {
+        theme = localStorage.getItem("theme");
+      } catch {}
+      document.documentElement.classList.toggle(
+        "dark",
+        theme ? theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches,
+      );
+    </script>
+    <script type="module" src="/src/theme.js"></script>
   </head>
-  <!-- Pendiente: de momento solo existe para que npm run build la incluya y los enlaces del panel no den 404 -->
-  <body class="p-8 text-brote-900">
-    <main class="flex flex-col gap-4">
-      <h1 class="font-display text-3xl font-extrabold">Kanban</h1>
-      <p>Pantalla en construcción.</p>
-      <p><a href="/app/panel.html" class="link">Volver al panel</a></p>
+  <!-- Mismo layout que el panel: el body es la rejilla y solo main hace scroll -->
+  <body class="grid h-dvh app-layout text-brote-900 md:app-layout-sidebar dark:bg-brote-950 dark:text-brote-50">
+    <a href="#contenido" class="skip-link">Saltar al contenido</a>
+
+    <header
+      class="flex items-center justify-between gap-4 border-b border-brote-900/10 bg-brote-50 px-4 py-3 area-header sm:px-6 dark:border-brote-50/10 dark:bg-brote-950"
+    >
+      <a
+        href="/"
+        class="flex items-center gap-2 rounded-md font-display text-2xl font-extrabold text-brote-900 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500 dark:text-brote-50 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300"
+      >
+        <span class="size-8 rounded-lg bg-brote-500 dark:bg-brote-300" aria-hidden="true"></span>
+        Postula
+      </a>
+
+      <div class="flex items-center gap-2 sm:gap-4">
+        <a href="#" class="btn-primary">
+          <span aria-hidden="true">+</span>
+          Nueva<span class="sr-only sm:not-sr-only"> candidatura</span>
+        </a>
+
+        <button type="button" id="theme-toggle" aria-pressed="false" class="theme-toggle">
+          <span class="sr-only">Modo oscuro</span>
+          <svg class="theme-icon dark:hidden" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z" />
+          </svg>
+          <svg class="theme-icon hidden dark:block" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <nav
+      aria-label="Aplicación"
+      class="border-b border-brote-900/10 bg-brote-50 area-sidebar md:border-r md:border-b-0 dark:border-brote-50/10 dark:bg-brote-950"
+    >
+      <ul class="flex gap-1 overflow-x-auto px-4 py-2 sm:px-6 md:flex-col md:p-4">
+        <li><a href="/app/panel.html" class="app-nav-link">Panel</a></li>
+        <li><a href="/app/candidaturas.html" aria-current="page" class="app-nav-link">Candidaturas</a></li>
+        <li><a href="#" class="app-nav-link">Contactos</a></li>
+        <li><a href="#" class="app-nav-link">CV y cartas</a></li>
+      </ul>
+    </nav>
+
+    <!-- relative: los sr-only de dentro (position: absolute) se colocan respecto a main y no a la
+         ventana; si no, desbordan el documento y en móvil aparece un scroll en blanco bajo main -->
+    <main id="contenido" class="relative overflow-y-auto area-main">
+      <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 md:p-8">
+        <!-- Igual que en la tabla: título y selector apilados en móvil, en los extremos de una fila desde sm -->
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 class="font-display text-3xl font-extrabold md:text-4xl">Candidaturas</h1>
+            <p class="mt-1 panel-meta">10 candidaturas, en columnas por estado.</p>
+          </div>
+
+          <nav aria-label="Vista">
+            <ul class="view-switch">
+              <li><a href="/app/candidaturas.html" class="view-link">Tabla</a></li>
+              <li><a href="/app/kanban.html" aria-current="page" class="view-link">Kanban</a></li>
+            </ul>
+          </nav>
+        </div>
+
+        <!-- Tablero con scroll horizontal y snap en móvil. Como en la tabla: tabindex="0" para moverlo
+             con las flechas y role="region" + aria-label para que tenga nombre al llegar con Tab.
+             items-start: cada columna mide lo que sus tarjetas, no lo que la más alta -->
+        <div
+          role="region"
+          aria-label="Tablero de candidaturas por estado"
+          tabindex="0"
+          class="flex snap-x snap-mandatory items-start gap-4 overflow-x-auto rounded-2xl pb-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 lg:gap-3 dark:focus-visible:outline-brote-300"
+        >
+          <section aria-labelledby="col-guardada" class="kanban-column snap-start">
+            <h2 id="col-guardada" class="kanban-heading border-brote-900/30 dark:border-brote-50/40">
+              Guardada
+              <span class="panel-meta font-sans font-medium">1<span class="sr-only"> candidatura</span></span>
+            </h2>
+            <ul class="@container flex flex-col gap-3">
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Maquetador/a HTML y CSS</a></h3>
+                    <p class="panel-meta">Nube Alta</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>Sin enviar</span> <time datetime="2026-10-12">12/10</time></p>
+                  <span class="status status-guardada">Guardada</span>
+                </article>
+              </li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="col-enviada" class="kanban-column snap-start">
+            <h2 id="col-enviada" class="kanban-heading border-brote-500/40 dark:border-brote-300/40">
+              Enviada
+              <span class="panel-meta font-sans font-medium">3<span class="sr-only"> candidaturas</span></span>
+            </h2>
+            <ul class="@container flex flex-col gap-3">
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Desarrolladora React</a></h3>
+                    <p class="panel-meta">Kora Health</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV React v2</span> <time datetime="2026-10-17">17/10</time></p>
+                  <span class="status status-enviada">Enviada</span>
+                </article>
+              </li>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Web Developer</a></h3>
+                    <p class="panel-meta">Garnacha Tech</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV generalista v1</span> <time datetime="2026-10-05">05/10</time></p>
+                  <span class="status status-enviada">Enviada</span>
+                </article>
+              </li>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Frontend Developer Jr.</a></h3>
+                    <p class="panel-meta">Nimbo Cloud</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV generalista v1</span> <time datetime="2026-09-30">30/09</time></p>
+                  <span class="status status-enviada">Enviada</span>
+                </article>
+              </li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="col-entrevista" class="kanban-column snap-start">
+            <h2 id="col-entrevista" class="kanban-heading border-coral-400">
+              Entrevista
+              <span class="panel-meta font-sans font-medium">3<span class="sr-only"> candidaturas</span></span>
+            </h2>
+            <ul class="@container flex flex-col gap-3">
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Frontend Developer</a></h3>
+                    <p class="panel-meta">Brisa Software</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV frontend v3</span> <time datetime="2026-10-19">19/10</time></p>
+                  <span class="status status-entrevista">Entrevista</span>
+                </article>
+              </li>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Frontend Engineer</a></h3>
+                    <p class="panel-meta">Mareta Pagos</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV frontend v3</span> <time datetime="2026-10-11">11/10</time></p>
+                  <span class="status status-entrevista">Entrevista</span>
+                </article>
+              </li>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Desarrollador/a frontend</a></h3>
+                    <p class="panel-meta">Faro Logística</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV React v2</span> <time datetime="2026-10-03">03/10</time></p>
+                  <span class="status status-entrevista">Entrevista</span>
+                </article>
+              </li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="col-oferta" class="kanban-column snap-start">
+            <h2 id="col-oferta" class="kanban-heading border-brote-500 dark:border-brote-300">
+              Oferta
+              <span class="panel-meta font-sans font-medium">1<span class="sr-only"> candidatura</span></span>
+            </h2>
+            <ul class="@container flex flex-col gap-3">
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Junior Web Developer</a></h3>
+                    <p class="panel-meta">Talaia Studio</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV frontend v3</span> <time datetime="2026-10-14">14/10</time></p>
+                  <span class="status status-oferta">Oferta</span>
+                </article>
+              </li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="col-descartada" class="kanban-column snap-start">
+            <h2 id="col-descartada" class="kanban-heading border-dashed border-brote-900/40 dark:border-brote-50/40">
+              Descartada
+              <span class="panel-meta font-sans font-medium">2<span class="sr-only"> candidaturas</span></span>
+            </h2>
+            <ul class="@container flex flex-col gap-3">
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Desarrollador/a Vue</a></h3>
+                    <p class="panel-meta">Ondina Games</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV generalista v1</span> <time datetime="2026-10-08">08/10</time></p>
+                  <span class="status status-descartada">Descartada</span>
+                </article>
+              </li>
+              <li>
+                <article class="job-card @md:flex-row">
+                  <div class="job-card-main">
+                    <h3 class="font-semibold"><a href="#" class="nav-link">Desarrollador/a Angular</a></h3>
+                    <p class="panel-meta">Lince Data</p>
+                  </div>
+                  <p class="job-card-meta panel-meta"><span>CV frontend v3</span> <time datetime="2026-09-26">26/09</time></p>
+                  <span class="status status-descartada">Descartada</span>
+                </article>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
     </main>
   </body>
 </html>

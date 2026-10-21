@@ -292,9 +292,10 @@
     @apply border-dashed border-brote-900/40 text-brote-900/80 dark:border-brote-50/40 dark:text-brote-50/80;
   }
 
-  /* Selector Tabla | Kanban: control segmentado, la vista activa lleva aria-current="page" */
+  /* Selector Tabla | Kanban: control segmentado, la vista activa lleva aria-current="page".
+     w-fit y no self-start: el padre de la ul es el <nav>, que es un bloque y no un flex */
   .view-switch {
-    @apply flex gap-1 self-start rounded-lg border border-brote-900/10 p-1 dark:border-brote-50/10;
+    @apply flex w-fit gap-1 rounded-lg border border-brote-900/10 p-1 dark:border-brote-50/10;
   }
 
   .view-link {
@@ -331,5 +332,30 @@
 
   .cell-meta {
     @apply text-brote-900/80 dark:text-brote-50/80;
+  }
+
+  /* Kanban. Móvil: columnas de ancho fijo que no encogen (shrink-0) y se desplazan en horizontal;
+     desde lg se reparten el ancho a partes iguales (flex-1 = flex: 1 1 0%) */
+  .kanban-column {
+    @apply flex w-4/5 shrink-0 flex-col gap-3 rounded-2xl bg-brote-900/5 p-3 sm:w-72 lg:flex-1 lg:p-2 dark:bg-brote-50/5;
+  }
+
+  /* El color del borde inferior va en el HTML, uno por estado (decorativo: el h2 ya dice el estado) */
+  .kanban-heading {
+    @apply flex items-center justify-between gap-2 border-b-4 px-1 pb-2 font-display font-semibold;
+  }
+
+  /* Tarjeta de candidatura (D2): cambia según el ancho de su contenedor, no de la ventana.
+     @container (en la ul) y @md:flex-row (en la tarjeta) se quedan en el HTML, como peer en el pie */
+  .job-card {
+    @apply flex flex-col gap-3 rounded-xl border border-brote-900/10 bg-brote-50 p-3 @md:gap-6 @md:px-4 dark:border-brote-50/10 dark:bg-brote-900;
+  }
+
+  .job-card-main {
+    @apply flex flex-col gap-0.5 @md:flex-1;
+  }
+
+  .job-card-meta {
+    @apply flex flex-wrap justify-between gap-x-3 gap-y-1;
   }
 }
