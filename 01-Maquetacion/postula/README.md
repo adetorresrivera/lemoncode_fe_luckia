@@ -41,3 +41,8 @@ npm run dev
 
 ## Integración de Tailwind
 Plugin `@tailwindcss/vite`: el proyecto ya es Vite, así que hay menos dependencias, no hace falta `postcss.config` y la recarga es más rápida. PostCSS solo compensaría si usáramos otros plugins de PostCSS o una herramienta distinta de Vite.
+
+## Cabecera sticky
+`sticky` y no `fixed`: la cabecera sigue ocupando su hueco en el flujo, así que el hero no queda debajo y no hay que compensar con un `padding-top` en el `body`; solo se pega arriba al hacer scroll.
+Hace falta `z-10` porque las tarjetas con `transform` en hover (`-translate-y-1`, `scale-105`) crean su propio contexto de apilamiento y, al ir después en el DOM, se pintarían por encima de una cabecera con `z-index: auto`.
+Como la cabecera tapa el inicio de cada sección, `<html>` lleva `scroll-pt-*` para que los enlaces `#como-funciona`, `#planes`… dejen el título visible.
