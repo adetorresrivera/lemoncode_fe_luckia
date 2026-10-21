@@ -353,8 +353,86 @@
         </div>
       </section>
 
-      <section id="planes" aria-labelledby="planes-titulo">
-        <h2 id="planes-titulo">Planes</h2>
+      <section
+        id="planes"
+        aria-labelledby="planes-titulo"
+        class="border-y border-brote-900/10"
+      >
+        <div class="section-container">
+          <h2
+            id="planes-titulo"
+            class="section-title text-center"
+          >
+            Planes
+          </h2>
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-6">
+            <article class="plan-card">
+              <h3 class="item-title">Gratis</h3>
+              <p class="plan-price">
+                0 €<span class="plan-period" aria-hidden="true">/mes</span
+                ><span class="sr-only">al mes</span>
+              </p>
+              <p class="item-text">Para empezar a ordenar tu búsqueda.</p>
+              <ul class="plan-features">
+                <li>Hasta 20 candidaturas activas</li>
+                <li>Vista tabla y kanban</li>
+                <li>1 versión de CV y carta</li>
+                <li>Historial de cada proceso</li>
+              </ul>
+              <a
+                href="/app/panel.html"
+                class="btn-secondary mt-auto py-3 text-center"
+                >Empezar gratis</a
+              >
+            </article>
+
+            <article class="plan-card relative border-2 border-brote-500 bg-brote-50 shadow-xl shadow-brote-900/10">
+              <p
+                class="absolute inset-x-0 -top-3.5 mx-auto w-fit rounded-full bg-coral-500 px-3 py-1 text-sm font-semibold whitespace-nowrap text-brote-950"
+              >
+                Más popular
+              </p>
+              <h3 class="item-title">Pro</h3>
+              <p class="plan-price">
+                6 €<span class="plan-period" aria-hidden="true">/mes</span
+                ><span class="sr-only">al mes</span>
+              </p>
+              <p class="item-text">Para quien está en plena búsqueda.</p>
+              <ul class="plan-features">
+                <li>Candidaturas ilimitadas</li>
+                <li>Versiones de CV y carta sin límite</li>
+                <li>Contactos por empresa</li>
+                <li>Estadísticas de entrevistas por CV</li>
+                <li>Notas de preparación de entrevistas</li>
+              </ul>
+              <a
+                href="/app/panel.html"
+                class="btn-primary mt-auto py-3 text-center"
+                >Probar Pro</a
+              >
+            </article>
+
+            <article class="plan-card">
+              <h3 class="item-title">Escuelas</h3>
+              <p class="plan-price">
+                3 €<span class="plan-period" aria-hidden="true">/alumno/mes</span
+                ><span class="sr-only">por alumno al mes</span>
+              </p>
+              <p class="item-text">Para bootcamps, másteres y centros de FP.</p>
+              <ul class="plan-features">
+                <li>Todo lo del plan Pro para cada alumno</li>
+                <li>Altas de grupos completos</li>
+                <li>Panel para orientadores</li>
+                <li>Soporte prioritario</li>
+              </ul>
+              <a
+                href="mailto:escuelas@postula.example"
+                class="btn-secondary mt-auto py-3 text-center"
+                >Contactar<span class="sr-only"> para el plan Escuelas</span></a
+              >
+            </article>
+          </div>
+        </div>
       </section>
 
       <section id="faq" aria-labelledby="faq-titulo">

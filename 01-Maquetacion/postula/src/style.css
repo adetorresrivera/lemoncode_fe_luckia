@@ -26,6 +26,10 @@
     @apply inline-block rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 hover:bg-brote-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500;
   }
 
+  .btn-secondary {
+    @apply inline-block rounded-lg border border-brote-900 px-4 py-2 font-semibold text-brote-900 hover:bg-brote-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500;
+  }
+
   .link {
     @apply rounded-sm font-semibold text-brote-500 underline-offset-4 hover:text-brote-900 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-500;
   }
@@ -76,6 +80,23 @@
 
   .card-footer {
     @apply mt-auto pt-3;
+  }
+
+  /* Planes: sin overflow-hidden (a diferencia de .card) para no recortar la etiqueta "Más popular" */
+  .plan-card {
+    @apply flex flex-col gap-4 rounded-2xl border border-brote-900/10 p-6;
+  }
+
+  .plan-price {
+    @apply flex items-baseline gap-1 font-display text-4xl font-extrabold text-brote-900;
+  }
+
+  .plan-period {
+    @apply font-sans text-base font-medium;
+  }
+
+  .plan-features {
+    @apply list-disc leading-relaxed text-brote-900 space-y-2 pl-5 marker:text-brote-500;
   }
 
   .tag {
