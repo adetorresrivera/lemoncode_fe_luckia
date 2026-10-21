@@ -1,11 +1,22 @@
 {
   "name": "Lemoncode FE",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+
+  // El código vive en un volumen de Docker (sistema de ficheros Linux), no en
+  // la carpeta de Windows: así git no ve ficheros "modificados" por diferencias
+  // de finales de línea, permisos o metadatos entre Windows y el contenedor.
+  "workspaceMount": "source=lemoncode-fe-luckia,target=/workspaces/lemoncode_fe_luckia,type=volume",
+  "workspaceFolder": "/workspaces/lemoncode_fe_luckia",
+
+  // La primera vez el volumen está vacío: se le da propiedad al usuario node
+  // y se clona el repo. En las siguientes no se vuelve a clonar.
+  "onCreateCommand": "sudo chown node:node /workspaces/lemoncode_fe_luckia && if [ ! -d .git ]; then git clone https://github.com/adetorresrivera/lemoncode_fe_luckia.git .; fi",
+  "postCreateCommand": "cd 01-Maquetacion/postula && npm install",
+
   "forwardPorts": [5173],
   "portsAttributes": {
     "5173": { "label": "Vite dev server" }
   },
-  "postCreateCommand": "cd 01-Maquetacion/postula && npm install",
   "customizations": {
     "vscode": {
       "extensions": [
