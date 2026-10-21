@@ -3,6 +3,9 @@
 /* Modo oscuro por clase (no por el sistema): src/theme.js pone o quita .dark en <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Enlace de la página actual: current-page:bg-… en vez de un selector arbitrario aria-[current=page]: */
+@custom-variant current-page (&[aria-current="page"]);
+
 @theme {
   /* Marca "Brote" — claro: 50 fondo, 500 botones, 900 texto */
   --color-brote-50: #f0fdfa;
@@ -196,5 +199,96 @@
 
   .tag {
     @apply self-start rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900 dark:bg-brote-950 dark:text-brote-50;
+  }
+}
+
+/* Layout de la aplicación (D5) con áreas con nombre. Son utilidades y no componentes para poder
+   usarlas con variantes: "app-layout md:app-layout-sidebar" en el HTML */
+
+/* Móvil: cabecera, nav en horizontal y contenido, apilados. minmax(0, 1fr) y no 1fr: 1fr es
+   minmax(auto, 1fr) y la fila crecería con el contenido en vez de dejar que main haga scroll */
+@utility app-layout {
+  grid-template-areas:
+    "header"
+    "sidebar"
+    "main";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+/* Escritorio: cabecera a todo el ancho, barra lateral de 14rem y el contenido ocupa el resto */
+@utility app-layout-sidebar {
+  grid-template-areas:
+    "header header"
+    "sidebar main";
+  grid-template-columns: --spacing(56) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+@utility area-header {
+  grid-area: header;
+}
+
+@utility area-sidebar {
+  grid-area: sidebar;
+}
+
+@utility area-main {
+  grid-area: main;
+}
+
+/* Pantallas de la aplicación (app/) */
+@layer components {
+  /* Enlace "Saltar al contenido": invisible hasta que recibe el foco con Tab */
+  .skip-link {
+    @apply sr-only rounded-lg bg-brote-500 px-4 py-2 font-semibold text-brote-50 focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-900 dark:bg-coral-400 dark:text-brote-950 dark:focus-visible:outline-brote-300;
+  }
+
+  /* El estilo de la página actual va después del hover para ganarle */
+  .app-nav-link {
+    @apply block rounded-lg px-3 py-2 font-medium whitespace-nowrap text-brote-900 hover:bg-brote-900/10 hover:text-brote-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-500 current-page:bg-brote-500 current-page:font-semibold current-page:text-brote-50 dark:text-brote-50 dark:hover:bg-brote-50/10 dark:hover:text-brote-300 dark:focus-visible:outline-brote-300 dark:current-page:bg-brote-300 dark:current-page:text-brote-950;
+  }
+
+  /* Cajas del bento */
+  .panel-box {
+    @apply flex flex-col gap-4 rounded-2xl border border-brote-900/10 p-5 shadow-sm shadow-brote-900/10 dark:border-brote-50/10 dark:bg-brote-900;
+  }
+
+  .panel-title {
+    @apply font-display text-lg font-semibold text-brote-900 dark:text-brote-50;
+  }
+
+  .panel-meta {
+    @apply text-sm text-brote-900/80 dark:text-brote-50/80;
+  }
+
+  /* Número de las estadísticas normales (la destacada es más grande) */
+  .stat-value {
+    @apply font-display text-4xl font-extrabold;
+  }
+
+  /* Estado de una candidatura. El texto ya dice el estado: el color solo refuerza */
+  .status {
+    @apply shrink-0 self-start rounded-full border border-transparent px-3 py-1 text-xs font-semibold whitespace-nowrap;
+  }
+
+  .status-guardada {
+    @apply border-brote-900/30 text-brote-900 dark:border-brote-50/40 dark:text-brote-50;
+  }
+
+  .status-enviada {
+    @apply border-brote-500/30 bg-brote-50 text-brote-900 dark:border-brote-50/10 dark:bg-brote-950 dark:text-brote-50;
+  }
+
+  .status-entrevista {
+    @apply bg-coral-400 text-brote-950;
+  }
+
+  .status-oferta {
+    @apply bg-brote-500 text-brote-50 dark:bg-brote-300 dark:text-brote-950;
+  }
+
+  .status-descartada {
+    @apply border-dashed border-brote-900/40 text-brote-900/80 dark:border-brote-50/40 dark:text-brote-50/80;
   }
 }

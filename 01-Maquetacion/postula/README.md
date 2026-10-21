@@ -12,7 +12,11 @@
    cd 01-Maquetacion/postula
    npm run dev
    ```
-4. Abre http://localhost:5173
+4. Abre http://localhost:5173 (landing) o http://localhost:5173/app/panel.html (panel).
+
+`npm run build` genera en `dist/` todas las páginas listadas en
+`build.rollupOptions.input` de `vite.config.js`: Vite solo construye por
+defecto `index.html`, así que cada página nueva de `app/` hay que añadirla ahí.
 
 ### Dónde está el código
 
@@ -56,3 +60,6 @@ Para esconder el menú tras el botón ☰ en móvil había dos técnicas sin JS.
 Criterio de color en oscuro (todas las parejas de texto pasan AA): fondo `brote-950`, superficies (tarjetas, «Cómo funciona», plan Pro) `brote-900`, texto `brote-50`, enlaces/hover/foco `brote-300` (`brote-500` sobre `brote-950` solo da 2,6:1) y acento `coral-400` **solo como fondo** con texto `brote-950` (como texto sobre `brote-900` se queda en 4,2:1). Es el mismo criterio que ya seguía el pie, que no cambia salvo un borde superior para separarse del resto de la página, que ahora tiene su mismo fondo.
 
 Las ilustraciones van en `<img>`, así que las clases `dark:` no llegan a sus colores internos, y un `@media (prefers-color-scheme)` dentro del SVG seguiría al sistema y no al botón. Por eso cada una tiene una variante `-dark.svg` y el HTML lleva las dos imágenes, con `dark:hidden` y `hidden dark:block`. Las de las tarjetas tienen `loading="lazy"`, así que la que está oculta no se descarga; las dos del hero sí se descargan, pero son SVG de unos 2 KB.
+
+## Panel: layout de aplicación
+`<body>` es una rejilla con áreas con nombre definidas con `@utility` en `src/style.css` (`app-layout` en móvil y `md:app-layout-sidebar` desde `md:`), así que en el HTML no hay valores arbitrarios. Tiene `h-dvh` y la última fila es `minmax(0, 1fr)`: con `1fr` a secas (`minmax(auto, 1fr)`) la fila crecería con el contenido y haría scroll toda la página; así solo lo hace `main` con `overflow-y-auto`, y la cabecera y la barra lateral se quedan fijas sin `sticky` ni `fixed`. En móvil la barra lateral pasa arriba como una fila de enlaces con scroll horizontal; no uso el `<details>` de la landing porque obligaría a duplicar el `<nav>`. El enlace de la página actual lleva `aria-current="page"` y se pinta con la variante propia `current-page:` (`@custom-variant`).
