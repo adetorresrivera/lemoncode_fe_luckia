@@ -110,3 +110,46 @@ del h3, para que el lector de pantalla lea primero el título y luego el dato.
 - `.card-footer` pasa a `mt-auto pt-3`: ya no es una fila flex porque solo contiene el enlace; `mt-auto` lo sigue empujando al fondo para que los enlaces queden alineados.
 - `.tag` cambia `shrink-0` por `self-start`: `.card-body` es `flex flex-col` y por defecto estira a sus hijos a todo el ancho; `self-start` mantiene la píldora a su ancho natural.
 - `&nbsp;` antes de la flecha para que "→" no salte sola a otra línea.
+
+## Footer
+### Prompt
+
+"Maqueta el footer. Ahora mismo tiene una section de newsletter vacía.
+- Al menos 4 bloques en escritorio: marca (logo + frase), Producto (enlaces
+  ul), Recursos/Legal (enlaces ul) y Newsletter. En móvil, apilados; 2
+  columnas en sm:, 4 en lg:. Dime si eliges grid o flex y por qué.
+- Enlaces de redes con iconos SVG inline. El nombre de la red tiene que ser
+  accesible (sr-only o aria-label), porque solo se ve el icono.
+- Newsletter: form con un label asociado al input type="email" required, y un
+  botón. Estilos focus:, user-invalid: (no invalid:, que pinta en rojo al
+  cargar) y disabled:. Un mensaje de error que solo aparece si el email no es
+  válido, con peer + peer-user-invalid:block. Explícame por qué el mensaje
+  tiene que ir después del input en el HTML.
+- Una línea final con el copyright separada por un border-t.
+- Revisa que los títulos del footer no se salten niveles respecto al resto de
+  la página."
+
+### Qué me dio
+
+- Rejilla `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`: grid porque son columnas fijas por breakpoint y en `sm:` queda un 2×2 alineado en dos dimensiones.
+- Títulos del pie como `h2`: el footer es hermano de `main`; con `h3` colgarían del último `h2` (Preguntas frecuentes).
+- El mensaje de error va después del input porque `peer-user-invalid:block` genera `.peer:user-invalid ~ *`, y `~` solo selecciona hermanos posteriores dentro del mismo padre.
+- Visualmente correcto, pero el código era difícil de leer: input y botón con 10-14 utilidades en línea y los tres SVG repitiendo los mismos 6 atributos.
+
+### Qué corregí y por qué
+
+Refactor de legibilidad del código, sin cambios visuales:
+
+- Clases nuevas en `@layer components`: `.footer-brand`, `.footer-input`, `.footer-button` y `.footer-error`, igual que `.btn-primary` o `.faq-summary` en otras secciones.
+- `peer` y `peer-user-invalid:block` se quedan en el HTML a propósito, para que en el marcado se vea qué elemento depende de cuál:
+
+```html
+<input id="newsletter-email" type="email" required class="footer-input peer" />
+<button type="submit" class="footer-button">Suscribirme</button>
+<p class="footer-error peer-user-invalid:block">…</p>
+```
+
+- `.footer-error` lleva `hidden`. Funciona porque `peer-user-invalid:block` es una utilidad y la capa utilities gana a la capa components.
+- `.footer-icon` sustituye `fill`, `stroke`, `stroke-width`, `stroke-linecap` y `stroke-linejoin` de cada SVG por `fill-none stroke-current stroke-2`. `stroke-linecap` y `stroke-linejoin` van en CSS normal porque Tailwind no tiene utilidad para ellos. En el `<svg>` solo quedan `viewBox`, `aria-hidden` y `focusable`.
+- Un comentario HTML encima de cada bloque (Marca, Producto, Recursos y legal, Newsletter, Copyright) para ver dónde empieza y acaba cada columna.
+- El logo de la cabecera no lo he tocado: es casi igual que `.footer-brand` pero con otros colores, y unificarlos sería modificar otra sección.

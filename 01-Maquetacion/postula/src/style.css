@@ -122,6 +122,43 @@
     @apply max-w-prose leading-relaxed text-brote-900 px-4 pt-1 pb-4;
   }
 
+  /* Pie: fondo brote-950, así que el foco usa brote-300 (brote-500 no contrasta) */
+  .footer-title {
+    @apply font-display text-lg font-semibold text-brote-50;
+  }
+
+  .footer-link {
+    @apply rounded-sm text-brote-50/80 underline-offset-4 hover:text-brote-300 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-300;
+  }
+
+  .footer-brand {
+    @apply flex items-center gap-2 rounded-md font-display text-2xl font-extrabold hover:text-brote-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brote-300;
+  }
+
+  .footer-social {
+    @apply flex size-10 items-center justify-center rounded-full text-brote-50/80 hover:bg-brote-900 hover:text-brote-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-300;
+  }
+
+  /* linecap y linejoin no tienen utilidad en Tailwind, van en CSS normal */
+  .footer-icon {
+    @apply size-5 fill-none stroke-current stroke-2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Newsletter: "peer" y "peer-user-invalid:block" se quedan en el HTML para que se vea la relación */
+  .footer-input {
+    @apply min-w-0 flex-1 rounded-lg border-2 border-transparent bg-brote-50 px-3 py-2 text-brote-950 placeholder:text-brote-500 focus:border-brote-300 focus:outline-none user-invalid:border-coral-400 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .footer-button {
+    @apply rounded-lg bg-coral-400 px-4 py-2 font-semibold text-brote-950 enabled:hover:bg-coral-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brote-300 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .footer-error {
+    @apply hidden w-full text-sm text-coral-400;
+  }
+
   .tag {
     @apply self-start rounded-full bg-brote-50 px-3 py-1 text-sm font-medium whitespace-nowrap text-brote-900;
   }
