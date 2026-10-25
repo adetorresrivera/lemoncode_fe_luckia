@@ -111,7 +111,7 @@ Además de las que pide el enunciado, hay otros comentarios marcados igual:
 - [x] **O9 · Tipos de utilidad**: `CoffeePreview` (`Pick`), `NewCoffee` (`Omit`), `updateCoffee` (`Partial`) y `countByRoast` (`Record`) en [`src/o09-utilidad.ts`](src/o09-utilidad.ts).
 - [x] **O10 · Closures**: `createDiscount` y `createOrderIdGenerator` en [`src/o10-closures.ts`](src/o10-closures.ts).
 - [x] **O11 · Immer**: el mismo cambio con spread y con `produce`, y un `produce` con varios cambios, en [`src/o11-immer.ts`](src/o11-immer.ts).
-- [ ] **O12 · README + bitácora de IA**: este fichero. Falta la captura de la consola y completar la [bitácora](#bitácora-de-ia).
+- [ ] **O12 · README + bitácora de IA**: este fichero y la [bitácora](#bitácora-de-ia). Falta la captura de la consola.
 
 ### ⭐ Opcionales
 
@@ -137,5 +137,6 @@ Herramienta: **Claude Code** (extensión de VS Code), dentro del DevContainer, c
 
 La bitácora completa, con el prompt, lo que me dio y lo que corregí en cada kata, está en [`../bitacora.md`](../bitacora.md):
 
-<!-- TODO: completar ../bitacora.md (mínimo 3 ejemplos) y resumir aquí una línea por kata:
-     - **Kata**: qué hizo mal la IA y qué corregí. -->
+- **O7 · Pureza**: para `createOrderId` recomendaba pasar el timestamp como parámetro; elegí inyectar el reloj (`now: () => number`), que es pura solo si `now` lo es.
+- **P4 · `sortBy`**: la firma del enunciado (`K extends keyof T`) deja pasar `notes` y no deja comparar sin `as`; elegí restringir `K` a las claves con valor `string | number`.
+- **P7 · `nextSteps`**: descartaba las acciones vencidas; ahora salen primero, marcadas con `overdue`.
