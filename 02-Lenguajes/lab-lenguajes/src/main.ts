@@ -13,3 +13,4 @@ import "./p02-historial";
 import "./p04-sortby";
 import "./p05-unknown";
 import "./p07-tfm";
+import "./d02-pagos";
