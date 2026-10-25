@@ -9,8 +9,8 @@ export type PaymentMethod =
 // `value: never` solo acepta algo que TypeScript ya ha descartado del todo.
 // Devuelve `never` porque nunca termina con normalidad: siempre lanza. El
 // `throw` cubre el caso en tiempo de ejecución (datos que no pasaron por tsc).
-const assertNever = (value: never): never => {
-  throw new Error(`Método de pago no contemplado: ${JSON.stringify(value)}`);
+export const assertNever = (value: never): never => {
+  throw new Error(`Caso no contemplado: ${JSON.stringify(value)}`);
 };
 
 export const describePayment = (method: PaymentMethod): string => {
