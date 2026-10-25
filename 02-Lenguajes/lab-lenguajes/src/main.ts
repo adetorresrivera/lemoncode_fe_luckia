@@ -7,3 +7,4 @@ import "./o06-carrito";
 import "./o07-pureza";
 import "./o08-uniones-genericos";
 import "./o09-utilidad";
+import "./o10-closures";
