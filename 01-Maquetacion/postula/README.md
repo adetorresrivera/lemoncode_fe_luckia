@@ -1,5 +1,53 @@
 # Postula · Lab 01 (Maquetación)
 
+## Tema elegido: la UI de mi TFM (vía 🅱️)
+
+**Postula** es un gestor de candidaturas de empleo. Cada usuario registra las
+ofertas a las que se presenta, las sigue en una tabla o en un tablero kanban,
+guarda los contactos de cada empresa y apunta qué versión de su CV y carta
+envió a cada oferta, para saber cuál le consigue más entrevistas.
+
+En este laboratorio solo hay **maquetación**: HTML + Tailwind CSS v4, con datos
+inventados escritos en el HTML. No hay backend ni lógica; el único JavaScript es
+el botón de modo oscuro.
+
+### Pantallas maquetadas
+
+| Pantalla | Fichero | Qué contiene |
+|---|---|---|
+| Landing pública | [`index.html`](index.html) | Cabecera, hero, cómo funciona (3 pasos), qué puedes hacer (6 tarjetas), planes (Gratis / Pro destacado / Escuelas), preguntas frecuentes y pie con newsletter |
+| Panel | [`app/panel.html`](app/panel.html) | Barra lateral y un resumen tipo bento: 4 estadísticas (una destacada), próximos pasos, entrevistas por versión de CV y últimas candidaturas |
+| Candidaturas en tabla | [`app/candidaturas.html`](app/candidaturas.html) | Filtros y tabla de candidaturas |
+| Candidaturas en kanban | [`app/kanban.html`](app/kanban.html) | 5 columnas por estado: Guardada, Enviada, Entrevista, Oferta y Descartada |
+
+La tabla y el kanban se enlazan con un selector de vista **Tabla | Kanban**.
+
+### Equivalencias con el tema propuesto
+
+| Pieza del tema propuesto | En Postula |
+|---|---|
+| Cabecera + menú | Cabecera de la landing (sticky, con menú hamburguesa en móvil) y barra lateral de la app |
+| Hero | Hero de la landing |
+| Tarjetas de cafés | «Qué puedes hacer» (6 tarjetas) y la tarjeta de candidatura del kanban y el panel |
+| Cómo funciona (3 pasos) | «Cómo funciona» |
+| Planes con destacado | Planes (Pro destacado) y estadísticas del panel (una destacada) |
+| FAQ | Preguntas frecuentes con `<details>` |
+| Pie + newsletter | Pie con newsletter y filtros de la tabla de candidaturas |
+
+## Capturas
+
+<!-- TODO: hacer las capturas y guardarlas en docs/screenshots/ con estos nombres.
+     Móvil: DevTools → modo dispositivo, 390 px de ancho. Escritorio: 1440 px.
+     Para una página entera: Ctrl/Cmd + Shift + P → "Capture full size screenshot". -->
+
+| Pantalla | Móvil | Escritorio |
+|---|---|---|
+| Landing | ![Landing en móvil](docs/screenshots/landing-movil.png) | ![Landing en escritorio](docs/screenshots/landing-escritorio.png) |
+| Landing (modo oscuro) | ![Landing en móvil, modo oscuro](docs/screenshots/landing-movil-oscuro.png) | ![Landing en escritorio, modo oscuro](docs/screenshots/landing-escritorio-oscuro.png) |
+| Panel | ![Panel en móvil](docs/screenshots/panel-movil.png) | ![Panel en escritorio](docs/screenshots/panel-escritorio.png) |
+| Candidaturas (tabla) | ![Tabla de candidaturas en móvil](docs/screenshots/candidaturas-movil.png) | ![Tabla de candidaturas en escritorio](docs/screenshots/candidaturas-escritorio.png) |
+| Candidaturas (kanban) | ![Kanban en móvil](docs/screenshots/kanban-movil.png) | ![Kanban en escritorio](docs/screenshots/kanban-escritorio.png) |
+
 ## Cómo arrancarlo
 
 ### Con DevContainer (recomendado)
@@ -48,6 +96,60 @@ npm run dev
 ## Integración de Tailwind
 Plugin `@tailwindcss/vite`: el proyecto ya es Vite, así que hay menos dependencias, no hace falta `postcss.config` y la recarga es más rápida. PostCSS solo compensaría si usáramos otros plugins de PostCSS o una herramienta distinta de Vite.
 
+## Checklist
+
+### ✅ Obligatorios
+
+- [x] **O1 · Estructura semántica**: `header`, `nav`, `main`, `section` con su título, `footer`, `article` en las tarjetas y `ul` en las listas de enlaces. Un solo `h1` por página, sin saltarse niveles, y todas las imágenes con `alt` (`alt=""` en las decorativas).
+- [x] **O2 · Tema con `@theme`**: marca `brote` (50, 300, 500, 900, 950), acento `coral` (400, 500), *Bricolage Grotesque* para los títulos e *Inter* para el texto. Están en [`src/style.css`](src/style.css) y no hay ningún color a pelo en el HTML.
+- [x] **O3 · Cabecera con flexbox**: logo a la izquierda y menú a la derecha; en móvil, menú hamburguesa (D1).
+- [x] **O4 · Hero**: `grid` de una columna que pasa a `md:grid-cols-2`, con el texto limitado por `max-w-xl`.
+- [x] **O5 · Rejilla de tarjetas**: «Qué puedes hacer», 6 tarjetas con `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`, `aspect-video` + `object-cover` y hover con sombra, `-translate-y-1` y zoom de la imagen.
+- [x] **O6 · Pasos con flexbox**: «Cómo funciona», con `flex flex-col md:flex-row` y cada paso centrado.
+- [x] **O7 · Pie**: 4 columnas en escritorio (marca + redes, Producto, Recursos y legal, Newsletter) que se apilan en móvil, y el copyright separado con `border-t`.
+- [x] **O8 · Accesibilidad mínima**: todo se usa con teclado y tiene `focus-visible:`, las páginas de la app tienen el enlace «Saltar al contenido» y el contraste está comprobado en los dos modos (ver [Accesibilidad y Lighthouse](#accesibilidad-y-lighthouse)).
+- [x] **O9 · README + bitácora de IA**: este fichero y la [bitácora](#bitácora-de-ia).
+
+### ⭐ Opcionales
+
+- [x] **P1 · Modo oscuro** con botón y la preferencia guardada (ver [Modo oscuro](#modo-oscuro)).
+- [x] **P2 · Cabecera fija con efecto cristal** (ver [Cabecera sticky](#cabecera-sticky)).
+- [x] **P3 · Planes con tarjeta destacada**: la etiqueta «Más popular» se coloca con `absolute` sobre el plan Pro, que es `relative`.
+- [x] **P4 · FAQ plegable sin JavaScript**: `<details>` + `<summary>`, con la flecha girada mediante `group-open:rotate-180`.
+- [x] **P5 · Formulario con estados**: la newsletter (`label`, `focus:`, `user-invalid:`, `disabled:` y el error con `peer-user-invalid:block`) y los filtros de la tabla.
+- [x] **P6 · Bento grid**: el resumen del panel, con `col-span-2` y `lg:row-span-2` en la estadística destacada.
+- [x] **P7 · Animaciones**: transiciones en botones, enlaces y tarjetas, y la animación propia `animate-menu-in` (definida en `@theme`) al abrir el menú móvil. Todo lo que se mueve lleva `motion-safe:`.
+
+### 🔥 Desafíos
+
+- [x] **D1 · Menú hamburguesa sin JavaScript**, con `<details>` (ver [Menú móvil](#menú-móvil-sin-javascript-checkbox-vs-detailssummary)).
+- [x] **D2 · Container queries**: la misma `.job-card` es vertical en las columnas del kanban y horizontal en el panel (ver [Kanban](#kanban-y-tarjeta-con-container-queries-d2)).
+- [ ] **D3 · Multitema**
+- [x] **D4 · Utilidades propias**: `@utility app-layout`, `app-layout-sidebar` y `area-*`, y la variante propia `current-page:` (ver [Utilidades propias](#utilidades-propias-d4)).
+- [x] **D5 · Layout de aplicación**: rejilla con áreas con nombre en la que solo hace scroll el contenido (ver [Panel](#panel-layout-de-aplicación)).
+- [ ] **D6 · De captura a código**
+- [ ] **D7 · Lighthouse al 100**
+
+## Accesibilidad y Lighthouse
+
+<!-- TODO: pasar Lighthouse desde el Chrome del host (DevTools → Lighthouse →
+     Accesibilidad, Buenas prácticas y SEO), mejor sobre la versión de
+     producción: npm run build && npm run preview → http://localhost:4173 -->
+
+| Página | Accesibilidad | Buenas prácticas | SEO | Rendimiento |
+|---|---|---|---|---|
+| Landing | TODO | TODO | TODO | TODO |
+| Panel | TODO | TODO | TODO | TODO |
+| Candidaturas (tabla) | TODO | TODO | TODO | TODO |
+| Candidaturas (kanban) | TODO | TODO | TODO | TODO |
+
+Comprobaciones hechas a mano:
+
+- **Teclado**: recorrido con Tab en las 4 páginas. El menú hamburguesa, las preguntas frecuentes, el botón de tema, la tabla y el tablero kanban (los dos con scroll horizontal, `tabindex="0"`) se pueden usar sin ratón.
+- **Contraste**: todas las parejas de texto de los dos modos pasan AA (≥ 4,5:1). La más justa es la etiqueta «Más popular» (`brote-950` sobre `coral-500`), con 5,2:1.
+- **Sin texto en imágenes**: las ilustraciones son SVG decorativos y todo el texto está en el HTML.
+- **Color con texto**: los estados de las candidaturas siempre muestran su nombre; el color solo lo refuerza.
+
 ## Cabecera sticky
 `sticky` y no `fixed`: la cabecera sigue ocupando su hueco en el flujo, así que el hero no queda debajo y no hay que compensar con un `padding-top` en el `body`; solo se pega arriba al hacer scroll.
 Hace falta `z-10` porque las tarjetas con `transform` en hover (`-translate-y-1`, `scale-105`) crean su propio contexto de apilamiento y, al ir después en el DOM, se pintarían por encima de una cabecera con `z-index: auto`.
@@ -71,3 +173,28 @@ El tablero es un `flex` (una sola fila, una dimensión). En móvil cada columna 
 
 La tarjeta de candidatura (`.job-card`) es la misma en el kanban y en «Últimas candidaturas» del panel. La `ul` que la contiene lleva `@container` y la tarjeta `@md:flex-row`: pasa a horizontal cuando **su lista** mide 28rem o más, mida lo que mida la ventana.
 
+## Utilidades propias (D4)
+
+En [`src/style.css`](src/style.css) conviven dos formas de crear clases propias:
+
+- **`@utility`** (`app-layout`, `app-layout-sidebar`, `area-header`, `area-sidebar`, `area-main`): son utilidades de verdad. Tailwind las registra como las suyas, así que admiten variantes (`md:app-layout-sidebar`) y se ordenan con el resto de utilidades. Las uso para lo que Tailwind no trae, como `grid-template-areas`, y así evito valores arbitrarios en el HTML.
+- **Clases en `@layer components` con `@apply`** (`.btn-primary`, `.card`, `.nav-link`…): son CSS normal que reúne varias utilidades bajo un nombre. Van en la capa `components` para que una utilidad puesta en el HTML pueda sobrescribirlas (`btn-primary px-6 py-3`). No admiten variantes: `md:btn-primary` no existe.
+
+También hay una **variante propia**, `@custom-variant current-page (&[aria-current="page"])`, para no escribir el selector arbitrario `aria-[current=page]:` en cada enlace.
+
+**Cuándo crear una utilidad o un componente en CSS y cuándo repetir clases.** Una utilidad con `@utility` tiene sentido cuando falta una propiedad CSS en Tailwind o cuando un valor del diseño se repite y tiene nombre propio (el layout de la app). Una clase de componente con `@apply` solo compensa cuando el mismo grupo de clases se repite en muchos sitios y **no hay forma de reutilizar el HTML**. Si el patrón aparece una o dos veces, es mejor repetir las clases: se leen donde se usan y no hay que inventar nombres. Y si hay un framework o un sistema de plantillas, lo correcto es un **componente de HTML/JS** (React, Vue, un *partial*…), que reutiliza a la vez el marcado y las clases.
+
+**Por qué abusar de `@apply` es mala práctica.** Vuelve a crear los problemas que Tailwind quería resolver: hay que inventar nombres para todo, saltar del HTML al CSS para saber qué hace una clase, el CSS crece con cada componente en vez de reutilizar las mismas utilidades, y aparecen conflictos de cascada (por eso estas clases tienen que ir en la capa `components`). Además se pierde lo que da Tailwind en el HTML: con IntelliSense ya no ves el CSS de cada clase y no se pueden aplicar variantes a la clase entera.
+
+**Lo que he hecho yo, siendo honesto.** En este laboratorio he usado `@apply` más de lo ideal: `.section-title`, `.item-title`, `.cell` o `.status-*` son grupos de clases que, con componentes, vivirían en el HTML. Lo he hecho porque son 4 páginas HTML sin plantillas, con 6 tarjetas, 10 filas de tabla y 13 tarjetas de candidatura repetidas a mano, y cada cambio habría que copiarlo en todas. En el TFM, con un framework, la mayoría de estas clases pasarán a ser componentes y las utilidades volverán al marcado.
+
+## Bitácora de IA
+
+Herramienta: **Claude Code** (extensión de VS Code), dentro del DevContainer, con las reglas del proyecto en `CLAUDE.md`: Tailwind v4, solo tokens de `@theme`, mobile first, `motion-safe:` y nada de JavaScript.
+
+La bitácora completa, con el prompt, lo que me dio y lo que corregí en cada sección, está en [`../bitacora.md`](../bitacora.md):
+
+- **Cabecera**: usaba `bg-white` en vez del token `bg-brote-50`; agrupé las clases repetidas.
+- **Hero**: frase mal traducida y botones con las clases repetidas en vez de `btn-primary`.
+- **Qué puedes hacer**: los enlaces «Saber más» quedaban alineados a la izquierda; rehíce el pie de la tarjeta.
+- **Footer**: el resultado se veía bien pero era difícil de leer (input y botón con 10-14 utilidades en línea, SVG con los mismos atributos repetidos); lo pasé a clases propias y dejé `peer` en el HTML para que se vea la relación.
