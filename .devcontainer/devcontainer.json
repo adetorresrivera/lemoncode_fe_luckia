@@ -11,7 +11,11 @@
   // La primera vez el volumen está vacío: se le da propiedad al usuario node
   // y se clona el repo. En las siguientes no se vuelve a clonar.
   "onCreateCommand": "sudo chown node:node /workspaces/lemoncode_fe_luckia && if [ ! -d .git ]; then git clone https://github.com/adetorresrivera/lemoncode_fe_luckia.git .; fi",
-  "postCreateCommand": "cd 01-Maquetacion/postula && npm install",
+  // Lab 1 (solo instalaba la maquetación), se conserva como referencia:
+  // "postCreateCommand": "cd 01-Maquetacion/postula && npm install",
+  // Instala las dependencias de cada laboratorio. Cada `cd` va en su propio
+  // subshell (paréntesis), así el segundo parte otra vez de la raíz del repo.
+  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install)",
 
   "forwardPorts": [5173],
   "portsAttributes": {
