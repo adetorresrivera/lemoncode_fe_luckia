@@ -22,9 +22,10 @@ Otros comandos, desde `02-Lenguajes/lab-lenguajes`:
 | Comando | Qué hace |
 |---|---|
 | `npm run katas` | Ejecuta `src/main.ts` con `tsx` y muestra la salida en la terminal, sin navegador |
+| `npm test` | Ejecuta con Vitest los tests de O5 y O6 (`src/*.test.ts`). Los `console.log` de las katas solo se ven si algún test falla |
 | `npx tsc` | Comprueba los tipos. Vite no lo hace: quita los tipos y ejecuta aunque haya errores. Si no muestra nada, no hay errores |
 
-### En local (Node 20+)
+### En local (Node 22.12+)
 ```bash
 cd 02-Lenguajes/lab-lenguajes
 npm install

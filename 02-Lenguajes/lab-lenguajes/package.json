@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "katas": "tsx src/main.ts"
+    "katas": "tsx src/main.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "immer": "^11.2.9"
