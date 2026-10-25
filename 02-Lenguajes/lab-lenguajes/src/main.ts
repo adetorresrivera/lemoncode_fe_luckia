@@ -9,3 +9,4 @@ import "./o08-uniones-genericos";
 import "./o09-utilidad";
 import "./o10-closures";
 import "./o11-immer";
+import "./p02-historial";
