@@ -4,31 +4,31 @@ Gestor de candidaturas de empleo. Los usuarios registran sus candidaturas, las
 siguen en una tabla o en un tablero kanban, guardan los contactos de cada
 empresa y controlan qué versión de su CV y carta enviaron a cada oferta.
 
-Ahora mismo estoy en el laboratorio 2 del máster (02-Lenguajes/lab.md): katas
-de JavaScript/TypeScript sobre el catálogo de cafés de Tueste. El proyecto vive
-en 02-Lenguajes/lab-lenguajes.
+Ahora mismo estoy en el laboratorio 3 del máster (03-Bundling/lab.md). El
+proyecto vive en 03-Bundling/lab-bundling.
 
-## Stack (lab 2)
-- Vite (plantilla vanilla-ts), TypeScript 6 en modo estricto, Immer.
-- Un fichero por kata en `src/` y `main.ts` que los importa todos.
-- Vite no comprueba tipos: el árbitro es `npx tsc`.
+## Stack (lab 3)
+- Vite 8 (Rolldown + Oxc; no esbuild ni Rollup).
+- Proyecto montado a mano desde un `package.json` vacío.
+- Sass con `sass-embedded`, TypeScript, React 19, `vite-plugin-checker`.
 
-## Reglas para todas las katas (lab 2)
-- Nada de `any` (el tipo correcto, un genérico o `unknown` con guardas), ni
-  `var`, ni `enum` (uniones de literales, por `erasableSyntaxOnly`).
-- Nada de `as` para callar errores: se arregla el tipo.
-- No mutar los datos de entrada (salvo que la kata lo diga): nada de `push`,
-  `sort`, `splice` ni `obj.prop = …` sobre lo recibido. `toSorted()` en vez de
-  `sort()`; `map` + spread (`{ ...item, quantity: item.quantity + 1 }`) en vez
-  de mutar dentro del `map`; `map`/`filter` en vez de `forEach` + `push`.
-- Copias: spread (superficial), `structuredClone` (profunda) o Immer. Nunca
-  `JSON.parse(JSON.stringify(...))` ni lodash.
-- Anotar parámetros y tipo de retorno de cada función; dentro, dejar que
-  TypeScript infiera (nada de `const n: number = 3`).
-- Tipos con `import type { ... }` (por `verbatimModuleSyntax`).
-- Debajo de cada `console.log`, un comentario con la salida esperada:
-  `// → "14.90 €"`.
-- `npx tsc` tiene que salir limpio.
+## Reglas (lab 3)
+- Nada de `npm create vite`: el proyecto se monta a mano.
+- Sass: `@use "variables" as *;`, nunca `@import`.
+- Sólo `sass-embedded` (ni `sass`, ni `node-sass`, ni loaders): Vite ya sabe
+  usarlo.
+- Variables de entorno con `import.meta.env.VITE_X`, nunca `process.env`.
+- Nada secreto en variables `VITE_`: todo acaba en el JS descargable.
+- `/// <reference types="vite/client" />` (no `path=`), en un fichero dentro
+  de `src`.
+- O `vite-plugin-checker` o `tsc` en el script de build, no los dos.
+- Comprobar en la documentación que cada opción existe en Vite 8 (nada de
+  opciones de esbuild ni `build.rollupOptions` de Vite 7 o anterior).
+- Cada dependencia que se instale tiene que hacer falta: la configuración
+  limpia puntúa.
+- Código TypeScript (heredado del lab 2): nada de `any` ni `enum`, nada de
+  `as` para callar errores, tipos con `import type { ... }` y no mutar el
+  estado.
 
 ## Pantallas
 1. Landing pública (index.html): cabecera, hero, cómo funciona (3 pasos),
@@ -49,10 +49,40 @@ en 02-Lenguajes/lab-lenguajes.
 - Lab 2: una kata cada vez. Después de cada una, explícame las decisiones menos
   obvias: por qué ese método de array, qué infiere TypeScript y qué se copia y
   qué se comparte (referencias).
+- Lab 3: un obligatorio cada vez. Después de cada uno, explícame cada línea de
+  configuración nueva (qué hace, si actúa en desarrollo, en build o en los
+  dos) y lista las comprobaciones que tengo que hacer yo en el navegador.
 - Si dudas entre dos enfoques, pregúntame antes de elegir.
 - Todas las soluciones deben funcionar con DevContainers. No instales dependencies en local sin confirmar antes.
 - El proyecto está estructurado en laboratorios entregables dentro de cada carpeta (lab.md) que irán desarrollandose hasta el producto final. Cada uno es una fase distinta del proyecto. No modifiques varios entregables a la vez.
 - Para cada entregable asegurate de que exite un fichero readme.md con instrucciones sobre como lanzar el proyecto.
+
+## Lab 2 (cerrado)
+Katas de JavaScript/TypeScript sobre el catálogo de cafés de Tueste
+(02-Lenguajes/lab-lenguajes). Estas reglas NO aplican al lab 3 salvo lo
+indicado en "Reglas (lab 3)"; se conservan como referencia.
+
+### Stack
+- Vite (plantilla vanilla-ts), TypeScript 6 en modo estricto, Immer.
+- Un fichero por kata en `src/` y `main.ts` que los importa todos.
+- Vite no comprueba tipos: el árbitro es `npx tsc`.
+
+### Reglas para todas las katas
+- Nada de `any` (el tipo correcto, un genérico o `unknown` con guardas), ni
+  `var`, ni `enum` (uniones de literales, por `erasableSyntaxOnly`).
+- Nada de `as` para callar errores: se arregla el tipo.
+- No mutar los datos de entrada (salvo que la kata lo diga): nada de `push`,
+  `sort`, `splice` ni `obj.prop = …` sobre lo recibido. `toSorted()` en vez de
+  `sort()`; `map` + spread (`{ ...item, quantity: item.quantity + 1 }`) en vez
+  de mutar dentro del `map`; `map`/`filter` en vez de `forEach` + `push`.
+- Copias: spread (superficial), `structuredClone` (profunda) o Immer. Nunca
+  `JSON.parse(JSON.stringify(...))` ni lodash.
+- Anotar parámetros y tipo de retorno de cada función; dentro, dejar que
+  TypeScript infiera (nada de `const n: number = 3`).
+- Tipos con `import type { ... }` (por `verbatimModuleSyntax`).
+- Debajo de cada `console.log`, un comentario con la salida esperada:
+  `// → "14.90 €"`.
+- `npx tsc` tiene que salir limpio.
 
 ## Lab 1 (cerrado)
 Maquetación de las pantallas de Postula (01-*). Estas reglas NO aplican al
