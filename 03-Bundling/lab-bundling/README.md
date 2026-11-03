@@ -57,7 +57,7 @@ errores. Con `--host`, Vite escucha en todas las interfaces del contenedor
 ### Obligatorios
 - [x] 1 - Proyecto desde cero
 - [x] 2 - Estilos con Sass
-- [ ] 3 - Imágenes
+- [x] 3 - Imágenes
 - [ ] 4 - TypeScript con comprobación de tipos
 - [ ] 5 - React
 - [ ] 6 - Variables de entorno
@@ -175,6 +175,80 @@ y lo enlaza con un `<link>` en el `index.html`: el navegador lo descarga en
 paralelo con el JS, lo puede cachear por separado y la página no espera a que
 se ejecute ningún script para tener estilos. <!-- REVISAR: lo del parpadeo
 sin estilos (FOUC) si el CSS dependiera del JS -->
+
+## 3 - Imágenes
+
+Dos imágenes en `src/assets/`, sin instalar nada ni tocar la configuración:
+Vite ya sabe tratar imágenes.
+
+- `logo.svg` (629 B): el icono `coffee` de [Lucide](https://lucide.dev)
+  (licencia ISC, indicada en un comentario del propio SVG), con el trazo en
+  `#9a5b33` (`$tueste-500`) en vez de `currentColor`: un SVG cargado con
+  `<img>` es un documento aparte y no hereda el `color` del CSS de la página.
+  Va en la cabecera del `index.html` con
+  `<img src="/src/assets/logo.svg" alt="Tueste" />`.
+- `coffee.jpg` (5,4 MB): se importa desde `src/index.js`. El `import`
+  devuelve un texto, la URL de la imagen, y con él se crea el `<img>`:
+
+```js
+import coffeePhoto from "./assets/coffee.jpg";
+
+console.log(coffeePhoto);
+// en desarrollo → "/src/assets/coffee.jpg"
+// en producción → "/assets/coffee-VeBrprW9.jpg"
+```
+
+### Salida de `npm run build`
+
+```
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 6 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                      1.39 kB │ gzip: 0.74 kB
+dist/assets/coffee-VeBrprW9.jpg  5,489.84 kB
+dist/assets/index-BeDCDn6j.css       0.21 kB │ gzip: 0.16 kB
+dist/assets/index-kzBbny1D.js        0.84 kB │ gzip: 0.48 kB
+
+✓ built in 181ms
+```
+
+La foto sale como fichero con hash; el logo no aparece en `dist/assets`. En
+`dist/index.html`, el `src` del `<img>` es ahora el propio SVG:
+
+```html
+<img class="brand-header__logo" src="data:image/svg+xml,%3c!--%20Icono%20'coffee'%20de%20Lucide%20(lucide-static%20v1.67.0)%20-…
+```
+
+![Network con el iniciador de cada imagen](docs/screenshots/03-network-imagenes.png)
+
+_Network con `npm start`, filtro Img: `coffee.jpg` la pide `index.js` (la
+crea el JavaScript) y `logo.svg` la pide `(index)`, el propio HTML._
+
+
+### Pregunta
+
+**¿Dónde ha ido a parar el logo y por qué Vite lo trata distinto que la
+foto? ¿Qué ganamos y qué perdemos con eso?**
+
+El logo está dentro de `dist/index.html`, incrustado como *data URI* en el
+`src` del `<img>`. Lo decide
+[`build.assetsInlineLimit`](https://vite.dev/config/build-options#build-assetsinlinelimit):
+los assets importados o referenciados que pesan menos de ese límite se
+incrustan en el fichero que los usa en vez de salir como fichero aparte. En
+Vite 8 vale `4096` (4 KiB) por defecto; el logo pesa 629 B y se incrusta, la
+foto pesa 5,4 MB y sale como `coffee-<hash>.jpg`. Los SVG no se pasan a
+base64 (aunque la documentación diga *base64 URLs*): Vite los mete como texto
+escapando sólo algunos caracteres (`%3c`, `%20`…), que ocupa menos.
+
+- **Ganamos**: una petición HTTP menos, y el logo llega con el HTML, sin
+  esperar a otra descarga ni ver un hueco mientras carga.
+- **Perdemos**: el logo no se cachea por separado y vuelve a viajar con cada
+  descarga del HTML (y en cada página que lo use); cualquier cambio en el logo
+  invalida el fichero que lo contiene, y el HTML es más difícil de leer. En
+  base64, además, ocuparía alrededor de un 33 % más. Por eso el límite es
+  pequeño: sólo compensa con ficheros diminutos.
 
 ## Bitácora de IA
 
