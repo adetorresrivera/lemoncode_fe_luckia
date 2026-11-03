@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { coffees, type Coffee } from "./data";
+import { API_BASE, SHOP_NAME, SHOW_OFFERS } from "./env.constants";
 import coffeePhoto from "./assets/coffee.jpg";
 
 export const App = () => {
@@ -7,7 +8,8 @@ export const App = () => {
 
   return (
     <main>
-      <h2>Cafés del mes</h2>
+      {SHOW_OFFERS && <p>Envío gratis este mes</p>}
+      <h2>Cafés del mes de {SHOP_NAME}</h2>
       <img src={coffeePhoto} alt="" />
       <ul>
         {coffees.map((coffee) => (
@@ -19,6 +21,9 @@ export const App = () => {
         ))}
       </ul>
       <p>Bolsas en el carrito: {cart.length}</p>
+      <p>
+        <small>API: {API_BASE}</small>
+      </p>
     </main>
   );
 };

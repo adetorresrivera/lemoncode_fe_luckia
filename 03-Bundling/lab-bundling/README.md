@@ -66,7 +66,7 @@ los tipos sin arrancar nada: `npx tsc`.
 - [x] 3 - Imágenes
 - [x] 4 - TypeScript con comprobación de tipos
 - [x] 5 - React
-- [ ] 6 - Variables de entorno
+- [x] 6 - Variables de entorno
 - [ ] 7 - README + bitácora de IA
 
 ### Opcionales
@@ -409,6 +409,103 @@ recargarla entera. Por eso el carrito mantiene las 3 bolsas. Sólo actúa en
 desarrollo: el build no cambia. <!-- REVISAR: si cambias el orden o el número
 de hooks, Fast Refresh sí reinicia el estado -->
 
+## 6 - Variables de entorno
+
+`npm start` (modo `development`) sólo lee `.env`; `npm run build` (modo
+`production`) lee `.env` y encima `.env.production`, que pisa sus valores.
+Los dos van al repo porque no contienen nada secreto y cualquiera que clone el
+proyecto necesita los mismos valores; `.env.local` (y `.env.*.local`) es para
+lo que cambia en cada máquina, por eso está en el `.gitignore`.
+
+| Variable | Desarrollo (`.env`) | Producción (`.env.production`) |
+|---|---|---|
+| `VITE_SHOP_NAME` | `Tueste (desarrollo)` | `Tueste` |
+| `VITE_API_BASE` | `http://localhost:3000` | `https://api.tueste.example` |
+| `VITE_SHOW_OFFERS` | `true` | `false` |
+
+- Primero puse `SHOP_NAME=Tueste (desarrollo)` sin prefijo y con
+  `console.log(import.meta.env)`: el objeto sólo tenía `BASE_URL`, `DEV`,
+  `MODE`, `PROD` y `SSR`. Con `VITE_SHOP_NAME` ya aparece.
+- `src/vite-env.d.ts`: `ImportMetaEnv` con las tres variables (`readonly`,
+  `string`: en un `.env` todo es texto) y `strictImportMetaEnv: unknown`
+  dentro de `ViteTypeOptions`, que es donde lo declara la
+  [documentación de Vite 8](https://vite.dev/guide/env-and-mode#intellisense-for-typescript)
+  (no es una opción de `vite.config.ts`). Sin esa clave, `ImportMetaEnv`
+  extiende `Record<string, any>` y cualquier nombre mal escrito es `any`.
+- `src/env.constants.ts`: el único fichero que lee `import.meta.env`.
+  `SHOW_OFFERS` es `VITE_SHOW_OFFERS === "true"`, un `boolean` de verdad: el
+  texto `"false"` sería *truthy* y el banner saldría siempre.
+- `src/app.tsx`: `<h2>Cafés del mes de {SHOP_NAME}</h2>` (el `<h1>` sigue
+  siendo el de `index.html`), el banner con `{SHOW_OFFERS && …}` y la API en
+  un `<small>` al final.
+
+### Error de `npx tsc` con `VITE_SHOP_NAM`
+
+```
+src/env.constants.ts(2,42): error TS2551: Property 'VITE_SHOP_NAM' does not exist on type 'ImportMetaEnv'. Did you mean 'VITE_SHOP_NAME'?
+```
+
+### Qué hay en el `.js` del build
+
+```
+dist/assets/index-BCj8Q5Bj.js    220.23 kB │ gzip: 68.97 kB
+```
+
+- `api.tueste.example` **está**, escrito tal cual:
+  `` f=`Tueste`,p=`https://api.tueste.example` ``. Vite sustituye cada
+  `import.meta.env.VITE_X` por su valor al construir; ni el nombre
+  `VITE_API_BASE` ni los valores de desarrollo (`localhost:3000`,
+  `Tueste (desarrollo)`) llegan al bundle.
+- `Envío gratis` **no está**. `SHOW_OFFERS` queda como `"false" === "true"`,
+  el minificador lo resuelve a `false` y borra la rama muerta: el JSX
+  compilado es `` children:[!1,(0,g.jsxs)(`h2`,…`` (`!1` es `false`). Pasa
+  porque la condición se puede calcular al construir; si el flag llegara en
+  tiempo de ejecución (de una API, de `localStorage`…), el texto sí estaría.
+
+### Captura: `npm run preview` con los valores de producción
+
+![Preview de producción: título "Cafés del mes de Tueste", sin banner y la URL de la API de producción](docs/screenshots/06-preview-produccion.png)
+
+_`npm run build` + `npm run preview` en http://localhost:4173: el título dice
+"Cafés del mes de Tueste" (sin "(desarrollo)"), no hay banner de envío gratis
+y al final aparece `API: https://api.tueste.example`._
+
+### Preguntas
+
+**¿Por qué Vite obliga a usar el prefijo `VITE_`?**
+
+Porque todo lo que se expone en `import.meta.env` acaba escrito dentro del JS
+que se descarga cualquiera. En los `.env` y en el entorno del sistema suele
+haber cosas que sólo debe ver el servidor (`DB_PASSWORD`, tokens de CI…), así
+que Vite no expone nada por defecto y el prefijo sirve de lista blanca:
+ponerle `VITE_` a una variable es decidir a propósito que es pública.
+<!-- REVISAR: el prefijo se puede cambiar con `envPrefix` en vite.config.ts -->
+
+**Si mañana cambia la URL de la API de producción, ¿basta con editar
+`.env.production` en el servidor? ¿Por qué nunca debe ir una clave secreta en
+una variable `VITE_`?**
+
+No basta: `.env.production` sólo se lee durante `npm run build`, que escribe
+el valor dentro de `index-<hash>.js`; el servidor sólo sirve `dist/` y no lee
+ningún `.env`. Hay que cambiarlo, volver a construir y desplegar el `dist/`
+nuevo (con otro hash). Por lo mismo, una clave en una `VITE_` acaba en texto
+plano en el JS público, como `api.tueste.example`: cualquiera la lee en
+DevTools → Sources. Los secretos se quedan en un backend que haga la llamada.
+<!-- REVISAR: diferencia entre build time y runtime -->
+
+**Según la comprobación 5: ¿un feature flag desactivado sirve para "esconder"
+algo a los usuarios?**
+
+No. Aquí el texto del banner no aparece porque el minificador ha eliminado
+una rama que sabía que era `false`, pero eso es una optimización, no una
+garantía: basta con que la condición no se pueda calcular al construir (el
+flag viene de una API, se combina con otro dato, el componente se usa en
+otro sitio) para que el código viaje entero en el bundle. Y aunque desaparezca
+el texto, la URL de la API y los datos siguen ahí. Lo que no deba ver el
+usuario tiene que protegerlo el servidor. <!-- REVISAR: por qué aquí sí se
+eliminó (dead code elimination de una constante) y el enunciado esperaba
+encontrarlo -->
+
 ## Bitácora de IA
 
 Herramienta: **Claude Code** (extensión de VS Code), dentro del DevContainer,
@@ -423,3 +520,7 @@ caso, está en [`../bitacora.md`](../bitacora.md):
   `--host`. Vite escuchaba sólo en `::1` (IPv6) y el reenvío de VS Code llega
   por `127.0.0.1`, así que la página no cargaba. Lo arreglé con `--host` en
   los scripts de `start` y `preview`.
+- **6 · Variables de entorno**: convirtió el flag con
+  `Boolean(import.meta.env.VITE_SHOW_OFFERS)`. Como `"false"` es un texto no
+  vacío, daba `true` y el banner salía también en `npm run preview`. Lo
+  cambié por `=== "true"`.
