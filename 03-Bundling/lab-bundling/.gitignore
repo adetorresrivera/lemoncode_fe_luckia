@@ -1,0 +1,11 @@
+# Dependencias (se recrean con npm install)
+node_modules
+
+# Salida de npm run build
+dist
+
+# Variables de entorno locales: nunca al repositorio
+.env.local
+
+# Logs de npm
+npm-debug.log*
