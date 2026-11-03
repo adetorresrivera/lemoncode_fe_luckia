@@ -41,8 +41,8 @@ npm start
 
 | Comando | Qué hace |
 |---|---|
-| `npm start` | Servidor de desarrollo de Vite en http://localhost:5173: sirve los ficheros sin empaquetar, transformados al vuelo, con HMR |
-| `npm run build` | Genera la versión de producción en `dist/`: empaquetada, minificada y con hash en los nombres |
+| `npm start` | Servidor de desarrollo de Vite en http://localhost:5173: sirve los ficheros sin empaquetar, transformados al vuelo, con HMR. Los errores de tipos salen en la terminal y en una capa encima de la página, pero no impiden que se sirva |
+| `npm run build` | Genera la versión de producción en `dist/`: empaquetada, minificada y con hash en los nombres. Si hay errores de tipos, falla y no genera nada |
 | `npm run preview` | Sirve la carpeta `dist/` ya construida en http://localhost:4173, para comprobar la versión de producción |
 
 `start` y `preview` llevan `--host`: sin él, Vite sólo escucha en `localhost`,
@@ -52,13 +52,19 @@ cargaba desde el navegador de la máquina anfitriona aunque Vite arrancara sin
 errores. Con `--host`, Vite escucha en todas las interfaces del contenedor
 (`0.0.0.0`).
 
+`vite-plugin-checker` comprueba los tipos en paralelo mientras trabajas. Si
+hay un error, `npm start` arranca igualmente, pero la terminal muestra
+`ERROR(TypeScript)` con el fichero, la línea y el trozo de código, y el
+navegador pinta una capa con el mismo error encima de la página. Para comprobar
+los tipos sin arrancar nada: `npx tsc`.
+
 ## Checklist
 
 ### Obligatorios
 - [x] 1 - Proyecto desde cero
 - [x] 2 - Estilos con Sass
 - [x] 3 - Imágenes
-- [ ] 4 - TypeScript con comprobación de tipos
+- [x] 4 - TypeScript con comprobación de tipos
 - [ ] 5 - React
 - [ ] 6 - Variables de entorno
 - [ ] 7 - README + bitácora de IA
@@ -187,7 +193,7 @@ Vite ya sabe tratar imágenes.
   `<img>` es un documento aparte y no hereda el `color` del CSS de la página.
   Va en la cabecera del `index.html` con
   `<img src="/src/assets/logo.svg" alt="Tueste" />`.
-- `coffee.jpg` (5,4 MB): se importa desde `src/index.js`. El `import`
+- `coffee.jpg` (268 KB): se importa desde `src/index.js`. El `import`
   devuelve un texto, la URL de la imagen, y con él se crea el `<img>`:
 
 ```js
@@ -195,7 +201,7 @@ import coffeePhoto from "./assets/coffee.jpg";
 
 console.log(coffeePhoto);
 // en desarrollo → "/src/assets/coffee.jpg"
-// en producción → "/assets/coffee-VeBrprW9.jpg"
+// en producción → "/assets/coffee-CVLsT1_e.jpg"
 ```
 
 ### Salida de `npm run build`
@@ -206,12 +212,12 @@ transforming...
 ✓ 6 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                      1.39 kB │ gzip: 0.74 kB
-dist/assets/coffee-VeBrprW9.jpg  5,489.84 kB
-dist/assets/index-BeDCDn6j.css       0.21 kB │ gzip: 0.16 kB
-dist/assets/index-kzBbny1D.js        0.84 kB │ gzip: 0.48 kB
+dist/index.html                    1.39 kB │ gzip: 0.75 kB
+dist/assets/coffee-CVLsT1_e.jpg  274.53 kB
+dist/assets/index-BeDCDn6j.css     0.21 kB │ gzip: 0.16 kB
+dist/assets/index-D9HIMtZe.js      0.84 kB │ gzip: 0.48 kB
 
-✓ built in 181ms
+✓ built in 159ms
 ```
 
 La foto sale como fichero con hash; el logo no aparece en `dist/assets`. En
@@ -238,7 +244,7 @@ El logo está dentro de `dist/index.html`, incrustado como *data URI* en el
 los assets importados o referenciados que pesan menos de ese límite se
 incrustan en el fichero que los usa en vez de salir como fichero aparte. En
 Vite 8 vale `4096` (4 KiB) por defecto; el logo pesa 629 B y se incrusta, la
-foto pesa 5,4 MB y sale como `coffee-<hash>.jpg`. Los SVG no se pasan a
+foto pesa 268 KB y sale como `coffee-<hash>.jpg`. Los SVG no se pasan a
 base64 (aunque la documentación diga *base64 URLs*): Vite los mete como texto
 escapando sólo algunos caracteres (`%3c`, `%20`…), que ocupa menos.
 
@@ -249,6 +255,74 @@ escapando sólo algunos caracteres (`%3c`, `%20`…), que ocupa menos.
   invalida el fichero que lo contiene, y el HTML es más difícil de leer. En
   base64, además, ocuparía alrededor de un 33 % más. Por eso el límite es
   pequeño: sólo compensa con ficheros diminutos.
+
+## 4 - TypeScript con comprobación de tipos
+
+`typescript` (7.0.2) en `devDependencies` aporta el compilador que comprueban
+el editor y `npx tsc`. Vite no lo usa para transformar: quita los tipos con
+Oxc. `vite-plugin-checker` (0.14.5) ejecuta ese mismo `tsc` dentro de Vite,
+tanto en `npm start` como en `npm run build`. Por eso el script de build sigue
+siendo `vite build` y no `tsc && vite build`: sería comprobar los tipos dos
+veces y, en desarrollo, `tsc &&` no avisaría de nada.
+
+- `tsconfig.json`: el del enunciado. `noEmit` (tsc sólo comprueba, el JS lo
+  genera Vite), `isolatedModules` y `moduleResolution: "bundler"`.
+- `src/vite-env.d.ts` con `/// <reference types="vite/client" />`: le dice
+  a TypeScript qué devuelve importar un `.jpg` (un `string` con la URL) o un
+  `.scss`. Sin él, `npx tsc` daba `TS2882` en `main.scss` y `TS2307` en
+  `coffee.jpg`.
+- `vite.config.ts` con `checker({ typescript: true })`. `vite-plugin-checker`
+  declara `typescript: "*"` en sus `peerDependencies` y `vite: ">=5.4.21"`, y
+  funciona con TypeScript 7 y Vite 8.3.5.
+
+Con `const total: string = 3;` en `src/index.ts` y sin el checker, `npm start`
+no se queja ni en la terminal ni en el navegador (la consola muestra `3`). Sólo
+lo marca el editor.
+
+### Salida de `npm run build` con el error puesto
+
+```
+> lab-bundling@1.0.0 build
+> vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+src/index.ts(14,7): error TS2322: Type 'number' is not assignable to type 'string'.
+```
+
+Termina con código de salida 1.
+
+### Salida de `npm run build` sin el error
+
+```
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 6 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                    1.39 kB │ gzip: 0.75 kB
+dist/assets/coffee-CVLsT1_e.jpg  274.53 kB
+dist/assets/index-BeDCDn6j.css     0.21 kB │ gzip: 0.16 kB
+dist/assets/index-D9HIMtZe.js      0.84 kB │ gzip: 0.48 kB
+
+✓ built in 198ms
+```
+
+### Pregunta
+
+**¿Por qué Vite, por sí solo, no comprueba los tipos? ¿Qué gana con ello?**
+
+Vite transforma cada `.ts` con Oxc, que sólo borra las anotaciones de tipos
+fichero a fichero, sin leer los demás ficheros ni saber de qué tipo es nada.
+`isolatedModules` garantiza que eso siempre se puede hacer sin cambiar el
+significado del código. <!-- REVISAR: por qué hace falta isolatedModules
+(p. ej. re-exportar un tipo sin `export type`) --> Gana velocidad: cada
+fichero se transforma en milisegundos cuando el navegador lo pide, y el
+arranque y el HMR no dependen del tamaño del proyecto. Comprobar los tipos
+obliga a analizar el proyecto entero, así que ese trabajo se deja al editor,
+a `tsc` o a `vite-plugin-checker`, que lo hace aparte sin bloquear la
+transformación. <!-- REVISAR: el checker corre en un worker thread, aparte
+del servidor -->
 
 ## Bitácora de IA
 
