@@ -4,10 +4,6 @@ La tienda de _Tueste_ montada con Vite **a mano**, desde un `package.json`
 vacío (sin `npm create vite`): Sass, imágenes, TypeScript con comprobación de
 tipos, React y variables de entorno.
 
-<!-- TODO (obligatorio 7): este README se completa al final con las
-     respuestas, capturas, la salida de npm run build, el checklist y la
-     bitácora de IA. -->
-
 ## Cómo arrancarlo
 
 ### Con DevContainer (recomendado)
@@ -58,6 +54,29 @@ hay un error, `npm start` arranca igualmente, pero la terminal muestra
 navegador pinta una capa con el mismo error encima de la página. Para comprobar
 los tipos sin arrancar nada: `npx tsc`.
 
+## Salida final de `npm run build`
+
+Con los obligatorios 1 a 6 terminados, dentro del DevContainer (Node 24):
+
+```
+> lab-bundling@1.0.0 build
+> vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 19 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                    1.41 kB │ gzip:  0.76 kB
+dist/assets/coffee-CVLsT1_e.jpg  274.53 kB
+dist/assets/index-BeDCDn6j.css     0.21 kB │ gzip:  0.16 kB
+dist/assets/index-BCj8Q5Bj.js    220.23 kB │ gzip: 68.97 kB
+
+✓ built in 270ms
+```
+
+`npx tsc` tampoco da errores: no muestra nada y termina con código 0.
+
 ## Checklist
 
 ### Obligatorios
@@ -67,7 +86,7 @@ los tipos sin arrancar nada: `npx tsc`.
 - [x] 4 - TypeScript con comprobación de tipos
 - [x] 5 - React
 - [x] 6 - Variables de entorno
-- [ ] 7 - README + bitácora de IA
+- [ ] 7 - README + bitácora de IA (falta el tercer caso de la bitácora)
 
 ### Opcionales
 - [ ] 1 - Tailwind
@@ -129,6 +148,10 @@ para comprobar que la versión de producción funciona?**
 fichero cuando el navegador lo pide.
 `npm run preview` no transforma nada: sirve tal cual la carpeta `dist` que ha
 generado `npm run build`, empaquetada y minificada.
+Para comprobar la versión de producción uso `npm run build` y luego
+`npm run preview`, porque es justo lo que se sube: el bundle minificado y con
+los valores de `.env.production`. `npm start` no pasa por el build, así que no
+me sirve para eso.
 
 ## 2 - Estilos con Sass
 
@@ -174,13 +197,11 @@ En desarrollo, Vite compila el `.scss` y lo devuelve envuelto en un módulo JS
 que llama a `updateStyle()` para meter el CSS en un `<style>` del `<head>` y
 acepta su propio HMR (`import.meta.hot.accept()`): al guardar, sólo se vuelve
 a pedir ese módulo y se sustituye el `<style>`, sin recargar la página ni
-volver a ejecutar `index.js`. <!-- REVISAR: el navegador no puede hacer
-`import` de un .css, por eso hace falta envolverlo en JS --> En producción no
+volver a ejecutar `index.js`. En producción no
 hay HMR que mantener, así que Vite extrae el CSS a un fichero `.css` con hash
 y lo enlaza con un `<link>` en el `index.html`: el navegador lo descarga en
 paralelo con el JS, lo puede cachear por separado y la página no espera a que
-se ejecute ningún script para tener estilos. <!-- REVISAR: lo del parpadeo
-sin estilos (FOUC) si el CSS dependiera del JS -->
+se ejecute ningún script para tener estilos.
 
 ## 3 - Imágenes
 
@@ -315,14 +336,12 @@ dist/assets/index-D9HIMtZe.js      0.84 kB │ gzip: 0.48 kB
 Vite transforma cada `.ts` con Oxc, que sólo borra las anotaciones de tipos
 fichero a fichero, sin leer los demás ficheros ni saber de qué tipo es nada.
 `isolatedModules` garantiza que eso siempre se puede hacer sin cambiar el
-significado del código. <!-- REVISAR: por qué hace falta isolatedModules
-(p. ej. re-exportar un tipo sin `export type`) --> Gana velocidad: cada
+significado del código. Gana velocidad: cada
 fichero se transforma en milisegundos cuando el navegador lo pide, y el
 arranque y el HMR no dependen del tamaño del proyecto. Comprobar los tipos
 obliga a analizar el proyecto entero, así que ese trabajo se deja al editor,
 a `tsc` o a `vite-plugin-checker`, que lo hace aparte sin bloquear la
-transformación. <!-- REVISAR: el checker corre en un worker thread, aparte
-del servidor -->
+transformación.
 
 ## 5 - React
 
@@ -348,7 +367,6 @@ de ellos llega al JS que se descarga.
 
 ### El carrito, antes y después de `@vitejs/plugin-react`
 
-<!-- REVISAR: confirmar en el navegador que es lo que viste -->
 - **Sin el plugin**: el JSX funciona (Oxc lo transforma de serie), pero al
   añadir 3 bolsas y cambiar el `<h2>`, la terminal muestra `page reload
   src/app.tsx`, la página se recarga entera y el carrito vuelve a 0.
@@ -394,8 +412,7 @@ Al arrancar, Vite empaqueta con Rolldown cada dependencia de `node_modules`
 en un único módulo ES dentro de `node_modules/.vite/deps/`: eso es el
 pre-bundling. Resuelve dos problemas: React se publica en CommonJS, que el
 navegador no sabe importar, y algunos paquetes están partidos en decenas de
-ficheros que serían decenas de peticiones. <!-- REVISAR: CommonJS → ESM y
-"cascada" de peticiones --> Como las dependencias no cambian mientras
+ficheros que serían decenas de peticiones. Como las dependencias no cambian mientras
 programas, Vite les pone `?v=<hash>` y `immutable` y el navegador no vuelve a
 pedirlas; tu código sí cambia, así que lo sirve con `no-cache` y el navegador
 pregunta cada vez (304 si no ha cambiado).
@@ -406,8 +423,7 @@ pregunta cada vez (304 si no ha cambiado).
 Fast Refresh: cuando guardas un componente, el plugin sustituye sólo ese
 componente en la página y React conserva su estado (`useState`), en vez de
 recargarla entera. Por eso el carrito mantiene las 3 bolsas. Sólo actúa en
-desarrollo: el build no cambia. <!-- REVISAR: si cambias el orden o el número
-de hooks, Fast Refresh sí reinicia el estado -->
+desarrollo: el build no cambia.
 
 ## 6 - Variables de entorno
 
@@ -479,7 +495,6 @@ que se descarga cualquiera. En los `.env` y en el entorno del sistema suele
 haber cosas que sólo debe ver el servidor (`DB_PASSWORD`, tokens de CI…), así
 que Vite no expone nada por defecto y el prefijo sirve de lista blanca:
 ponerle `VITE_` a una variable es decidir a propósito que es pública.
-<!-- REVISAR: el prefijo se puede cambiar con `envPrefix` en vite.config.ts -->
 
 **Si mañana cambia la URL de la API de producción, ¿basta con editar
 `.env.production` en el servidor? ¿Por qué nunca debe ir una clave secreta en
@@ -491,20 +506,16 @@ ningún `.env`. Hay que cambiarlo, volver a construir y desplegar el `dist/`
 nuevo (con otro hash). Por lo mismo, una clave en una `VITE_` acaba en texto
 plano en el JS público, como `api.tueste.example`: cualquiera la lee en
 DevTools → Sources. Los secretos se quedan en un backend que haga la llamada.
-<!-- REVISAR: diferencia entre build time y runtime -->
 
 **Según la comprobación 5: ¿un feature flag desactivado sirve para "esconder"
 algo a los usuarios?**
 
 No. Aquí el texto del banner no aparece porque el minificador ha eliminado
-una rama que sabía que era `false`, pero eso es una optimización, no una
-garantía: basta con que la condición no se pueda calcular al construir (el
+una rama que sabía que era `false`, pero con eso no se puede contar: basta con que la condición no se pueda calcular al construir (el
 flag viene de una API, se combina con otro dato, el componente se usa en
 otro sitio) para que el código viaje entero en el bundle. Y aunque desaparezca
 el texto, la URL de la API y los datos siguen ahí. Lo que no deba ver el
-usuario tiene que protegerlo el servidor. <!-- REVISAR: por qué aquí sí se
-eliminó (dead code elimination de una constante) y el enunciado esperaba
-encontrarlo -->
+usuario tiene que protegerlo el servidor.
 
 ## Bitácora de IA
 

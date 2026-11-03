@@ -6,6 +6,7 @@ dist
 
 # Variables de entorno locales: nunca al repositorio
 .env.local
+.env.*.local
 
 # Logs de npm
 npm-debug.log*
