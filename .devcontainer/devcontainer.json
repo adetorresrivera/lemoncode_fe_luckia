@@ -1,6 +1,8 @@
 {
   "name": "Lemoncode FE",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  // Lab 3: Node 24 (LTS actual). Vite 8 pide como mínimo 20.19; los labs 1 y 2
+  // funcionan igual con la 24. Antes: javascript-node:22.
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
 
   // El código vive en un volumen de Docker (sistema de ficheros Linux), no en
   // la carpeta de Windows: así git no ve ficheros "modificados" por diferencias
@@ -14,12 +16,17 @@
   // Lab 1 (solo instalaba la maquetación), se conserva como referencia:
   // "postCreateCommand": "cd 01-Maquetacion/postula && npm install",
   // Instala las dependencias de cada laboratorio. Cada `cd` va en su propio
-  // subshell (paréntesis), así el segundo parte otra vez de la raíz del repo.
-  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install)",
+  // subshell (paréntesis), así el siguiente parte otra vez de la raíz del repo.
+  // El lab 3 se monta a mano desde un package.json vacío: hasta que exista
+  // (obligatorio 1) se salta, en vez de hacer fallar la creación del contenedor.
+  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi",
 
-  "forwardPorts": [5173],
+  // 5173: npm start / npm run dev (servidor de desarrollo).
+  // 4173: npm run preview (sirve la carpeta dist del build).
+  "forwardPorts": [5173, 4173],
   "portsAttributes": {
-    "5173": { "label": "Vite dev server" }
+    "5173": { "label": "Vite dev server" },
+    "4173": { "label": "Vite preview (dist)" }
   },
   "customizations": {
     "vscode": {
