@@ -56,7 +56,7 @@ errores. Con `--host`, Vite escucha en todas las interfaces del contenedor
 
 ### Obligatorios
 - [x] 1 - Proyecto desde cero
-- [ ] 2 - Estilos con Sass
+- [x] 2 - Estilos con Sass
 - [ ] 3 - Imágenes
 - [ ] 4 - TypeScript con comprobación de tipos
 - [ ] 5 - React
@@ -123,6 +123,58 @@ para comprobar que la versión de producción funciona?**
 fichero cuando el navegador lo pide.
 `npm run preview` no transforma nada: sirve tal cual la carpeta `dist` que ha
 generado `npm run build`, empaquetada y minificada.
+
+## 2 - Estilos con Sass
+
+Se ha instalado sólo `sass-embedded` como `devDependency`
+(`npm install -D sass-embedded`), que es justo lo que pedía el error de Vite
+al importar `main.scss` sin compilador: `Preprocessor dependency
+"sass-embedded" not found. Did you install it? Try npm install -D
+sass-embedded`. Vite ya trae el soporte de `.scss` y sólo necesita el
+compilador; `sass-embedded` es el compilador oficial de Dart Sass y es el que
+Vite prefiere, así que ni `sass`, ni `node-sass` (obsoleto) ni loaders.
+
+Las variables viven en `src/styles/_variables.scss` y `main.scss` las carga
+con `@use "variables" as *;` (`@import` está obsoleto en Sass).
+
+### Salida de `npm run build`
+
+```
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 5 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                 0.57 kB │ gzip: 0.35 kB
+dist/assets/index-B-6UkqOc.css  0.30 kB │ gzip: 0.20 kB
+dist/assets/index-DKo7hhUa.js   0.70 kB │ gzip: 0.42 kB
+
+✓ built in 207ms
+```
+
+`dist/index.html` enlaza el CSS generado, ya sin variables de Sass
+(`$tueste-900` es ahora `#2e1a10`):
+
+```html
+<link rel="stylesheet" crossorigin href="/assets/index-B-6UkqOc.css">
+```
+
+### Pregunta
+
+**¿Por qué en desarrollo el CSS llega como un módulo de JavaScript y en
+producción como un fichero `.css`?**
+
+En desarrollo, Vite compila el `.scss` y lo devuelve envuelto en un módulo JS
+que llama a `updateStyle()` para meter el CSS en un `<style>` del `<head>` y
+acepta su propio HMR (`import.meta.hot.accept()`): al guardar, sólo se vuelve
+a pedir ese módulo y se sustituye el `<style>`, sin recargar la página ni
+volver a ejecutar `index.js`. <!-- REVISAR: el navegador no puede hacer
+`import` de un .css, por eso hace falta envolverlo en JS --> En producción no
+hay HMR que mantener, así que Vite extrae el CSS a un fichero `.css` con hash
+y lo enlaza con un `<link>` en el `index.html`: el navegador lo descarga en
+paralelo con el JS, lo puede cachear por separado y la página no espera a que
+se ejecute ningún script para tener estilos. <!-- REVISAR: lo del parpadeo
+sin estilos (FOUC) si el CSS dependiera del JS -->
 
 ## Bitácora de IA
 
