@@ -65,7 +65,7 @@ los tipos sin arrancar nada: `npx tsc`.
 - [x] 2 - Estilos con Sass
 - [x] 3 - Imágenes
 - [x] 4 - TypeScript con comprobación de tipos
-- [ ] 5 - React
+- [x] 5 - React
 - [ ] 6 - Variables de entorno
 - [ ] 7 - README + bitácora de IA
 
@@ -323,6 +323,91 @@ obliga a analizar el proyecto entero, así que ese trabajo se deja al editor,
 a `tsc` o a `vite-plugin-checker`, que lo hace aparte sin bloquear la
 transformación. <!-- REVISAR: el checker corre en un worker thread, aparte
 del servidor -->
+
+## 5 - React
+
+`react` y `react-dom` (19.3.1) van en `dependencies` porque se ejecutan en el
+navegador y acaban dentro del JS del build. `@types/react`, `@types/react-dom`
+y `@vitejs/plugin-react` (6.2.1) van en `devDependencies`: los tipos sólo los
+usan el editor y `tsc`, y el plugin sólo actúa mientras Vite transforma; nada
+de ellos llega al JS que se descarga.
+
+- `tsconfig.json`: `"jsx": "react-jsx"` (runtime automático: el JSX pasa a
+  llamadas a `jsx()` de `react/jsx-runtime`, sin `import React`) y
+  `"verbatimModuleSyntax": true` (los imports que sólo traen tipos se marcan
+  con `type`, como `type Coffee` en `app.tsx`, porque Oxc transforma fichero a
+  fichero y no sabe si `Coffee` es un tipo o un valor).
+- `index.html`: `<div id="root"></div>` debajo de la cabecera y el `<script>`
+  a `/src/index.tsx`.
+- `src/index.ts` → `src/index.tsx`, más `src/data.ts` y `src/app.tsx` del
+  enunciado. Desaparecen los dos `console.log` y la foto creada con
+  `createElement`: ahora la pinta `App`.
+- `vite.config.ts`: `plugins: [react(), checker({ typescript: true })]`.
+  `@vitejs/plugin-react` 6 pide `vite: ^8.0.0`; sus otras `peerDependencies`
+  (Babel, React Compiler) son opcionales y no se instalan.
+
+### El carrito, antes y después de `@vitejs/plugin-react`
+
+<!-- REVISAR: confirmar en el navegador que es lo que viste -->
+- **Sin el plugin**: el JSX funciona (Oxc lo transforma de serie), pero al
+  añadir 3 bolsas y cambiar el `<h2>`, la terminal muestra `page reload
+  src/app.tsx`, la página se recarga entera y el carrito vuelve a 0.
+- **Con el plugin**: el título cambia sin recargar y el carrito sigue con sus
+  3 bolsas. En Network aparece `@react-refresh` y `app.tsx` llega con llamadas
+  a `$RefreshReg$` e `import.meta.hot.accept`.
+
+### Salida de `npm run build`
+
+```
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 18 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                    1.41 kB │ gzip:  0.76 kB
+dist/assets/coffee-CVLsT1_e.jpg  274.53 kB
+dist/assets/index-BeDCDn6j.css     0.21 kB │ gzip:  0.16 kB
+dist/assets/index-BXu9FbnC.js    220.11 kB │ gzip: 68.91 kB
+
+✓ built in 470ms
+```
+
+El JS pasa de 0,84 kB a 220 kB: React va dentro del bundle. La salida es la
+misma con y sin el plugin, porque Fast Refresh sólo existe en desarrollo.
+
+### Captura: `Cache-Control` de una dependencia pre-empaquetada
+
+![react.js servido desde /node_modules/.vite/deps/ con Cache-Control immutable](docs/screenshots/05-cache-control.png)
+
+_Network con `npm start` (Disable cache desmarcado), tras pulsar F5:
+`react.js?v=e99a8634` viene de `/node_modules/.vite/deps/`, responde `200 OK
+(from disk cache)` sin llegar al servidor, y su cabecera es `Cache-Control:
+max-age=31536000,immutable` (un año). `app.tsx`, en cambio, llega con
+`Cache-Control: no-cache` y responde 304._
+
+### Preguntas
+
+**¿Por qué Vite trata distinto a `react` (dependencia) y a `app.tsx`
+(vuestro código)? ¿Qué es el pre-bundling y qué problema resuelve?**
+
+Al arrancar, Vite empaqueta con Rolldown cada dependencia de `node_modules`
+en un único módulo ES dentro de `node_modules/.vite/deps/`: eso es el
+pre-bundling. Resuelve dos problemas: React se publica en CommonJS, que el
+navegador no sabe importar, y algunos paquetes están partidos en decenas de
+ficheros que serían decenas de peticiones. <!-- REVISAR: CommonJS → ESM y
+"cascada" de peticiones --> Como las dependencias no cambian mientras
+programas, Vite les pone `?v=<hash>` y `immutable` y el navegador no vuelve a
+pedirlas; tu código sí cambia, así que lo sirve con `no-cache` y el navegador
+pregunta cada vez (304 si no ha cambiado).
+
+**¿Qué aporta exactamente `@vitejs/plugin-react` si el JSX ya funcionaba sin
+él?**
+
+Fast Refresh: cuando guardas un componente, el plugin sustituye sólo ese
+componente en la página y React conserva su estado (`useState`), en vez de
+recargarla entera. Por eso el carrito mantiene las 3 bolsas. Sólo actúa en
+desarrollo: el build no cambia. <!-- REVISAR: si cambias el orden o el número
+de hooks, Fast Refresh sí reinicia el estado -->
 
 ## Bitácora de IA
 
