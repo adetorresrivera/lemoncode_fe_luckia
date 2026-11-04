@@ -33,13 +33,28 @@ npm start
 | Script | Qué hace |
 | --- | --- |
 | `npm start` | Servidor de desarrollo de Vite en http://localhost:5173. Con `--host` escucha en todas las interfaces (`0.0.0.0`) y no sólo en `[::1]`, para que el reenvío de puertos del DevContainer llegue (ver bitácora del lab 3, entrada 1) |
-| `npm run build` | Comprueba los tipos con `tsc --noEmit` y genera `dist/` con `vite build` |
+| `npm run build` | `vite build && tsc --noEmit`: primero `vite build` genera `dist/` y, de paso, el plugin de TanStack Router regenera `src/routeTree.gen.ts`; después `tsc --noEmit` comprueba los tipos, que necesitan ese fichero ya generado (desde O5; antes era `tsc --noEmit && vite build`) |
 | `npm run typecheck` | Sólo la comprobación de tipos |
 | `npm run preview` | Sirve `dist/` en http://localhost:4173, también con `--host` |
 
 ## Datos de partida
 - `public/coffees.json`: los 6 cafés iniciales (se piden con `fetch` a partir de O3).
 - `src/model.ts`: los tipos `Roast`, `Coffee` y `CoffeeInput`.
+
+## Mapa de la aplicación
+Rutas por archivos con TanStack Router: cada fichero de `src/routes` es una
+ruta y el plugin de Vite genera con ellos `src/routeTree.gen.ts` (se versiona
+y no se edita a mano).
+
+| URL | Fichero | Qué muestra |
+| --- | --- | --- |
+| (todas) | `src/routes/__root.tsx` | Layout común: nombre de la tienda, navegación con enlace al catálogo y `<Outlet />` donde se pinta la ruta hija. Su `notFoundComponent` muestra "Página no encontrada" en cualquier URL desconocida (`/teteras`) |
+| `/` | `src/routes/index.tsx` | Nada: redirige a `/coffees` en `beforeLoad` |
+| `/coffees` | `src/routes/coffees/index.tsx` | El catálogo: buscador, carrito y tarjetas; el nombre de cada café enlaza a su detalle |
+| `/coffees/$coffeeId` | `src/routes/coffees/$coffeeId.tsx` | El detalle de un café (`/coffees/3`): origen, tueste, precio y notas de cata. "Café no encontrado" si el id no existe o no es un número (`/coffees/999`, `/coffees/abc`) |
+
+Los datos llegan con `src/api.ts` (`getCoffees` y `getCoffee`), que usan los
+hooks `useCoffees` (catálogo) y `useCoffee(id)` (detalle).
 
 ## Estado
 - [ ] O1 · El catálogo con componentes
@@ -84,3 +99,13 @@ Cada uno tiene los suyos: un custom hook (`src/use-coffees.ts`) sólo reutiliza 
 **¿Por qué el foco se hace con una ref y no con un estado?**
 
 Porque poner el foco no es algo que se pinte: es una orden imperativa al nodo del DOM (`searchRef.current?.focus()`), y `useRef` nos da acceso a ese `<input>` sin provocar ningún render. Con un estado (`const [focused, setFocused] = useState(false)`) tendríamos que forzar un render que no cambia nada en pantalla y luego un `useEffect` que, al final, necesitaría igualmente el nodo para llamar a `.focus()`; además, el estado se quedaría a `true` cuando el usuario saliera del campo y un segundo clic en "Buscar" ya no haría nada.
+
+### O5
+
+**¿Qué ganamos con una URL por pantalla frente a mostrar el detalle con un booleano en el estado?**
+
+Con una URL por pantalla, la pantalla que se ve es parte de la dirección y no de un estado que se pierde: `/coffees/4` se puede guardar en marcadores, compartir o recargar y se vuelve a abrir ese mismo café, y los botones Atrás y Adelante del navegador funcionan porque cada navegación es una entrada del historial. Con un booleano (`const [showDetail, setShowDetail] = useState(false)`) la URL sería siempre la misma, al recargar se volvería al catálogo y Atrás sacaría al usuario de la aplicación. Además, con TanStack Router el `Link` está tipado: TypeScript comprueba que `/coffees/$coffeeId` existe y que le pasamos su parámetro; si escribimos `params={{ coffeeID: ... }}` da `error TS2353: Object literal may only specify known properties, and 'coffeeID' does not exist in type 'ParamsReducerFn<...> | { ...; }'.`
+
+**Según la comprobación 5: ¿por qué se ha vaciado el carrito? ¿Dónde tendría que vivir ese estado para no perderse?**
+
+El estado `cart` es un `useState` de `CoffeesPage`, el componente de `src/routes/coffees/index.tsx`, y al navegar a `/coffees/3` el router deja de pintar esa ruta en el `<Outlet />` y pinta la de `src/routes/coffees/$coffeeId.tsx`: `CoffeesPage` se desmonta y React tira su estado. Al volver a `/coffees` se monta un `CoffeesPage` nuevo, que arranca con `useState<Coffee[]>([])` (y vuelve a pedir los cafés). Para que no se pierda, el carrito tendría que vivir en un componente que no se desmonte al navegar, el layout de `src/routes/__root.tsx`, y llegar a las pantallas que lo necesiten con Context (`createContext` + un hook `useCart()`), que es el opcional P1.

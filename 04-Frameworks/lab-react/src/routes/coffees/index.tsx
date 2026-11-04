@@ -1,9 +1,14 @@
 import { useRef, useState } from "react";
-import type { Coffee } from "./model";
-import { CoffeeCard } from "./coffee-card";
-import { useCoffees } from "./use-coffees";
+import { createFileRoute } from "@tanstack/react-router";
+import type { Coffee } from "../../model";
+import { CoffeeCard } from "../../coffee-card";
+import { useCoffees } from "../../use-coffees";
 
-export function App() {
+export const Route = createFileRoute("/coffees/")({
+  component: CoffeesPage,
+});
+
+function CoffeesPage() {
   const { coffees, loading, error } = useCoffees();
   const [cart, setCart] = useState<Coffee[]>([]);
   const [query, setQuery] = useState("");
@@ -35,26 +40,26 @@ export function App() {
 
   if (loading) {
     return (
-      <main>
-        <h1>Tueste</h1>
+      <>
+        <h1>Catálogo</h1>
         <p role="status">Cargando…</p>
-      </main>
+      </>
     );
   }
 
   if (error !== null) {
     return (
-      <main>
-        <h1>Tueste</h1>
+      <>
+        <h1>Catálogo</h1>
         <p role="alert">{error}</p>
-      </main>
+      </>
     );
   }
 
   return (
-    <main>
+    <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1>Tueste</h1>
+        <h1>Catálogo</h1>
         <button type="button" onClick={focusSearch}>
           Buscar
         </button>
@@ -92,6 +97,6 @@ export function App() {
           ))}
         </ul>
       )}
-    </main>
+    </>
   );
 }

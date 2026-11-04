@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Coffee } from "./model";
-import { isCoffeeList } from "./model";
+import { getCoffees } from "./api";
 
 interface UseCoffeesResult {
   coffees: Coffee[];
@@ -18,15 +18,7 @@ export function useCoffees(): UseCoffeesResult {
 
     async function loadCoffees(): Promise<void> {
       try {
-        const response = await fetch("/coffees.json", { signal: controller.signal });
-        if (!response.ok) {
-          throw new Error(`El servidor respondió ${response.status}`);
-        }
-        const data: unknown = await response.json();
-        if (!isCoffeeList(data)) {
-          throw new Error("La respuesta no es una lista de cafés");
-        }
-        setCoffees(data);
+        setCoffees(await getCoffees(controller.signal));
       } catch (caught) {
         // La limpieza abortó esta petición: no es un error que enseñar.
         if (controller.signal.aborted) return;
