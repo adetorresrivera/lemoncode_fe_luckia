@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { Coffee } from "./model";
+import type { Coffee } from "../../../core/coffees/model";
 
 interface CoffeeCardProps {
   coffee: Coffee;

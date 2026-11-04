@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { coffeeSchema, MAX_PRICE } from "./coffee.schema";
-import type { CoffeeInput, Roast } from "./model";
-import { roastLabels } from "./model";
+import { coffeeSchema, MAX_PRICE } from "../../core/coffees/coffee.schema";
+import type { CoffeeInput, Roast } from "../../core/coffees/model";
+import { roastLabels } from "../../core/coffees/model";
 
-interface Props {
+interface CoffeeFormProps {
   initialValues?: CoffeeInput;
   onSave: (values: CoffeeInput) => Promise<void>;
 }
@@ -26,7 +26,7 @@ function errorText(errors: ReadonlyArray<{ message: string } | undefined>): stri
   return errors.map((error) => error?.message).join(" ");
 }
 
-export function CoffeeForm({ initialValues = emptyValues, onSave }: Props) {
+export function CoffeeForm({ initialValues = emptyValues, onSave }: CoffeeFormProps) {
   const [saveError, setSaveError] = useState("");
 
   const form = useForm({

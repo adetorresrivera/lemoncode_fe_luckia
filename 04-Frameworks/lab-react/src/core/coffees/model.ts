@@ -46,3 +46,10 @@ export function isCoffee(value: unknown): value is Coffee {
 export function isCoffeeList(value: unknown): value is Coffee[] {
   return Array.isArray(value) && value.every(isCoffee);
 }
+
+// El parámetro de la URL siempre es un string: sólo "1", "2"… son ids válidos.
+// Con Number() a secas, "" daría 0, " 4" daría 4 y "0x4" también 4.
+// NaN = id imposible: getCoffee lo trata como "no encontrado".
+export function parseCoffeeId(value: string): number {
+  return /^[1-9]\d*$/.test(value) ? Number(value) : Number.NaN;
+}

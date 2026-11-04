@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoffeesIndexRouteImport } from './routes/coffees/index'
-import { Route as CoffeesCoffeeIdRouteImport } from './routes/coffees/$coffeeId'
 import { Route as CoffeesNewRouteImport } from './routes/coffees/new'
+import { Route as CoffeesCoffeeIdIndexRouteImport } from './routes/coffees/$coffeeId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,49 +24,49 @@ const CoffeesIndexRoute = CoffeesIndexRouteImport.update({
   path: '/coffees/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CoffeesCoffeeIdRoute = CoffeesCoffeeIdRouteImport.update({
-  id: '/coffees/$coffeeId',
-  path: '/coffees/$coffeeId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CoffeesNewRoute = CoffeesNewRouteImport.update({
   id: '/coffees/new',
   path: '/coffees/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoffeesCoffeeIdIndexRoute = CoffeesCoffeeIdIndexRouteImport.update({
+  id: '/coffees/$coffeeId/',
+  path: '/coffees/$coffeeId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/coffees/$coffeeId': typeof CoffeesCoffeeIdRoute
   '/coffees/new': typeof CoffeesNewRoute
   '/coffees/': typeof CoffeesIndexRoute
+  '/coffees/$coffeeId/': typeof CoffeesCoffeeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/coffees/$coffeeId': typeof CoffeesCoffeeIdRoute
   '/coffees/new': typeof CoffeesNewRoute
   '/coffees': typeof CoffeesIndexRoute
+  '/coffees/$coffeeId': typeof CoffeesCoffeeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/coffees/$coffeeId': typeof CoffeesCoffeeIdRoute
   '/coffees/new': typeof CoffeesNewRoute
   '/coffees/': typeof CoffeesIndexRoute
+  '/coffees/$coffeeId/': typeof CoffeesCoffeeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/coffees/$coffeeId' | '/coffees/new' | '/coffees/'
+  fullPaths: '/' | '/coffees/new' | '/coffees/' | '/coffees/$coffeeId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/coffees/$coffeeId' | '/coffees/new' | '/coffees'
-  id: '__root__' | '/' | '/coffees/$coffeeId' | '/coffees/new' | '/coffees/'
+  to: '/' | '/coffees/new' | '/coffees' | '/coffees/$coffeeId'
+  id: '__root__' | '/' | '/coffees/new' | '/coffees/' | '/coffees/$coffeeId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CoffeesCoffeeIdRoute: typeof CoffeesCoffeeIdRoute
   CoffeesNewRoute: typeof CoffeesNewRoute
   CoffeesIndexRoute: typeof CoffeesIndexRoute
+  CoffeesCoffeeIdIndexRoute: typeof CoffeesCoffeeIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,13 +85,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoffeesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coffees/$coffeeId': {
-      id: '/coffees/$coffeeId'
-      path: '/coffees/$coffeeId'
-      fullPath: '/coffees/$coffeeId'
-      preLoaderRoute: typeof CoffeesCoffeeIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/coffees/new': {
       id: '/coffees/new'
       path: '/coffees/new'
@@ -99,14 +92,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoffeesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coffees/$coffeeId/': {
+      id: '/coffees/$coffeeId/'
+      path: '/coffees/$coffeeId'
+      fullPath: '/coffees/$coffeeId/'
+      preLoaderRoute: typeof CoffeesCoffeeIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CoffeesCoffeeIdRoute: CoffeesCoffeeIdRoute,
   CoffeesNewRoute: CoffeesNewRoute,
   CoffeesIndexRoute: CoffeesIndexRoute,
+  CoffeesCoffeeIdIndexRoute: CoffeesCoffeeIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
