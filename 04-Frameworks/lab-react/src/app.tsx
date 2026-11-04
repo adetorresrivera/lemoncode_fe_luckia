@@ -1,45 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Coffee } from "./model";
+import { isCoffeeList } from "./model";
 import { CoffeeCard } from "./coffee-card";
 
-const coffees: Coffee[] = [
-  {
-    id: 1,
-    name: "Etiopía Yirgacheffe",
-    origin: "Etiopía",
-    roast: "light",
-    price: 14.9,
-    notes: "Floral, bergamota y té negro.",
-  },
-  {
-    id: 2,
-    name: "Colombia Huila",
-    origin: "Colombia",
-    roast: "medium",
-    price: 12.9,
-    notes: "Caramelo y manzana roja.",
-  },
-  {
-    id: 3,
-    name: "Kenia AA",
-    origin: "Kenia",
-    roast: "light",
-    price: 15.5,
-    notes: "Frutos rojos y pomelo.",
-  },
-  {
-    "id": 4,
-    "name": "Brasil Cerrado",
-    "origin": "Brasil",
-    "roast": "dark",
-    "price": 10.5,
-    "notes": "Chocolate y avellana."
-  },
-];
-
 export function App() {
+  const [coffees, setCoffees] = useState<Coffee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [cart, setCart] = useState<Coffee[]>([]);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCoffees(): Promise<void> {
+      try {
+        const response = await fetch("/coffees.json", { signal: controller.signal });
+        if (!response.ok) {
+          throw new Error(`El servidor respondió ${response.status}`);
+        }
+        const data: unknown = await response.json();
+        if (!isCoffeeList(data)) {
+          throw new Error("La respuesta no es una lista de cafés");
+        }
+        setCoffees(data);
+      } catch (caught) {
+        // La limpieza abortó esta petición: no es un error que enseñar.
+        if (controller.signal.aborted) return;
+        const detail = caught instanceof Error ? caught.message : "error desconocido";
+        setError(`No se han podido cargar los cafés (${detail}).`);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadCoffees();
+    return () => controller.abort();
+  }, []);
 
   const count = coffees.length;
   const summary = `${count} ${count === 1 ? "café" : "cafés"} este mes`;
@@ -59,6 +56,24 @@ export function App() {
 
   function emptyCart(): void {
     setCart([]);
+  }
+
+  if (loading) {
+    return (
+      <main>
+        <h1>Tueste</h1>
+        <p role="status">Cargando…</p>
+      </main>
+    );
+  }
+
+  if (error !== null) {
+    return (
+      <main>
+        <h1>Tueste</h1>
+        <p role="alert">{error}</p>
+      </main>
+    );
   }
 
   return (
