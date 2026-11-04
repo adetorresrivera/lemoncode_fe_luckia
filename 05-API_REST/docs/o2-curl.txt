@@ -1,0 +1,104 @@
+# O2 · Recorrido de "Probar CRUD" con curl
+# Servidor recién arrancado (npm run dev, sin USE_CORS), 2026-11-04 14:58 UTC.
+# Mismas cabeceras que pone request<T>: Accept siempre; Content-Type sólo con cuerpo (POST y PUT).
+# Cuerpos recortados a 300 caracteres por línea; las líneas "→" son lo que sacaría console.log.
+
+$ curl -s -i -H "Accept: application/json" http://localhost:3000/api/hotels
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 11332
+ETag: W/"2c44-xlGvxTrVPajVvMyI7Zg/AUp1FA4"
+Date: Wed, 04 Nov 2026 14:58:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":[{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1464777618676,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenceRating":52,"countryCode":"US","deepLink":"http://www.travelnow.com/templates/55505/hotels/125727/o
+
+→ 1 10
+
+
+$ curl -s -i -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120}' http://localhost:3000/api/hotels
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 170
+ETag: W/"aa-qXXwTe3RBFEJKceFjlBF7SkkiAc"
+Date: Wed, 04 Nov 2026 14:58:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120,"id":"ed596e79-4b4f-441b-8e83-a6f9d198106f","created":1793804334865,"modified":1793804334865}}
+
+→ 2 Hotel Tueste ed596e79-4b4f-441b-8e83-a6f9d198106f
+
+
+$ curl -s -i -H "Accept: application/json" http://localhost:3000/api/hotels/ed596e79-4b4f-441b-8e83-a6f9d198106f
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 170
+ETag: W/"aa-qXXwTe3RBFEJKceFjlBF7SkkiAc"
+Date: Wed, 04 Nov 2026 14:58:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120,"id":"ed596e79-4b4f-441b-8e83-a6f9d198106f","created":1793804334865,"modified":1793804334865}}
+
+→ 3 Hotel Tueste
+
+
+$ curl -s -i -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{"lowRate":95}' http://localhost:3000/api/hotels/ed596e79-4b4f-441b-8e83-a6f9d198106f
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 170
+ETag: W/"aa-CPyre4WeuTc8EVFvpqJHSA3QNG8"
+Date: Wed, 04 Nov 2026 14:58:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"name":"Hotel Tueste","city":"Seattle","lowRate":95,"highRate":120,"id":"ed596e79-4b4f-441b-8e83-a6f9d198106f","created":1793804334865,"modified":1793804334947}}
+
+→ 4 95
+
+
+$ curl -s -i -X DELETE -H "Accept: application/json" http://localhost:3000/api/hotels/ed596e79-4b4f-441b-8e83-a6f9d198106f
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Date: Wed, 04 Nov 2026 14:58:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+→ (deleteHotel: 204, sin cuerpo; request no lee JSON)
+
+
+$ curl -s -i -H "Accept: application/json" http://localhost:3000/api/hotels/ed596e79-4b4f-441b-8e83-a6f9d198106f
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+ETag: W/"2-vyGp6PvFo4RvsFtPoIWeCReyIC8"
+Date: Wed, 04 Nov 2026 14:58:54 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{}
+
+→ 5 null   (200 con {}: sin data → getHotel devuelve null)
+
+
+$ curl -s -i -H "Accept: application/json" http://localhost:3000/api/hotels
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 11332
+ETag: W/"2c44-xlGvxTrVPajVvMyI7Zg/AUp1FA4"
+Date: Wed, 04 Nov 2026 14:58:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":[{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1464777618676,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenceRating":52,"countryCode":"US","deepLink":"http://www.travelnow.com/templates/55505/hotels/125727/o
+
+→ 6 10

@@ -58,6 +58,35 @@ algo, basta con reiniciar.
 La carpeta `hotels-server/front/` (la que sirve en `/`) no se sube a git: es
 el resultado de `npm run build` en `client`, igual que un `dist`.
 
+### Cliente construido (O2)
+
+Con el servidor arrancado (sin `USE_CORS`), en otra terminal:
+
+```bash
+cd 05-API_REST/client
+npm run build
+```
+
+`build` es `tsc && vite build`: si hay un error de tipos, no se construye.
+Después, el `postbuild` borra `hotels-server/front/` y copia ahí `dist/`
+(`rm -rf ../hotels-server/front && cp -r dist ../hotels-server/front`).
+No hace falta reiniciar el servidor: `express.static` lee los ficheros en
+cada petición. Basta con recargar.
+
+Abre http://localhost:3000 (sirve el cliente y la API en el mismo origen) y
+F12. El botón **Probar CRUD** hace el recorrido del enunciado (listar, crear
+"Hotel Tueste", leerlo, cambiarle el `lowRate` a 95, borrarlo, volver a
+leerlo y listar) y escribe cada paso en **Console** (`1 10` … `6 10`). Si
+algo falla, el error sale en Console con `console.error`. Como el hotel se
+crea y se borra, el botón se puede pulsar varias veces y la cuenta vuelve a
+10.
+
+> El `postbuild` de `.start-code` era `cp -r dist/ ../hotels-server/front`.
+> Sólo funciona la primera vez: si `front/` ya existe, `cp` copia la carpeta
+> **dentro** (`front/dist/…`) y el servidor sigue sirviendo el `index.html`
+> viejo. Se vio en el segundo build de O2, y por eso ahora se borra antes de
+> copiar.
+
 ## Estructura
 
 ```
@@ -73,7 +102,7 @@ el resultado de `npm run build` en `client`, igual que un `dist`.
 │   ├── public/         miniaturas de los hoteles (estáticos con USE_CORS=yes)
 │   └── front/          build del cliente (estáticos sin CORS), ignorado en git
 └── client/             cliente TypeScript + Vite
-    ├── src/            main.ts y el código del cliente
+    ├── src/            main.ts (botones), hotels.api.ts (request<T> y el CRUD)
     └── public/         favicon e iconos
 ```
 
@@ -195,6 +224,125 @@ Así que, para este servidor: **si el cuerpo no trae `data`, el hotel no
 existe** y `getHotel` devolverá `null`. Ojo, el PUT de un hotel que no existe
 es distinto: devuelve `{"data":null}` (el `null` sí sobrevive al JSON).
 
+## O2 · Cliente con fetch
+
+### Qué hay en `client/src/hotels.api.ts`
+
+- **`Hotel`** (`id`, `name`, `city`, `lowRate`, `highRate`) y
+  **`NewHotel = Omit<Hotel, "id">`**: sólo los campos que usa el front, no
+  los ~30 del servidor.
+- **`API_BASE = "/api"`**: URL relativa, porque el cliente construido lo
+  sirve el mismo servidor (mismo origen). En O3 pasa a `VITE_API_BASE`.
+- **`Envelope<T> = { data?: T }`**: la forma de las respuestas. `data` es
+  opcional porque a veces falta (el `{}` del 999).
+- **`request<T>(path, options)`**: la única función que llama a `fetch`.
+  Devuelve `Promise<T | undefined>`.
+- **`requireData(data, what)`**: para las llamadas que siempre tienen que
+  traer `data`. Si llega `undefined`, lanza un `Error` en vez de dejar pasar
+  un `undefined` silencioso.
+- Las cinco funciones, con el tipo de retorno anotado:
+
+  | Función | Petición | Éxito | Devuelve |
+  | --- | --- | --- | --- |
+  | `getHotels()` | `GET /api/hotels` | 200 | `Promise<Hotel[]>` (con `requireData`) |
+  | `getHotel(id)` | `GET /api/hotels/:id` | 200 (también si no existe) | `Promise<Hotel \| null>`: `null` si el cuerpo no trae `data` |
+  | `createHotel(hotel: NewHotel)` | `POST /api/hotels` con el hotel en JSON | 201 | `Promise<Hotel>`: el hotel con el `id` del servidor |
+  | `updateHotel(id, changes: Partial<NewHotel>)` | `PUT /api/hotels/:id` con los cambios en JSON | 200 | `Promise<Hotel>`: el hotel completo ya cambiado |
+  | `deleteHotel(id)` | `DELETE /api/hotels/:id` | 204 | `Promise<void>` |
+
+**Cabeceras.** `request` parte de las que lleguen en `options.headers` (con
+`new Headers(...)`, que acepta objeto, array o `Headers`) y sólo añade las
+que falten, para no pisarlas: `Accept: application/json` siempre, y
+`Content-Type: application/json` sólo si hay `body` (POST y PUT). Un GET o
+un DELETE no llevan `Content-Type`, porque no envían nada que describir.
+
+**El tipo de la respuesta.** `response.json()` devuelve `any`. Se guarda en
+una variable anotada, `const body: Envelope<T> = await response.json()`.
+TypeScript lo acepta porque `any` se puede asignar a cualquier tipo, sin
+`as` ni `any` explícito. Pero **ahí TypeScript se fía del servidor sin
+comprobar nada** (lo dice un comentario en el código): si el servidor
+mandase `lowRate: "barato"`, el tipo seguiría diciendo `number`. Validarlo
+en ejecución es P5 (Zod). La otra opción era leerlo como `unknown` y
+pasarlo por una guarda `body is { data: T }`. Se descartó porque esa guarda
+sólo puede mirar que exista `data`, no que sea un `T`: dice más de lo que
+comprueba, igual que un `as`.
+
+**Por qué `T | undefined`.** En un 204 hay que devolver algo sin leer el
+cuerpo, y `undefined` no se puede asignar a un `T` genérico sin `as`. En
+lugar de esconderlo, el tipo lo dice: `request` devuelve `undefined` en un
+204 **y** cuando el cuerpo no trae `data`, que es justo el caso del hotel que
+no existe. Así `getHotel` se queda en `(await request<Hotel>(…)) ?? null`, y
+las demás pasan por `requireData`.
+
+### Qué hace `request<T>` en cada caso
+
+Comprobado con el `hotels.api.ts` real ejecutado en Node (Node 22 quita los
+tipos al importar un `.ts`). Para que la URL relativa funcione fuera del
+navegador, la prueba envuelve `fetch` para que anteponga
+`http://localhost:3000`.
+
+| Caso | Qué pasa en `fetch` | Qué hace `request<T>` | Qué ve quien llama |
+| --- | --- | --- | --- |
+| **200 / 201 con `data`** | resuelve, `ok` `true` | `response.json()` y devuelve `body.data` | el dato (`1 10`, `2 Hotel Tueste <uuid>`, `4 95`…) |
+| **200 con `{}`** (hotel que no existe) | resuelve, `ok` `true` | devuelve `body.data`, que es `undefined` | `getHotel` → `null` (`5 null`) |
+| **204** (DELETE) | resuelve, `ok` `true` | devuelve `undefined` **sin** llamar a `response.json()` | `deleteHotel` → `void` |
+| **404** (p. ej. `/api/nope`) | resuelve, `ok` `false` | lanza `Error: GET /api/nope → 404 Not Found` | el `await` rechaza → `catch` |
+| **406** (sin `Accept`) | resuelve, `ok` `false` | lanza `Error: GET /api/hotels → 406 Not Acceptable` | el `await` rechaza → `catch` |
+| **Error de red** (servidor parado) | **rechaza** con `TypeError` (Chrome: `Failed to fetch`; Node: `fetch failed`, `cause` `ECONNREFUSED`) | no llega a mirar `ok`: el `TypeError` sube tal cual | el `await` rechaza → `catch` |
+
+En `main.ts`, el listener del botón llama a `testCrud().catch(error =>
+console.error("Probar CRUD:", error))`. `addEventListener` no espera a la
+promesa, así que sin ese `catch` cualquiera de estos errores acabaría como
+`Uncaught (in promise)`.
+
+### El recorrido, con curl
+
+Con el servidor recién arrancado, la misma secuencia que hace el botón, con
+las mismas cabeceras. Está completa en [docs/o2-curl.txt](docs/o2-curl.txt):
+
+| # | Petición | Código | Salida en Console |
+| --- | --- | --- | --- |
+| 1 | `GET /api/hotels` | 200 | `1 10` |
+| 2 | `POST /api/hotels` `{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120}` | **201** Created | `2 Hotel Tueste ed596e79-…` |
+| 3 | `GET /api/hotels/<id>` | 200 | `3 Hotel Tueste` |
+| 4 | `PUT /api/hotels/<id>` `{"lowRate":95}` | 200 | `4 95` |
+| 5 | `DELETE /api/hotels/<id>` | **204** No Content | (nada) |
+| 6 | `GET /api/hotels/<id>` | 200 con `{}` | `5 null` |
+| 7 | `GET /api/hotels` | 200 | `6 10` |
+
+Después se reinició el servidor y se lanzó el recorrido con el
+`hotels.api.ts` real (en Node). Sacó lo mismo: `1 10`,
+`2 Hotel Tueste 2e1a26f5-…`, `3 Hotel Tueste`, `4 95`, `5 null`, `6 10`. El
+log del servidor (`morgan`) registró `200, 201, 200, 200, 204, 200, 200`.
+Las cabeceras que envió cada petición: `Accept: application/json` en las 7, y
+`Content-Type: application/json` sólo en el POST y el PUT.
+
+### Lo que se ve en Network
+
+En http://localhost:3000, F12 → Network, filtro **Fetch/XHR**, al pulsar
+**Probar CRUD**:
+
+- **7 peticiones**: `hotels` GET 200, `hotels` POST **201**, `<uuid>` GET 200,
+  `<uuid>` PUT 200, `<uuid>` DELETE **204**, `<uuid>` GET 200 y `hotels` GET
+  200. No hay ninguna OPTIONS: es el mismo origen y no hay CORS (eso es O3).
+- **Payload del POST**: *Request Payload*
+  `{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120}`,
+  sin `id`. En *Headers* → *Request Headers*: `Accept: application/json` y
+  `Content-Type: application/json`. En *Response*:
+  `{"data":{…,"id":"<uuid>","created":…,"modified":…}}`.
+- **DELETE**: en *Response* no hay nada ("This request has no response
+  data available"), y en *Response Headers* no hay `Content-Type`.
+- **El GET después del DELETE**: 200, y en *Response* sólo `{}`. Network
+  no lo marca en rojo, aunque el hotel ya no existe.
+- **Sin `Accept`**: se probó quitando de `request` el bloque que lo pone y
+  recompilando. Sin esa cabecera, `fetch` (y curl) mandan `Accept: */*`, y el
+  servidor responde **406** `{"error":"Not Acceptable"}`. El recorrido se para
+  en el primer paso: en Network sólo sale un GET `hotels` **406** (en rojo), y
+  en Console, `Probar CRUD: Error: GET /api/hotels → 406 Not Acceptable`. Ni
+  un `undefined` ni un `1 undefined`. Después se volvió a poner el bloque y
+  se recompiló: el fichero quedó idéntico (`cmp`) y el JS construido vuelve a
+  llevar el `Accept`.
+
 ## Respuestas
 
 ### O1
@@ -235,11 +383,68 @@ las respuestas: aquí lo correcto viene en `data` (`{"data":[…]}`,
 que una sola función (`request<T>`) puede tratar todas las llamadas igual.
 Hasta el 999 se detecta gracias a eso: la clave `data` falta.
 
+### O2
+
+> `fetch` no lanza un error con un 404 o un 500. ¿Cuándo sí lanza? ¿Qué
+> pasaría en vuestra aplicación si no comprobaseis `response.ok`?
+
+`fetch` sólo rechaza cuando **no hay respuesta HTTP que entregar**. Para
+`fetch`, un 404 o un 500 son respuestas válidas: el servidor ha contestado, y
+qué significa ese código lo decide la aplicación. Rechaza en estos casos:
+
+- **Error de red**: servidor parado, DNS que no resuelve, sin conexión.
+  Rechaza con `TypeError`. Comprobado contra un puerto sin nadie escuchando:
+  `TypeError: fetch failed` con `cause` `ECONNREFUSED` (en Chrome el mensaje
+  es `Failed to fetch`).
+- **Respuesta bloqueada por CORS**: también `TypeError`, y el código no ve
+  ni el estado (es O3).
+- **Petición cancelada** con un `AbortController`: `AbortError` (es O4).
+- **Petición mal formada** antes de enviarla, p. ej. un GET con `body` o una
+  URL inválida: `TypeError`.
+
+Si no se comprobase `response.ok`, los errores del servidor se leerían como
+datos. Con el 406, `response.json()` da `{"error":"Not Acceptable"}` y
+`body.data` es `undefined`. `getHotel` devolvería entonces `null`, es decir,
+"ese hotel no existe", cuando en realidad la petición ha fallado (pasaría lo
+mismo con un 500, que trae `{"error":{…}}`). En `getHotels`, `requireData`
+lanzaría `GET /api/hotels: la respuesta no trae data`, que apunta a otra
+cosa y no dice el código. Sin `requireData` sería peor: llegaría
+`undefined`, y `(await getHotels()).length` reventaría con `TypeError:
+Cannot read properties of undefined`, lejos de la causa. Y con un 404 de
+Express, que responde HTML (`Content-Type: text/html`, `Cannot GET
+/api/nope`), `response.json()` lanzaría `SyntaxError`. Comprobando `ok`, el error sale
+donde se produce y con lo que hace falta para entenderlo:
+`GET /api/hotels → 406 Not Acceptable`.
+
+> ¿Por qué `createHotel` no envía el `id`? ¿Quién lo decide?
+
+Porque el `id` lo decide el **servidor**: lo crea en el POST, y el cliente
+no tiene forma de saber qué ids están libres (otro cliente podría haber
+usado el mismo). En
+[hotel.repo.ts:66-72](hotels-server/src/data-layer/hotel.repo.ts#L66-L72),
+`create` recibe un `CreateHotelDTO = Omit<Hotel, 'id' | 'created' | 'modified'>`
+y construye `{ ...data, id: crypto.randomUUID(), created, modified }`. Como
+el `id` va después del spread, aunque el cliente mandase uno, el servidor lo
+pisaría. Por eso `createHotel` recibe un `NewHotel` (`Omit<Hotel, "id">`):
+TypeScript ni deja pasarlo. El `id` llega en la respuesta del 201
+(`{"data":{…,"id":"ed596e79-…"}}`), y por eso el recorrido usa
+`created.id` en los pasos siguientes. Es lo que dice REST: con
+`POST /api/hotels` se crea un recurso dentro de la colección, y es el
+servidor quien le da su URL (`/api/hotels/<uuid>`).
+
+## Capturas
+
+| Captura | Qué se ve |
+| --- | --- |
+| *(Opcional)* [docs/o2-network-crud.png](docs/o2-network-crud.png) | Network filtrado por Fetch/XHR tras pulsar Probar CRUD: GET, POST 201, GET, PUT, DELETE 204, GET y GET |
+
+![Network filtrado por Fetch/XHR tras pulsar Probar CRUD: GET, POST 201, GET, PUT, DELETE 204, GET y GET](docs/o2-network-crud.png)
+
 ## Checklist
 
 ### Obligatorios
 - [x] O1 · Explorar la API antes de programar
-- [ ] O2 · Un cliente con fetch
+- [x] O2 · Un cliente con fetch
 - [ ] O3 · Llamar desde otro origen: CORS
 - [ ] O4 · Gestionar varias peticiones
 - [ ] O5 · README + bitácora de IA

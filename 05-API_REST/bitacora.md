@@ -86,3 +86,54 @@ puerto (`ss -ltnp | grep ':3000 '`), subir a sus padres con `ps -o ppid=` y
 hacer `kill` de los tres procesos (`sh -c`, el `tsx watch` y el `node` que
 escucha). Hay que matar también el `tsx watch`: si sólo se para el hijo, el
 watcher lo puede volver a lanzar.
+
+## 4 · Un script de curl que habría creado dos hoteles
+
+### Prompt
+
+"Comprueba el recorrido sin navegador: con el servidor recién arrancado,
+reproduce con curl la misma secuencia (GET, POST, GET, PUT, DELETE, GET,
+GET) y confirma los códigos […] Guárdalo en docs/o2-curl.txt" (prompt 2 de
+`prompts.md`).
+
+### Qué me dio
+
+Un primer borrador del script que, para cada paso, lanzaba la petición una
+vez para mostrar la respuesta con `-i` y otra vez para sacar el valor del
+`console.log` (`1 10`, el `id`…). Con el POST y el DELETE, eso es crear dos
+hoteles y borrar dos veces.
+
+### Qué corregí y por qué
+
+Se vio antes de ejecutarlo y se rehízo: cada petición se lanza **una sola
+vez**, su respuesta se guarda en una variable y de ahí salen tanto lo que se
+muestra como el valor (`b.data.length`, `b.data.id`…). Si no, el paso 6 no
+habría dado `6 10` (habría quedado un "Hotel Tueste" de más) y la prueba no
+habría reproducido lo que hace el botón. Con peticiones que cambian datos
+(POST, PUT, DELETE), repetir una petición para "mirarla" no sale gratis.
+
+## 5 · Una respuesta del README que no cuadraba con mi propio código
+
+### Prompt
+
+"'### O2' en Respuestas: responde tú las dos preguntas 📝 de O2" (prompt 2
+de `prompts.md`).
+
+### Qué me dio
+
+En "¿qué pasaría si no comprobaseis `response.ok`?", escribió que
+`getHotels` devolvería `undefined` y que `.length` reventaría con
+`TypeError`. Es lo que pasa en un cliente genérico, pero no en este:
+`getHotels` pasa por `requireData`, que lanza su propio error si falta
+`data`.
+
+### Qué corregí y por qué
+
+Al repasar el README contra `hotels.api.ts`, se reescribió la respuesta: sin
+la comprobación de `ok`, `requireData` lanzaría
+`GET /api/hotels: la respuesta no trae data`, un error que no dice el código
+y apunta a otra cosa, y sólo sin `requireData` se llegaría al `TypeError`.
+De paso se comprobó con curl lo del 404 de Express (`Content-Type:
+text/html`, `Cannot GET /api/nope`), que antes estaba sin comprobar. En la
+revisión preguntan por *vuestro* código: una respuesta correcta en general
+pero falsa para el código entregado no sirve.
