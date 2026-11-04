@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
+    "start": "vite --host",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview --host"
   },
   "dependencies": {
     "tailwindcss": "^4.3.3",

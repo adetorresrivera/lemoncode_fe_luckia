@@ -32,10 +32,10 @@ npm start
 ### Scripts
 | Script | Qué hace |
 | --- | --- |
-| `npm start` | Servidor de desarrollo de Vite en http://localhost:5173 |
+| `npm start` | Servidor de desarrollo de Vite en http://localhost:5173. Con `--host` escucha en todas las interfaces (`0.0.0.0`) y no sólo en `[::1]`, para que el reenvío de puertos del DevContainer llegue (ver bitácora del lab 3, entrada 1) |
 | `npm run build` | Comprueba los tipos con `tsc --noEmit` y genera `dist/` con `vite build` |
 | `npm run typecheck` | Sólo la comprobación de tipos |
-| `npm run preview` | Sirve `dist/` en http://localhost:4173 |
+| `npm run preview` | Sirve `dist/` en http://localhost:4173, también con `--host` |
 
 ## Datos de partida
 - `public/coffees.json`: los 6 cafés iniciales (se piden con `fetch` a partir de O3).
