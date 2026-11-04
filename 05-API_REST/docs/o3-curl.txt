@@ -1,0 +1,96 @@
+# O3 · CORS reproducido con curl
+# 2026-11-04 15:27 UTC. curl manda las cabeceras que mandaría Chrome desde
+# http://localhost:5173. curl NO aplica la política CORS: enseña la respuesta
+# entera. Quien decide si el código JS puede leerla es el navegador.
+# Cuerpos recortados a 200 caracteres.
+
+################################################################
+## a) Servidor SIN CORS (npm run dev)
+################################################################
+
+$ curl -s -i -H "Origin: http://localhost:5173" -H "Accept: application/json" http://localhost:3000/api/hotels
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 11332
+ETag: W/"2c44-xlGvxTrVPajVvMyI7Zg/AUp1FA4"
+Date: Wed, 04 Nov 2026 15:27:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":[{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1464777618676,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenc… (recortado)
+
+# ¿Access-Control-Allow-Origin en la respuesta? Cabeceras Access-Control-* encontradas:
+#   0
+
+# Log del servidor (morgan) en este arranque:
+#   
+#   > hotels-server@1.0.0 dev
+#   > tsx watch ./src/index.ts
+#   
+#   Application running on 3000
+#   GET /api/hotels 200 2.809 ms - 11332
+
+################################################################
+## b) Servidor CON CORS (USE_CORS=yes npm run dev): el mismo GET
+################################################################
+
+$ curl -s -i -H "Origin: http://localhost:5173" -H "Accept: application/json" http://localhost:3000/api/hotels
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 11332
+ETag: W/"2c44-xlGvxTrVPajVvMyI7Zg/AUp1FA4"
+Date: Wed, 04 Nov 2026 15:27:27 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":[{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1464777618676,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenc… (recortado)
+
+################################################################
+## c) CON CORS: el preflight del POST, como lo manda el navegador
+##    (sin Accept: application/json; curl pone Accept: */*)
+################################################################
+
+$ curl -s -i -X OPTIONS -H "Origin: http://localhost:5173" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type" http://localhost:3000/api/hotels
+HTTP/1.1 406 Not Acceptable
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 26
+ETag: W/"1a-fX47ke7NTmnIbAjYBIBUoJWqdg4"
+Date: Wed, 04 Nov 2026 15:27:27 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Not Acceptable"}
+
+################################################################
+## c2) Contraprueba (esto NO lo hace el navegador): el mismo OPTIONS
+##     pero con Accept: application/json. Pasa el middleware del 406
+##     y llega a cors(), que contesta el preflight.
+################################################################
+
+$ curl -s -i -X OPTIONS -H "Origin: http://localhost:5173" -H "Accept: application/json" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type" http://localhost:3000/api/hotels
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
+Vary: Access-Control-Request-Headers
+Access-Control-Allow-Headers: content-type
+Content-Length: 0
+Date: Wed, 04 Nov 2026 15:27:27 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+
+# Log del servidor (morgan) en este arranque (b, c y c2):
+#   
+#   > hotels-server@1.0.0 dev
+#   > tsx watch ./src/index.ts
+#   
+#   Application running on 3000
+#   GET /api/hotels 200 3.048 ms - 11332
+#   OPTIONS /api/hotels 406 0.388 ms - 26
+#   OPTIONS /api/hotels 204 0.393 ms - 0

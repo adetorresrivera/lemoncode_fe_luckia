@@ -137,3 +137,66 @@ De paso se comprobó con curl lo del 404 de Express (`Content-Type:
 text/html`, `Cannot GET /api/nope`), que antes estaba sin comprobar. En la
 revisión preguntan por *vuestro* código: una respuesta correcta en general
 pero falsa para el código entregado no sirve.
+
+## 6 · Un docs/o3-curl.txt con los comandos sin comillas
+
+### Prompt
+
+"Reproduce con curl lo que va a hacer el navegador y guárdalo en
+docs/o3-curl.txt" (prompt 3 de `prompts.md`).
+
+### Qué me dio
+
+Un script que, para cada petición, escribía el comando con `echo "\$ $*"`
+y después la respuesta. `$*` junta los argumentos con espacios y pierde las
+comillas, así que en el fichero quedaba
+`curl -s -i -H Origin: http://localhost:5173 -H Accept: application/json …`.
+Copiado y pegado en una terminal, ese comando ya no es el mismo: curl toma
+`http://localhost:5173` y `application/json` como URLs sueltas y manda
+cabeceras `Origin:` y `Accept:` vacías. Además, como los cuerpos JSON no
+acaban en salto de línea, el título de la sección siguiente quedaba pegado a
+la respuesta.
+
+### Qué corregí y por qué
+
+Al repasar el fichero antes de enlazarlo en el README. Se cambió el script
+para que ponga entre comillas cada argumento con espacios
+(`-H "Origin: http://localhost:5173"`) y añada un salto de línea tras cada
+cuerpo, y se volvió a generar entero (con el servidor reiniciado, sin y con
+`USE_CORS`). Las respuestas no cambiaron (200 sin `Access-Control-*`, 200 con
+`Access-Control-Allow-Origin: *`, 406 en el preflight). Pero el fichero es la
+prueba que enlaza el README, y un comando que no se puede repetir tal cual no
+prueba nada.
+
+## 7 · Un mensaje de consola deducido que Chrome no muestra
+
+### Prompt
+
+"Deduce, a partir de las respuestas de curl del paso 3, el mensaje exacto que
+va a mostrar Chrome en cada caso […] Si cuando yo lo vea en el navegador el
+texto cambia en algo, te lo diré y lo corregimos" (prompt 3 de `prompts.md`).
+
+### Qué me dio
+
+Para el POST con `USE_CORS=yes`, el README decía que Chrome mostraría
+`Response to preflight request doesn't pass access control check: It does
+not have HTTP ok status.`, y que de los dos fallos de la respuesta del
+preflight (estado 406 y sin `Access-Control-Allow-Origin`) Chrome
+informaría del estado. La explicación de la tercera pregunta se apoyaba en
+eso: "el mensaje señala al estado".
+
+### Qué corregí y por qué
+
+En el navegador sale otro mensaje: `Response to preflight request doesn't
+pass access control check: No 'Access-Control-Allow-Origin' header is
+present on the requested resource.`, seguido de
+`hotels.api.ts:43 POST http://localhost:3000/api/hotels net::ERR_FAILED`.
+Chrome informa de la cabecera que falta, no del 406. La deducción partía de
+una respuesta de curl correcta, pero suponía en qué orden hace Chrome sus
+comprobaciones, y eso no sale de curl: sólo se sabe mirándolo en el
+navegador. Se cambió el mensaje en el README (sección "Los mensajes de
+consola" y tercera respuesta de O3) y se reescribió la explicación: el
+motivo es el mismo texto que en el GET sin CORS, y despista porque CORS sí
+está activado. El 406, que es la causa, no sale en la consola; hay que
+buscarlo en Network o en el log del servidor. El README marca ahora qué
+mensaje está copiado del navegador y cuál sigue deducido (el del GET).

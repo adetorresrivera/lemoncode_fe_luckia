@@ -11,10 +11,10 @@ export interface Hotel {
 
 export type NewHotel = Omit<Hotel, "id">;
 
-// URL relativa: el cliente construido lo sirve el propio servidor
-// (http://localhost:3000), así que "/api" es el mismo origen.
-// En O3 pasa a import.meta.env.VITE_API_BASE.
-const API_BASE = "/api";
+// URL base absoluta, de client/.env (O3): http://localhost:3000/api.
+// Desde el build servido en localhost:3000 es el mismo origen; desde
+// `npm run dev` (localhost:5173) es otro origen, y entra en juego CORS.
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 // Las respuestas con éxito vienen envueltas en { data: ... }. `data` es
 // opcional porque a veces falta: GET /api/hotels/999 responde 200 con {}.
