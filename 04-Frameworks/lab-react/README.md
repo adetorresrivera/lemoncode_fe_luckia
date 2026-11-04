@@ -50,3 +50,11 @@ npm start
 - [ ] O6 · Alta de cafés con TanStack Form y Zod
 - [ ] O7 · Edición y organización en pods
 - [ ] O8 · README + bitácora de IA
+
+## Respuestas
+
+### O1
+
+**¿Qué aviso da React sin key y para qué la necesita? ¿Por qué usáis coffee.id y no el índice del map?**
+
+Sin `key`, React escribe en la consola ``Each child in a list should have a unique "key" prop. Check the render method of `App`. See https://react.dev/link/warning-keys for more information.``: necesita la `key` para saber qué elemento de la lista es cuál entre un render y el siguiente, y así reutilizar, mover o quitar sólo el `<li>` que ha cambiado en lugar de rehacerlos todos. En `src/app.tsx` usamos `key={coffee.id}` porque el `id` va con el café y no cambia nunca, mientras que el índice depende de la posición: en cuanto el buscador de O2 filtre la lista o se añada o borre un café, el índice 0 pasaría a ser otro café y React reutilizaría el elemento (y su estado) equivocado.
