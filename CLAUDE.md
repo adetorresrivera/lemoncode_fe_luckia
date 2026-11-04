@@ -4,15 +4,59 @@ Gestor de candidaturas de empleo. Los usuarios registran sus candidaturas, las
 siguen en una tabla o en un tablero kanban, guardan los contactos de cada
 empresa y controlan qué versión de su CV y carta enviaron a cada oferta.
 
-Ahora mismo estoy en el laboratorio 3 del máster (03-Bundling/lab.md). El
-proyecto vive en 03-Bundling/lab-bundling.
+Ahora mismo estoy en el laboratorio 4 del máster (04-Frameworks/lab.md). El
+proyecto vive en 04-Frameworks/lab-react: el catálogo de cafés de Tueste
+(lista con buscador y carrito, detalle, alta y edición).
 
-## Stack (lab 3)
+## Stack (lab 4)
+- Copia de la demo `01-de-javascript-a-react/demos/02-react`: Vite 8,
+  TypeScript 7 estricto, React 19 y Tailwind 4 (`@tailwindcss/vite`).
+- Desde O5: TanStack Router con rutas por archivos (`@tanstack/router-plugin`,
+  antes del plugin de React en `vite.config.ts`).
+- Desde O6: TanStack Form + Zod 4 (Standard Schema, sin adaptador).
+- Datos: `public/coffees.json`; modelo en `src/model.ts` (en O7 pasa a
+  `src/core/coffees/model.ts`).
+
+## Reglas (lab 4)
+- Componentes como funciones, con las props tipadas. Nada de clases.
+- El estado nunca se muta: nada de `push`, `splice` ni `coffee.price = …`;
+  spread, `map` y `filter` (`setCart(previous => [...previous, coffee])`).
+- Lo que se puede calcular no es estado: total del carrito, número de bolsas
+  y lista filtrada se calculan durante el render (nada de useState + useEffect
+  para datos derivados).
+- Cada `.map` que pinte una lista lleva `key={coffee.id}`, nunca el índice.
+- Efectos con limpieza cuando haga falta (`clearInterval`, `controller.abort()`).
+- Hooks siempre arriba, antes de cualquier return condicional.
+- `useMemo`/`useCallback` sólo si se ha medido un problema.
+- Eventos: `onAdd={addToCart}` u `onClick={() => addToCart(coffee)}`, nunca
+  `onClick={addToCart(coffee)}`.
+- Router: TanStack Router (`createFileRoute`, `Route.useParams()`, `Link`
+  tipado). Nada de React Router. `routeTree.gen.ts` no se toca a mano.
+- Formularios: TanStack Form acepta el esquema de Zod directamente (nada de
+  `@hookform/resolvers` ni `zodValidator`). Cada campo con `<label>` y su
+  error. El precio con `event.target.valueAsNumber`.
+- Fetch: comprobar `response.ok`; estados `coffees`, `loading` y `error`.
+- O7 (pods): cada pod con container + component e `index.ts`; las escenas
+  importan sólo de ese index; ningún pod importa a otro; el formulario recibe
+  `onSaved` de la escena.
+- Dejar `<StrictMode>` en `main.tsx`.
+- `npm run build` sin errores. Hasta O4 el script es `tsc --noEmit && vite
+  build`; en O5 pasa a `vite build && tsc --noEmit`.
+- Cada dependencia que se instale tiene que hacer falta (las de O5 y O6 las
+  indica el enunciado).
+- Código TypeScript (heredado del lab 2): nada de `any` ni `enum`, nada de
+  `as` para callar errores, tipos con `import type { ... }`.
+
+## Lab 3 (cerrado)
+Vite montado a mano (03-Bundling/lab-bundling). Estas reglas NO aplican al
+lab 4 salvo lo indicado en "Reglas (lab 4)"; se conservan como referencia.
+
+### Stack (lab 3)
 - Vite 8 (Rolldown + Oxc; no esbuild ni Rollup).
 - Proyecto montado a mano desde un `package.json` vacío.
 - Sass con `sass-embedded`, TypeScript, React 19, `vite-plugin-checker`.
 
-## Reglas (lab 3)
+### Reglas (lab 3)
 - Nada de `npm create vite`: el proyecto se monta a mano.
 - Sass: `@use "variables" as *;`, nunca `@import`.
 - Sólo `sass-embedded` (ni `sass`, ni `node-sass`, ni loaders): Vite ya sabe
@@ -52,6 +96,11 @@ proyecto vive en 03-Bundling/lab-bundling.
 - Lab 3: un obligatorio cada vez. Después de cada uno, explícame cada línea de
   configuración nueva (qué hace, si actúa en desarrollo, en build o en los
   dos) y lista las comprobaciones que tengo que hacer yo en el navegador.
+- Lab 4: un obligatorio cada vez. Después de cada uno, explícame cada
+  componente y cada hook: qué es estado y qué se calcula, quién es dueño de
+  cada dato, cuándo se ejecuta cada efecto y qué limpia, y lista las
+  comprobaciones 🔎 que tengo que hacer en el navegador y las preguntas 📝
+  que tocan para el README.
 - Si dudas entre dos enfoques, pregúntame antes de elegir.
 - Todas las soluciones deben funcionar con DevContainers. No instales dependencies en local sin confirmar antes.
 - El proyecto está estructurado en laboratorios entregables dentro de cada carpeta (lab.md) que irán desarrollandose hasta el producto final. Cada uno es una fase distinta del proyecto. No modifiques varios entregables a la vez.

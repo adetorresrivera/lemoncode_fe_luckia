@@ -19,7 +19,8 @@
   // subshell (paréntesis), así el siguiente parte otra vez de la raíz del repo.
   // El lab 3 se monta a mano desde un package.json vacío: hasta que exista
   // (obligatorio 1) se salta, en vez de hacer fallar la creación del contenedor.
-  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi",
+  // Lab 4: parte de una copia de la demo 02-react, que ya trae package.json.
+  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi && (cd 04-Frameworks/lab-react && npm install)",
 
   // 5173: npm start / npm run dev (servidor de desarrollo).
   // 4173: npm run preview (sirve la carpeta dist del build).
