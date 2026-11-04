@@ -9,10 +9,12 @@
     "preview": "vite preview --host"
   },
   "dependencies": {
+    "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-router": "^1.170.46",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

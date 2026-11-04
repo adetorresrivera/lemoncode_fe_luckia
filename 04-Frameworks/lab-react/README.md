@@ -39,7 +39,11 @@ npm start
 
 ## Datos de partida
 - `public/coffees.json`: los 6 cafés iniciales (se piden con `fetch` a partir de O3).
-- `src/model.ts`: los tipos `Roast`, `Coffee` y `CoffeeInput`.
+- `src/model.ts`: los tipos `Roast`, `Coffee` y `CoffeeInput` y los nombres
+  en español de cada tueste (`roastLabels`).
+- Desde O6, los cafés que se dan de alta se guardan en `localStorage` con la
+  clave `tueste.coffees` (la lista completa: los 6 iniciales más los nuevos).
+  Si se borra esa clave, al recargar vuelven los 6 cafés de `coffees.json`.
 
 ## Mapa de la aplicación
 Rutas por archivos con TanStack Router: cada fichero de `src/routes` es una
@@ -48,13 +52,41 @@ y no se edita a mano).
 
 | URL | Fichero | Qué muestra |
 | --- | --- | --- |
-| (todas) | `src/routes/__root.tsx` | Layout común: nombre de la tienda, navegación con enlace al catálogo y `<Outlet />` donde se pinta la ruta hija. Su `notFoundComponent` muestra "Página no encontrada" en cualquier URL desconocida (`/teteras`) |
+| (todas) | `src/routes/__root.tsx` | Layout común: nombre de la tienda, navegación con enlaces a "Catálogo" y "Añadir café" y `<Outlet />` donde se pinta la ruta hija. Su `notFoundComponent` muestra "Página no encontrada" en cualquier URL desconocida (`/teteras`) |
 | `/` | `src/routes/index.tsx` | Nada: redirige a `/coffees` en `beforeLoad` |
 | `/coffees` | `src/routes/coffees/index.tsx` | El catálogo: buscador, carrito y tarjetas; el nombre de cada café enlaza a su detalle |
 | `/coffees/$coffeeId` | `src/routes/coffees/$coffeeId.tsx` | El detalle de un café (`/coffees/3`): origen, tueste, precio y notas de cata. "Café no encontrado" si el id no existe o no es un número (`/coffees/999`, `/coffees/abc`) |
+| `/coffees/new` | `src/routes/coffees/new.tsx` | El formulario de alta (`CoffeeForm`, de `src/coffee-form.tsx`): nombre, origen, tueste, precio y notas, validados con el esquema de `src/coffee.schema.ts`. Al guardar abre el detalle del café nuevo. Como `new` es un segmento fijo, el router lo prefiere a `$coffeeId` |
 
 Los datos llegan con `src/api.ts` (`getCoffees` y `getCoffee`), que usan los
-hooks `useCoffees` (catálogo) y `useCoffee(id)` (detalle).
+hooks `useCoffees` (catálogo) y `useCoffee(id)` (detalle). Los dos leen
+primero de `localStorage` y, si no hay nada, piden `/coffees.json`.
+`saveCoffee` (alta) guarda la lista completa en `localStorage`.
+
+### Cómo se escribió `saveCoffee`
+El enunciado de O6 dice "ampliad vuestro api.ts con el `saveCoffee` de la
+demo", pero no tenía el código de esa demo. En lugar de copiarlo, lo
+escribimos a partir de lo que pide el enunciado:
+
+- **Clave propia en `localStorage`** (`tueste.coffees`) con la **lista
+  completa**, no solo los cafés nuevos. Así hay una única fuente de datos
+  después del primer alta.
+- **`getCoffees` lee primero de `localStorage`** y solo si no hay nada (o lo
+  guardado no pasa `isCoffeeList`) pide `/coffees.json`. Como `getCoffee`
+  ya usaba `getCoffees`, el detalle encuentra también los cafés nuevos sin
+  cambiarlo.
+- **Id nuevo = máximo + 1**: `Math.max(0, ...coffees.map((coffee) => coffee.id)) + 1`
+  (el `0` cubre una lista vacía).
+- **Sin mutar la lista**: se guarda `[...coffees, { ...input, id }]`, nunca
+  `coffees.push(...)`.
+- **Retraso simulado de 600 ms** antes de guardar, para que se vea el
+  botón "Guardando…" desactivado mientras `isSubmitting` es `true`.
+- **`signal` opcional** en `getCoffees`: los hooks le pasan el de su
+  `AbortController`, pero `saveCoffee` no tiene nada que cancelar y lo llama
+  sin argumentos.
+- **Se guardan los datos ya transformados por el esquema**: `CoffeeForm`
+  llama a `onSave(coffeeSchema.parse(value))`, porque el `value` de TanStack
+  Form llega sin el `trim`.
 
 ## Estado
 - [ ] O1 · El catálogo con componentes
@@ -109,3 +141,13 @@ Con una URL por pantalla, la pantalla que se ve es parte de la dirección y no d
 **Según la comprobación 5: ¿por qué se ha vaciado el carrito? ¿Dónde tendría que vivir ese estado para no perderse?**
 
 El estado `cart` es un `useState` de `CoffeesPage`, el componente de `src/routes/coffees/index.tsx`, y al navegar a `/coffees/3` el router deja de pintar esa ruta en el `<Outlet />` y pinta la de `src/routes/coffees/$coffeeId.tsx`: `CoffeesPage` se desmonta y React tira su estado. Al volver a `/coffees` se monta un `CoffeesPage` nuevo, que arranca con `useState<Coffee[]>([])` (y vuelve a pedir los cafés). Para que no se pierda, el carrito tendría que vivir en un componente que no se desmonte al navegar, el layout de `src/routes/__root.tsx`, y llegar a las pantallas que lo necesiten con Context (`createContext` + un hook `useCart()`), que es el opcional P1.
+
+### O6
+
+**Ya teníais la interfaz Coffee en TypeScript. ¿Para qué hace falta además un esquema de Zod?**
+
+La interfaz `Coffee` sólo existe en compilación: `tsc` la comprueba sobre el código que escribimos y desaparece del JavaScript que llega al navegador, así que no puede revisar lo que teclea el usuario ni lo que hay guardado en `localStorage`. El esquema de `src/coffee.schema.ts` sí se ejecuta: comprueba en tiempo de ejecución cada valor del formulario (un nombre de sólo espacios, un precio de 0) y da los mensajes en español que pinta `CoffeeForm`, y además lo transforma (el `trim`). Para que las dos descripciones no se separen, el propio fichero comprueba con `Expect<Equals<z.output<typeof coffeeSchema>, CoffeeInput>>` que el esquema produce exactamente un `CoffeeInput`; si no, `tsc` falla con `TS2344: Type 'false' does not satisfy the constraint 'true'`.
+
+**¿Por qué el precio necesita valueAsNumber? ¿Qué pasaría con el esquema si llegase como texto?**
+
+Porque `event.target.value` de un `<input type="number">` es siempre un string (`"12.5"`), mientras que `valueAsNumber` da el número `12.5` (o `NaN` si el campo está vacío), que es lo que espera tanto `CoffeeInput` como `z.number()`. Si llegase como texto, `z.number()` no lo convierte: rechaza `"12.5"` con un issue `invalid_type` cuyo mensaje por defecto es `Invalid input: expected number, received string` (en nuestro esquema sale `Indica el precio`). El formulario nunca sería válido, así que no se podría guardar ningún café.

@@ -1,16 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { Roast } from "../../model";
+import { roastLabels } from "../../model";
 import { useCoffee } from "../../use-coffee";
 
 export const Route = createFileRoute("/coffees/$coffeeId")({
   component: CoffeeDetailPage,
 });
-
-const roastLabels: Record<Roast, string> = {
-  light: "claro",
-  medium: "medio",
-  dark: "oscuro",
-};
 
 // El parámetro de la URL siempre es un string: sólo "1", "2"… son ids válidos.
 // Con Number() a secas, "" daría 0, " 4" daría 4 y "0x4" también 4.

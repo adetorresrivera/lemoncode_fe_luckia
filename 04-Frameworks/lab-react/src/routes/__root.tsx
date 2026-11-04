@@ -14,7 +14,12 @@ function RootLayout() {
           <nav aria-label="Principal">
             <ul className="flex gap-4">
               <li>
-                <Link to="/coffees">Catálogo</Link>
+                <Link to="/coffees" activeOptions={{ exact: true }}>
+                  Catálogo
+                </Link>
+              </li>
+              <li>
+                <Link to="/coffees/new">Añadir café</Link>
               </li>
             </ul>
           </nav>

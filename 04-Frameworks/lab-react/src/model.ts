@@ -11,6 +11,13 @@ export interface Coffee {
 
 export type CoffeeInput = Omit<Coffee, "id">;
 
+// Cómo se nombra cada tueste en pantalla (detalle y formulario).
+export const roastLabels: Record<Roast, string> = {
+  light: "claro",
+  medium: "medio",
+  dark: "oscuro",
+};
+
 const roasts: readonly Roast[] = ["light", "medium", "dark"];
 
 function isRoast(value: unknown): value is Roast {
