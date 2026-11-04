@@ -12,7 +12,12 @@ export function CoffeeDetailContainer({ coffeeId }: CoffeeDetailContainerProps) 
   const { coffee, loading, error } = useCoffee(coffeeId);
 
   if (loading) {
-    return <LoadingMessage />;
+    return (
+      <>
+        <h1>Detalle del café</h1>
+        <LoadingMessage />
+      </>
+    );
   }
 
   if (error !== null) {
