@@ -74,3 +74,13 @@ Porque se deduce entero de `cart`: en `src/app.tsx` se calcula en cada render co
 **¿Por qué la petición va dentro de un useEffect y no directamente en el cuerpo del componente? ¿Qué significa el [] del final?**
 
 El cuerpo de `App` se ejecuta en cada render y tiene que ser puro: un `fetch` ahí lanzaría una petición nueva en cada render, y como al llegar la respuesta llamamos a `setCoffees`, que provoca otro render, pediríamos `/coffees.json` en bucle sin fin; `useEffect` saca la petición del render y la ejecuta después de que React pinte. El `[]` es la lista de dependencias vacía: el efecto no depende de ningún valor del componente, así que sólo se ejecuta al montar `App` (y su limpieza, `controller.abort()`, al desmontarlo), no cuando cambian `cart` o `query`. Con `<StrictMode>`, en desarrollo React monta, desmonta y vuelve a montar el componente: la limpieza aborta la primera petición (en Network sale cancelada y en el `catch` la ignoramos porque `controller.signal.aborted` es `true`) y sólo la segunda llega a cambiar el estado.
+
+### O4
+
+**Si dos componentes distintos llaman a useCoffees(), ¿comparten los mismos datos o cada uno tiene los suyos? ¿Cuántas peticiones se hacen?**
+
+Cada uno tiene los suyos: un custom hook (`src/use-coffees.ts`) sólo reutiliza la lógica, y cada llamada crea sus propios `useState` y su propio `useEffect` dentro del componente que lo llama, igual que si hubiéramos copiado el código en los dos. Por eso en Network se ven dos peticiones a `/coffees.json` (una por componente) en el build de producción. En desarrollo se ven cuatro: `<StrictMode>` monta, desmonta y vuelve a montar cada componente, así que cada uno lanza una petición que su limpieza (`controller.abort()`) cancela y otra que sí termina.
+
+**¿Por qué el foco se hace con una ref y no con un estado?**
+
+Porque poner el foco no es algo que se pinte: es una orden imperativa al nodo del DOM (`searchRef.current?.focus()`), y `useRef` nos da acceso a ese `<input>` sin provocar ningún render. Con un estado (`const [focused, setFocused] = useState(false)`) tendríamos que forzar un render que no cambia nada en pantalla y luego un `useEffect` que, al final, necesitaría igualmente el nodo para llamar a `.focus()`; además, el estado se quedaría a `true` cuando el usuario saliera del campo y un segundo clic en "Buscar" ya no haría nada.
