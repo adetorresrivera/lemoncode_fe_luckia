@@ -200,3 +200,27 @@ motivo es el mismo texto que en el GET sin CORS, y despista porque CORS sí
 está activado. El 406, que es la causa, no sale en la consola; hay que
 buscarlo en Network o en el log del servidor. El README marca ahora qué
 mensaje está copiado del navegador y cuál sigue deducido (el del GET).
+
+## 8 · Un texto de la página que no cuadraba con el código
+
+### Prompt
+
+"main.ts, cuatro botones, cada uno mostrando el resultado en la página (una
+zona con aria-live="polite") además de en consola" (prompt 4 de
+`prompts.md`).
+
+### Qué me dio
+
+En `index.html`, el párrafo de arriba decía "Probar CRUD escribe sólo en la
+consola; los botones de O4, también aquí debajo". Pero en el mismo cambio,
+`main.ts` pasó a registrar los cinco botones con un mismo `onClick`, que
+ante cualquier error lo escribe también en la zona `aria-live`. Así que, si
+Probar CRUD fallaba, el error sí salía en la página.
+
+### Qué corregí y por qué
+
+Lo vi al repasar `onClick` antes de redactar el README. Cambié el texto a
+"Probar CRUD escribe sus pasos en la consola; los botones de O4 (y cualquier
+error) salen también aquí debajo" y volví a construir. Es la primera frase
+que lee quien abre la página para hacer las comprobaciones: si dice que algo
+no sale en pantalla y luego sale, despista justo cuando hay un error.

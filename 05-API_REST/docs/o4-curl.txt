@@ -1,0 +1,42 @@
+# O4 · GET /api/nope (la ruta inexistente de "Cargar con fallo")
+# 2026-11-04 16:09 UTC. Servidor sin CORS (npm run dev). Cuerpos completos.
+
+## a) Con Accept: application/json (lo que manda request)
+
+$ curl -s -i -H "Accept: application/json" http://localhost:3000/api/nope
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+Content-Type: text/html; charset=utf-8
+Content-Length: 147
+Date: Wed, 04 Nov 2026 16:09:31 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/nope</pre>
+</body>
+</html>
+
+
+## b) Sin Accept (curl manda */*)
+
+$ curl -s -i http://localhost:3000/api/nope
+HTTP/1.1 406 Not Acceptable
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 26
+ETag: W/"1a-fX47ke7NTmnIbAjYBIBUoJWqdg4"
+Date: Wed, 04 Nov 2026 16:09:31 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Not Acceptable"}
+

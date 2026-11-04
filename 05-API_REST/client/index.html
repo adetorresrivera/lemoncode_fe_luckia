@@ -9,8 +9,16 @@
   <body>
     <main>
       <h1>API REST · Hoteles</h1>
-      <p>Los resultados salen en la consola (F12 → Console) y las peticiones en Network.</p>
-      <button id="test-crud" type="button">Probar CRUD</button>
+      <p>Las peticiones se ven en Network (F12). Probar CRUD escribe sus pasos en la consola; los botones de O4 (y cualquier error) salen también aquí debajo.</p>
+      <div class="buttons">
+        <button id="test-crud" type="button">Probar CRUD</button>
+        <button id="load-all" type="button">Cargar todo</button>
+        <button id="load-serial" type="button">Cargar en serie</button>
+        <button id="load-failing" type="button">Cargar con fallo</button>
+        <button id="reload" type="button">Recargar</button>
+      </div>
+      <h2>Resultado</h2>
+      <pre id="result" aria-live="polite">Pulsa un botón.</pre>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

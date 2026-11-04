@@ -12,3 +12,16 @@ button:focus-visible {
   outline: 3px solid #1a56db;
   outline-offset: 2px;
 }
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* pre-wrap: respeta los saltos de línea del resultado pero parte las líneas
+   largas (los mensajes de error llevan la URL entera). */
+#result {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

@@ -146,7 +146,8 @@ ventana: `Remove-Item Env:USE_CORS`).
 │   └── front/          build del cliente (estáticos sin CORS), ignorado en git
 └── client/             cliente TypeScript + Vite
     ├── .env            VITE_API_BASE (URL de la API, no secreta)
-    ├── src/            main.ts (botones), hotels.api.ts (request<T> y el CRUD),
+    ├── src/            main.ts (botones), hotels.api.ts (request<T>, el CRUD,
+    │                   getCities y getNope),
     │                   vite-env.d.ts (tipos de import.meta.env)
     └── public/         favicon e iconos
 ```
@@ -544,6 +545,152 @@ origen.
   listener en `main.ts`. Ni rastro del 406: para el código JS es igual que un
   error de red.
 
+## O4 · Varias peticiones
+
+Se prueba en el modo de O2: servidor sin `USE_CORS`, `npm run build` en
+`client` y http://localhost:3000. Hay cuatro botones nuevos junto a
+**Probar CRUD**. Cada uno escribe su resultado en la página (un
+`<pre id="result" aria-live="polite">`, que el lector de pantalla anuncia al
+cambiar) y en la consola.
+
+En [hotels.api.ts](client/src/hotels.api.ts) hay tres cosas nuevas:
+
+- `City` (`id`, `name`: lo que trae `GET /api/cities`, ver
+  [docs/o1-curl.txt](docs/o1-curl.txt)) y `getCities()`.
+- `getHotels(signal?: AbortSignal)`. `request` no ha cambiado de firma: la
+  señal le llega en `options.signal`, porque `RequestInit` ya la tiene, y el
+  `...options` se la pasa a `fetch`. Las llamadas de O2 (`getHotels()`)
+  siguen funcionando igual.
+- `getNope()`: pide `/api/nope` pasando por `request`, así que el 404 sale con
+  el mismo error que cualquier otro. `request` sigue siendo privado:
+  exportarlo permitiría a `main.ts` pedir cualquier ruta con sus propias
+  cabeceras, y `hotels.api.ts` dejaría de ser el único sitio que habla con
+  la API.
+
+Lo que responde `/api/nope` (curl, en [docs/o4-curl.txt](docs/o4-curl.txt)):
+con `Accept: application/json`, **404** `Not Found` con un **HTML** de
+Express (`<pre>Cannot GET /api/nope</pre>`), no JSON. Sin `Accept`,
+**406** `{"error":"Not Acceptable"}`: `checkContentTypeJSON` se ejecuta en
+`/api` antes de buscar la ruta. Como `request` lanza en cuanto ve
+`!response.ok`, no llega a intentar leer ese HTML como JSON.
+
+### Los botones
+
+| Botón | Peticiones | Qué enseña |
+| --- | --- | --- |
+| **Cargar todo** | `GET /api/hotels` y `GET /api/cities` a la vez, con `Promise.all` | `10 hoteles, 5 ciudades` y el tiempo |
+| **Cargar en serie** | las mismas dos, `await getHotels()` y después `await getCities()` | lo mismo, para comparar el tiempo |
+| **Cargar con fallo** | 1) hoteles, ciudades y `/api/nope` con `Promise.all`; 2) las tres otra vez con `Promise.allSettled` | 1) sólo el error; 2) los dos que van bien y el que no, con su motivo |
+| **Recargar** | `GET /api/hotels` con un `AbortController`; cada clic aborta el anterior | `Recargar #n` con los hoteles y el tiempo de la última |
+
+Las dos peticiones de **Cargar todo** salen al **construir** el array
+(`[getHotels(), getCities()]`): llamar a la función ya hace el `fetch`.
+`Promise.all` no lanza nada, sólo espera. En **Cargar en serie**,
+`getCities()` no se llama hasta que el `await getHotels()` ha terminado.
+
+Por la misma razón, **Cargar con fallo** escribe el array dos veces y no lo
+guarda en una variable "para luego". Con
+`const requests = [getHotels(), getCities(), getNope()]` arriba del todo, las
+tres peticiones saldrían en ese momento, y el `allSettled` reutilizaría las
+mismas promesas, ya terminadas, sin hacer peticiones nuevas. Para tener
+peticiones que se lanzan más tarde hay que guardar funciones
+(`[() => getHotels(), …]`). Aquí no hace falta: cada versión lanza las suyas
+en la línea en que las espera.
+
+### Tiempos
+
+Medidos con un script de Node (`fetch` y `performance.now()` globales, como
+en el navegador) contra el servidor arrancado esa misma tarde y sin datos
+cambiados (10 hoteles, 5 ciudades). Se hicieron 20 ejecuciones de cada
+versión, alternadas (paralelo, serie, paralelo…) para que las dos sufran
+igual cualquier cambio de carga de la máquina, y antes una de calentamiento
+de cada una, que no cuenta (la primera abre la conexión). Cada ejecución
+hace las dos peticiones con `Accept: application/json` y lee el JSON, como
+el cliente. Salida completa: [docs/o4-tiempos.txt](docs/o4-tiempos.txt).
+
+| Versión | Mediana | Mínimo | Máximo |
+| --- | --- | --- | --- |
+| En paralelo (`Promise.all`) | 2,32 ms | 1,35 ms | 4,88 ms |
+| En serie (`await` + `await`) | 3,19 ms | 1,53 ms | 5,22 ms |
+
+La diferencia es de menos de un milisegundo, porque en `localhost` casi no
+hay nada que esperar. No hay red de por medio (ni latencia ni ancho de
+banda que repartir), la conexión ya está abierta (keep-alive) y el servidor
+responde desde memoria. Cada petición tarda uno o dos milisegundos, y buena
+parte de ese tiempo lo pasa el cliente leyendo JSON, que es trabajo que no
+se solapa. Además, el servidor es un solo proceso de Node: en paralelo, las
+dos peticiones llegan a la vez, pero las atiende una detrás de otra (son
+microsegundos). Por eso la serie no tarda el doble, sino algo más de 1,3
+veces.
+
+Con una red lenta todo cambia, porque lo que domina es la **espera**: cada
+petición pasa cientos de milisegundos viajando. Las esperas en serie se
+**suman**, y en paralelo se **solapan**, así que cuenta sólo la más lenta.
+Si cada una tardase 500 ms, serían unos 1000 ms en serie y unos 500 ms en
+paralelo. En Network, con Slow 4G, se ve en la columna Waterfall (captura
+opcional `o4-waterfall.png`).
+
+### Promise.all y Promise.allSettled ante el 404
+
+En la página, tras pulsar **Cargar con fallo**:
+
+```
+Cargar con fallo
+1) Promise.all
+   → catch: GET http://localhost:3000/api/nope → 404 Not Found
+2) Promise.allSettled
+   ✔ hoteles: 10
+   ✔ ciudades: 5
+   ✘ /api/nope: GET http://localhost:3000/api/nope → 404 Not Found
+```
+
+- **`Promise.all`** rechaza en cuanto rechaza una, con el motivo de esa, y
+  nunca llega a la línea que cuenta hoteles y ciudades. Los datos de las
+  dos que han ido bien se pierden. Pero esas peticiones **no se cancelan**:
+  en Network, `hotels` y `cities` acaban con 200 aunque el código ya no las
+  espere. `Promise.all` no aborta nada; para eso habría que pasarles a las
+  tres la misma señal y abortarla en el `catch`.
+- **`Promise.allSettled`** espera a las tres y nunca rechaza. Devuelve un
+  `PromiseSettledResult` por petición, en el mismo orden:
+  `{ status: "fulfilled", value }` o `{ status: "rejected", reason }`.
+  TypeScript sabe el tipo de cada posición (`value` es `Hotel[]` en la
+  primera y `City[]` en la segunda), y `describe` mira el `status` antes de
+  tocar `value` o `reason`.
+
+En Network salen seis peticiones: `hotels` 200, `cities` 200 y `nope` 404
+(en rojo), dos veces.
+
+### La cancelación (Recargar)
+
+Es el patrón "Cancelling Previous Requests" de la demo 05. El controlador de
+la petición en curso vive **fuera** de la función (`reloadController`),
+para que el siguiente clic lo encuentre:
+
+1. Cada clic hace primero `reloadController?.abort()`, que aborta la
+   petición anterior si todavía está en marcha. Si ya terminó, no pasa nada.
+2. Crea un `AbortController` nuevo, lo guarda como el actual y llama a
+   `getHotels(controller.signal)`.
+3. La petición abortada rechaza en el `await` con un `DOMException` de
+   nombre `AbortError` (comprobado en Node: `e instanceof DOMException` es
+   `true` y `e.name` es `"AbortError"`). `isAbortError` lo reconoce sin `as`
+   (`error instanceof DOMException && error.name === "AbortError"`). Esa
+   rama sólo hace `console.info("Recargar #n: cancelada…")` y `return`: ni
+   error en la página ni `console.error`. Cualquier otro error se relanza y
+   lo enseña `onClick`.
+4. En el `finally`, el controlador se borra sólo si sigue siendo el suyo.
+   Si ya hay otra petición en curso, el actual es el de esa, y no se toca.
+
+Sólo se pinta la última porque las anteriores nunca llegan a la línea que
+pinta: rechazan con el `AbortError`. Una petición que ya ha terminado no se
+puede abortar, pero tampoco hace falta. Desde que llega su JSON hasta que
+pinta, todo son continuaciones de `await` (microtareas), y un clic es un
+evento que espera a que terminen. Así que, si la anterior ya ha pintado, la
+nueva la pisa al acabar. Cada resultado lleva el número de clic
+(`Recargar #5`) para que se vea cuál ha ganado.
+
+En Network, con Slow 4G y cinco clics seguidos: cuatro `hotels` con Status
+**(canceled)** y la quinta con 200.
+
 ## Respuestas
 
 ### O1
@@ -723,6 +870,66 @@ sin llamar a `next()`, y `cors()` nunca llega a contestarlo (con el
 `Accept` puesto a mano, el mismo OPTIONS da 204: contraprueba c2 de
 [docs/o3-curl.txt](docs/o3-curl.txt)). Arreglarlo es D1.
 
+### O4
+
+> En una pantalla que necesita hoteles y ciudades para funcionar, ¿usaríais
+> Promise.all o Promise.allSettled? ¿Y en un panel con varios bloques
+> independientes (el tiempo, las noticias, la bolsa)?
+
+**`Promise.all`** para la pantalla que necesita las dos cosas. Sin hoteles o
+sin ciudades no se puede pintar nada útil, así que un fallo cualquiera
+significa "la pantalla no se puede cargar", y es lo que hace `Promise.all`:
+rechaza a la primera, con un solo error, y se enseña un único mensaje.
+Cuando todo va bien, devuelve directamente `[hotels, cities]` con sus tipos,
+sin mirar `status` uno por uno. Con `allSettled` habría que comprobar las
+dos y, si falla una, tratarla igual que si fallasen todas: el mismo
+resultado, con más código. (Las otras peticiones siguen en marcha aunque
+`Promise.all` ya haya rechazado; si importase, se les pasaría la misma
+señal y se abortarían en el `catch`).
+
+**`Promise.allSettled`** para el panel de bloques independientes. Que fallen
+las noticias no es motivo para dejar sin el tiempo y la bolsa: cada bloque
+pinta su dato o su propio error. Es lo que se ve en **Cargar con fallo**:
+con `Promise.all`, el 404 de `/api/nope` se lleva por delante los hoteles y
+las ciudades, que habían llegado bien; con `allSettled` se ven los dos
+resultados y el error.
+
+> ¿Dónde habéis usado ya un AbortController en este curso? (Laboratorio 4,
+> O3). ¿Para qué servía allí?
+
+En el lab 4 (Tueste, React), en O3, para cargar los cafés en un
+`useEffect`. En el commit de O3 (`L4 - O3`, `e70073a`) estaba en
+`04-Frameworks/lab-react/src/app.tsx`. En la línea 14 se crea el
+controlador, en la 18 su señal se pasa al `fetch("/coffees.json", { signal:
+controller.signal })`, en la 29 el `catch` ignora el error si
+`controller.signal.aborted`, y en la 38 la limpieza del efecto es
+`return () => controller.abort()`. Hoy, tras los pods de O7, el mismo código
+está en
+[hooks.ts:17](../04-Frameworks/lab-react/src/core/coffees/hooks.ts#L17)
+(`new AbortController()`),
+[hooks.ts:24](../04-Frameworks/lab-react/src/core/coffees/hooks.ts#L24)
+(el `if (controller.signal.aborted) return;`) y
+[hooks.ts:33](../04-Frameworks/lab-react/src/core/coffees/hooks.ts#L33)
+(`return () => controller.abort();`), con la señal llegando al `fetch` en
+[api.ts:21](../04-Frameworks/lab-react/src/core/coffees/api.ts#L21).
+
+Allí servía para la **limpieza del efecto**. Si el componente se desmonta
+antes de que llegue la respuesta, se aborta la petición y no se hace
+`setCoffees` sobre un componente que ya no está. El caso que se veía en
+Network era el de `<StrictMode>` en desarrollo: React monta, desmonta y
+vuelve a montar, así que la primera petición salía *(canceled)* y sólo la
+segunda cambiaba el estado. En `useCoffee`
+([hooks.ts:59-74](../04-Frameworks/lab-react/src/core/coffees/hooks.ts#L59-L74),
+desde O7), con `[id]` como dependencia, es además lo mismo que **Recargar**:
+si cambia el id antes de que llegue el café anterior, la limpieza aborta esa
+petición y sólo cuenta la última.
+
+La diferencia está en cómo se reconoce la cancelación. En React, el `catch`
+mira `controller.signal.aborted`, el controlador de ese mismo efecto. Aquí
+se mira el error (`instanceof DOMException` y `name === "AbortError"`), que
+dice por qué ha fallado esta petición sin depender de qué controlador hay
+guardado en la variable de fuera.
+
 ## Capturas
 
 | Captura | Qué se ve |
@@ -730,6 +937,8 @@ sin llamar a `next()`, y `cors()` nunca llega a contestarlo (con el
 | *(Opcional)* [docs/o2-network-crud.png](docs/o2-network-crud.png) | Network filtrado por Fetch/XHR tras pulsar Probar CRUD: GET, POST 201, GET, PUT, DELETE 204, GET y GET |
 | [docs/o3-cors-error.png](docs/o3-cors-error.png) | Consola en localhost:5173 con el servidor sin CORS: el fetch a localhost:3000 bloqueado por la política CORS |
 | [docs/o3-options-406.png](docs/o3-options-406.png) | Network con USE_CORS=yes: el preflight OPTIONS a /api/hotels responde 406, y el POST no llega a enviarse |
+| [docs/o4-canceled.png](docs/o4-canceled.png) | Network con Slow 4G tras pulsar Recargar cinco veces: cuatro peticiones (canceled) y la última con 200 |
+| *(Opcional)* [docs/o4-waterfall.png](docs/o4-waterfall.png) | Waterfall de Cargar todo: las dos peticiones empiezan a la vez; en serie, la segunda empieza al acabar la primera |
 
 ![Network filtrado por Fetch/XHR tras pulsar Probar CRUD: GET, POST 201, GET, PUT, DELETE 204, GET y GET](docs/o2-network-crud.png)
 
@@ -737,13 +946,17 @@ sin llamar a `next()`, y `cors()` nunca llega a contestarlo (con el
 
 ![Network con USE_CORS=yes: el preflight OPTIONS a /api/hotels responde 406, y el POST no llega a enviarse](docs/o3-options-406.png)
 
+![Network con Slow 4G tras pulsar Recargar cinco veces: cuatro peticiones (canceled) y la última con 200](docs/o4-canceled.png)
+
+![Waterfall de Cargar todo: las dos peticiones empiezan a la vez; en serie, la segunda empieza al acabar la primera](docs/o4-waterfall.png)
+
 ## Checklist
 
 ### Obligatorios
 - [x] O1 · Explorar la API antes de programar
 - [x] O2 · Un cliente con fetch
 - [x] O3 · Llamar desde otro origen: CORS
-- [ ] O4 · Gestionar varias peticiones
+- [x] O4 · Gestionar varias peticiones
 - [ ] O5 · README + bitácora de IA
 
 ### Opcionales

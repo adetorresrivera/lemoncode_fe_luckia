@@ -11,6 +11,13 @@ export interface Hotel {
 
 export type NewHotel = Omit<Hotel, "id">;
 
+// GET /api/cities devuelve { id, name } (docs/o1-curl.txt); en O4 sólo se
+// cuentan, pero el id hace falta para pintarlas en una lista.
+export interface City {
+  id: string;
+  name: string;
+}
+
 // URL base absoluta, de client/.env (O3): http://localhost:3000/api.
 // Desde el build servido en localhost:3000 es el mismo origen; desde
 // `npm run dev` (localhost:5173) es otro origen, y entra en juego CORS.
@@ -20,6 +27,10 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 // opcional porque a veces falta: GET /api/hotels/999 responde 200 con {}.
 type Envelope<T> = { data?: T };
 
+// La señal para cancelar (O4) entra por options.signal: RequestInit ya la
+// tiene, y el ...options de abajo la pasa a fetch tal cual. Si se aborta,
+// fetch (o response.json(), si ya estaba leyendo el cuerpo) rechaza con un
+// DOMException de nombre "AbortError", que sale de aquí sin tocar.
 async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -68,9 +79,24 @@ function requireData<T>(data: T | undefined, what: string): T {
   return data;
 }
 
-export async function getHotels(): Promise<Hotel[]> {
-  const hotels = await request<Hotel[]>("/hotels");
+// signal es opcional: las llamadas de O2 (getHotels()) siguen igual.
+export async function getHotels(signal?: AbortSignal): Promise<Hotel[]> {
+  const hotels = await request<Hotel[]>("/hotels", { signal });
   return requireData(hotels, `GET ${API_BASE}/hotels`);
+}
+
+export async function getCities(): Promise<City[]> {
+  const cities = await request<City[]>("/cities");
+  return requireData(cities, `GET ${API_BASE}/cities`);
+}
+
+// Sólo para el botón "Cargar con fallo" (O4): una ruta que no existe. Pasa
+// por request como las demás, así que el 404 sale con el mismo error
+// ("GET http://localhost:3000/api/nope → 404 Not Found"). Nunca resuelve con
+// datos: el cuerpo del 404 es HTML de Express, y request lanza antes de
+// intentar leerlo.
+export async function getNope(): Promise<unknown> {
+  return request<unknown>("/nope");
 }
 
 // El servidor no devuelve 404: un hotel que no existe es un 200 con {}, sin
