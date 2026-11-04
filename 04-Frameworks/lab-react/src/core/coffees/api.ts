@@ -3,7 +3,6 @@ import { isCoffeeList } from "./model";
 
 // Clave propia en localStorage: guarda la lista completa (los 6 iniciales + los nuevos).
 const STORAGE_KEY = "tueste.coffees";
-// Retraso simulado al guardar, para que se vea el botón desactivado.
 const SAVE_DELAY_MS = 600;
 
 // undefined = no hay nada guardado (o lo guardado no es una lista de cafés válida).
@@ -38,11 +37,36 @@ export async function getCoffee(id: number, signal: AbortSignal): Promise<Coffee
   return coffees.find((coffee) => coffee.id === id);
 }
 
-export async function saveCoffee(input: CoffeeInput): Promise<Coffee> {
-  await new Promise<void>((resolve) => setTimeout(resolve, SAVE_DELAY_MS));
+// Retraso simulado: así se ve el botón "Guardando…" desactivado.
+function wait(ms: number): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+function storeCoffees(coffees: Coffee[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(coffees));
+}
+
+// Alta: id nuevo = máximo + 1 (el 0 cubre una lista vacía) y se añade al final.
+export async function createCoffee(input: CoffeeInput): Promise<Coffee> {
+  await wait(SAVE_DELAY_MS);
   const coffees = await getCoffees();
   const id = Math.max(0, ...coffees.map((coffee) => coffee.id)) + 1;
   const coffee: Coffee = { ...input, id };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...coffees, coffee]));
+  storeCoffees([...coffees, coffee]);
   return coffee;
+}
+
+// Edición: el café conserva su id y ocupa el mismo sitio en la lista.
+// map devuelve una lista nueva; los demás cafés son las mismas referencias.
+export async function updateCoffee(id: number, input: CoffeeInput): Promise<Coffee> {
+  await wait(SAVE_DELAY_MS);
+  const coffees = await getCoffees();
+  // Si el café ya no existe (lo borraron en otra pestaña), no creamos uno nuevo
+  // sin avisar: el formulario enseña su mensaje de "No se ha podido guardar".
+  if (!coffees.some((coffee) => coffee.id === id)) {
+    throw new Error(`No existe el café ${id}`);
+  }
+  const updated: Coffee = { ...input, id };
+  storeCoffees(coffees.map((coffee) => (coffee.id === id ? updated : coffee)));
+  return updated;
 }

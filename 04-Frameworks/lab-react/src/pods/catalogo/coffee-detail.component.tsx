@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { Coffee } from "../../core/coffees/model";
 import { roastLabels } from "../../core/coffees/model";
 import { BackToCatalogLink } from "./components/back-to-catalog-link";
@@ -22,6 +23,12 @@ export function CoffeeDetail({ coffee }: CoffeeDetailProps) {
           <dt className="font-semibold">Notas de cata</dt>
           <dd>{coffee.notes}</dd>
         </dl>
+        {/* Sólo un enlace a la ruta de edición: este pod no importa el formulario. */}
+        <p>
+          <Link to="/coffees/$coffeeId/edit" params={{ coffeeId: String(coffee.id) }}>
+            Editar café
+          </Link>
+        </p>
       </article>
     </>
   );

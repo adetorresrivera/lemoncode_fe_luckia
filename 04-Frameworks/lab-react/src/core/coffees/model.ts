@@ -53,3 +53,14 @@ export function isCoffeeList(value: unknown): value is Coffee[] {
 export function parseCoffeeId(value: string): number {
   return /^[1-9]\d*$/.test(value) ? Number(value) : Number.NaN;
 }
+
+// Los valores que edita el formulario: todo menos el id, que no se toca.
+export function toCoffeeInput(coffee: Coffee): CoffeeInput {
+  return {
+    name: coffee.name,
+    origin: coffee.origin,
+    roast: coffee.roast,
+    price: coffee.price,
+    notes: coffee.notes,
+  };
+}

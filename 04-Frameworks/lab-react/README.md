@@ -39,31 +39,42 @@ npm start
 
 ## Datos de partida
 - `public/coffees.json`: los 6 cafés iniciales (se piden con `fetch` a partir de O3).
-- `src/model.ts`: los tipos `Roast`, `Coffee` y `CoffeeInput` y los nombres
-  en español de cada tueste (`roastLabels`).
+- `src/core/coffees/model.ts` (hasta O6, `src/model.ts`): los tipos `Roast`,
+  `Coffee` y `CoffeeInput` y los nombres en español de cada tueste
+  (`roastLabels`).
 - Desde O6, los cafés que se dan de alta se guardan en `localStorage` con la
   clave `tueste.coffees` (la lista completa: los 6 iniciales más los nuevos).
-  Si se borra esa clave, al recargar vuelven los 6 cafés de `coffees.json`.
+  Desde O7 también se guardan ahí los cafés editados. Si se borra esa clave,
+  al recargar vuelven los 6 cafés de `coffees.json`.
 
 ## Mapa de la aplicación
 Rutas por archivos con TanStack Router: cada fichero de `src/routes` es una
 ruta y el plugin de Vite genera con ellos `src/routeTree.gen.ts` (se versiona
 y no se edita a mano).
 
-| URL | Fichero | Qué muestra |
-| --- | --- | --- |
-| (todas) | `src/routes/__root.tsx` | Layout común: nombre de la tienda, navegación con enlaces a "Catálogo" y "Añadir café" y `<Outlet />` donde se pinta la ruta hija. Su `notFoundComponent` muestra "Página no encontrada" en cualquier URL desconocida (`/teteras`) |
-| `/` | `src/routes/index.tsx` | Nada: redirige a `/coffees` en `beforeLoad` |
-| `/coffees` | `src/routes/coffees/index.tsx` | El catálogo: buscador, carrito y tarjetas; el nombre de cada café enlaza a su detalle |
-| `/coffees/$coffeeId` | `src/routes/coffees/$coffeeId.tsx` | El detalle de un café (`/coffees/3`): origen, tueste, precio y notas de cata. "Café no encontrado" si el id no existe o no es un número (`/coffees/999`, `/coffees/abc`) |
-| `/coffees/new` | `src/routes/coffees/new.tsx` | El formulario de alta (`CoffeeForm`, de `src/coffee-form.tsx`): nombre, origen, tueste, precio y notas, validados con el esquema de `src/coffee.schema.ts`. Al guardar abre el detalle del café nuevo. Como `new` es un segmento fijo, el router lo prefiere a `$coffeeId` |
+Desde O7 cada ruta sólo lee sus parámetros y pinta una **escena**
+(`src/scenes`). La escena compone la pantalla con los **pods**
+(`src/pods/catalogo` y `src/pods/edicion`) y decide adónde se navega.
 
-Los datos llegan con `src/api.ts` (`getCoffees` y `getCoffee`), que usan los
-hooks `useCoffees` (catálogo) y `useCoffee(id)` (detalle). Los dos leen
-primero de `localStorage` y, si no hay nada, piden `/coffees.json`.
-`saveCoffee` (alta) guarda la lista completa en `localStorage`.
+| URL | Fichero de ruta | Escena | Qué muestra |
+| --- | --- | --- | --- |
+| (todas) | `src/routes/__root.tsx` | — | El layout `src/layouts/app-layout.tsx`: nombre de la tienda, navegación con "Catálogo" y "Añadir café" y `<Outlet />`. Su `notFoundComponent` muestra "Página no encontrada" en cualquier URL desconocida (`/teteras`) |
+| `/` | `src/routes/index.tsx` | — | Nada: redirige a `/coffees` en `beforeLoad` |
+| `/coffees` | `src/routes/coffees/index.tsx` | `catalog.scene.tsx` | El catálogo (`CoffeeListContainer`, pod catálogo): buscador, carrito y tarjetas. El nombre de cada café enlaza a su detalle |
+| `/coffees/$coffeeId` | `src/routes/coffees/$coffeeId/index.tsx` | `coffee-detail.scene.tsx` | El detalle de un café (`/coffees/3`, `CoffeeDetailContainer`, pod catálogo): origen, tueste, precio, notas de cata y el enlace "Editar café". Muestra "Café no encontrado" si el id no existe o no es un número (`/coffees/999`, `/coffees/abc`) |
+| `/coffees/new` | `src/routes/coffees/new.tsx` | `new-coffee.scene.tsx` | El formulario vacío (`CoffeeFormContainer` sin `coffeeId`, pod edición). Al guardar se crea un café con id nuevo y se abre su detalle. Como `new` es un segmento fijo, el router lo prefiere a `$coffeeId` |
+| `/coffees/$coffeeId/edit` | `src/routes/coffees/$coffeeId/edit.tsx` | `edit-coffee.scene.tsx` | El mismo formulario con los valores del café (`CoffeeFormContainer` con `coffeeId`). Al guardar se sustituye ese café, que conserva su id, y se vuelve a su detalle. Muestra "Café no encontrado" con `/coffees/999/edit` |
 
-### Cómo se escribió `saveCoffee`
+Los datos viven en `src/core/coffees`, que comparten los dos pods:
+
+- **`api.ts`**: `getCoffees` y `getCoffee` leen primero de `localStorage` y,
+  si no hay nada, piden `/coffees.json`. `createCoffee` (alta) y
+  `updateCoffee` (edición) guardan la lista completa.
+- **`hooks.ts`**: `useCoffees` (catálogo) y `useCoffee(id)` (detalle y
+  edición).
+- **`coffee.schema.ts`**: el esquema de Zod. Lo usan el alta y la edición.
+
+### Cómo se escribió `saveCoffee` (en O7, `createCoffee` y `updateCoffee`)
 El enunciado de O6 dice "ampliad vuestro api.ts con el `saveCoffee` de la
 demo", pero no tenía el código de esa demo. En lugar de copiarlo, lo
 escribimos a partir de lo que pide el enunciado:
@@ -84,6 +95,13 @@ escribimos a partir de lo que pide el enunciado:
 - **`signal` opcional** en `getCoffees`: los hooks le pasan el de su
   `AbortController`, pero `saveCoffee` no tiene nada que cancelar y lo llama
   sin argumentos.
+- **En O7 se separó en dos funciones**: `createCoffee(input)` calcula el id
+  nuevo y añade el café al final, y `updateCoffee(id, input)` sustituye ese
+  café con `coffees.map((coffee) => (coffee.id === id ? updated : coffee))`.
+  Así conserva el id y el sitio en la lista, sin mutar nada. Si el id ya no
+  existe, `updateCoffee` lanza un error en vez de crear un café sin avisar.
+  La otra opción era un `saveCoffee(input, id?)`, pero entonces una sola
+  función tendría dos comportamientos según un parámetro opcional.
 - **Se guardan los datos ya transformados por el esquema**: `CoffeeForm`
   llama a `onSave(coffeeSchema.parse(value))`, porque el `value` de TanStack
   Form llega sin el `trim`.
@@ -151,3 +169,17 @@ La interfaz `Coffee` sólo existe en compilación: `tsc` la comprueba sobre el c
 **¿Por qué el precio necesita valueAsNumber? ¿Qué pasaría con el esquema si llegase como texto?**
 
 Porque `event.target.value` de un `<input type="number">` es siempre un string (`"12.5"`), mientras que `valueAsNumber` da el número `12.5` (o `NaN` si el campo está vacío), que es lo que espera tanto `CoffeeInput` como `z.number()`. Si llegase como texto, `z.number()` no lo convierte: rechaza `"12.5"` con un issue `invalid_type` cuyo mensaje por defecto es `Invalid input: expected number, received string` (en nuestro esquema sale `Indica el precio`). El formulario nunca sería válido, así que no se podría guardar ningún café.
+
+### O7
+
+**Imaginad estos tres cambios: el diseño de la tarjeta de café, la regla de validación del precio y adónde se va después de guardar. ¿En qué fichero haríais cada uno?**
+
+| Cambio | Fichero |
+| --- | --- |
+| El diseño de la tarjeta de café | `src/pods/catalogo/components/coffee-card.tsx` |
+| La regla de validación del precio | `src/core/coffees/coffee.schema.ts` (el campo `price`; vale a la vez para el alta y la edición) |
+| Adónde se va después de guardar | `src/scenes/new-coffee.scene.tsx` (alta) y `src/scenes/edit-coffee.scene.tsx` (edición), en la función que pasan como `onSaved` |
+
+**¿Qué ventaja tiene separar el container del component? ¿Lo haríais en todos los componentes?**
+
+El component sólo recibe props y pinta, así que no sabe de dónde salen los datos. Por ejemplo, `CoffeeDetail` recibe un `coffee` que ya existe seguro, y se puede cambiar su diseño o probarlo con un café de ejemplo sin tocar la carga. El container (`CoffeeDetailContainer`) concentra en un solo sitio el hook, los estados de carga, error y "no encontrado" y la decisión de qué se muestra. No lo haríamos en todos: un componente pequeño sin datos ni lógica, como `BackToCatalogLink` o `LoadingMessage`, partido en dos sólo añadiría un fichero que pasa props sin hacer nada.

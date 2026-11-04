@@ -15,7 +15,6 @@ export function NewCoffeeScene() {
       <p>
         <Link to="/coffees">← Volver al catálogo</Link>
       </p>
-      <h1>Añadir café</h1>
       <CoffeeFormContainer onSaved={goToDetail} />
     </>
   );
