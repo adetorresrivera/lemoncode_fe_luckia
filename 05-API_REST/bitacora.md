@@ -224,3 +224,117 @@ Lo vi al repasar `onClick` antes de redactar el README. Cambié el texto a
 error) salen también aquí debajo" y volví a construir. Es la primera frase
 que lee quien abre la página para hacer las comprobaciones: si dice que algo
 no sale en pantalla y luego sale, despista justo cuando hay un error.
+
+## 9 · El otro mensaje de consola deducido, que tampoco era el de Chrome
+
+### Prompt
+
+"Deduce, a partir de las respuestas de curl del paso 3, el mensaje exacto que
+va a mostrar Chrome en cada caso" (prompt 3 de `prompts.md`). Se corrigió en
+la revisión final: "Si el mensaje de consola de la captura no coincide con el
+del README, corrige el README y apúntalo en la bitácora" (prompt 5).
+
+### Qué me dio
+
+Para el GET sin CORS, el prompt ya traía el mensaje, terminado en *"…is
+present on the requested resource."*. Claude le añadió una frase más: *"If
+an opaque response serves your needs, set the request's mode to 'no-cors' to
+fetch the resource with CORS disabled."*. Además escribió un párrafo que lo
+daba por hecho: "La última frase la añade Chrome cuando la petición es un
+`fetch`".
+
+### Qué corregí y por qué
+
+En la captura `docs/o3-cors-error.png` el mensaje acaba en *"…is present on
+the requested resource."*: esta versión de Chrome no añade esa frase. En la
+entrada 7 ya se había visto que deducir los mensajes de Chrome no funciona,
+pero sólo se corrigió el del POST, que fue el que se vio en el navegador. El
+del GET se quedó marcado como "deducido" y con un párrafo que lo explicaba
+como si fuese seguro. Se cambió por el texto copiado de la captura, junto con
+las dos líneas siguientes, que además prueban algo: `GET … net::ERR_FAILED
+200 (OK)` (la petición llegó y el servidor respondió 200) y la pila del
+`TypeError: Failed to fetch`. El párrafo sobre `mode: "no-cors"` se mantiene,
+pero ya no dice que Chrome lo sugiera: la trampa existe igual.
+
+## 10 · Lo que el README daba por visto en el navegador sin haberlo visto
+
+### Prompt
+
+"Comprueba tú también el experimento del Accept: quita el Accept de request,
+recompila, comprueba con curl qué recibe una petición sin él (406) y qué
+mensaje lanzaría tu Error" y "lo que se ve en Network (los 7 códigos, el
+Payload del POST, el 406 sin Accept)" (prompt 2 de `prompts.md`). Se corrigió
+en la revisión final, que pide "nada que suene bien pero no se pueda enseñar"
+(prompt 5).
+
+### Qué me dio
+
+Una sección "Lo que se ve en Network" escrita como si se hubiese visto: el
+orden de las 7 peticiones, el panel *Response* del DELETE ("This request has
+no response data available") y, sin `Accept`, "en Network sólo sale un GET
+`hotels` 406 (en rojo), y en Console, `Probar CRUD: Error: …`". En O2 Claude
+no tenía navegador: lo comprobado era curl y el build. El pie de
+`o2-network-crud.png` también daba un orden (GET, POST 201, GET, PUT…), y la
+captura está ordenada por la columna *Method*.
+
+### Qué corregí y por qué
+
+Se separó lo que enseña la captura (las 7 peticiones con sus códigos, la
+consola `1 10` … `6 10`, los tamaños) de lo que está probado con curl en
+`docs/o2-curl.txt` (el cuerpo del POST, el 204 sin `Content-Type`, el 406),
+y lo que queda en el navegador se marca como comprobación 🔎 sin captura. Se
+cambió el pie de la captura. Con el mismo criterio se revisó O4: la salida
+de **Cargar con fallo** estaba en el README sin ninguna prueba detrás. Se
+reprodujo con el `hotels.api.ts` real contra un servidor recién arrancado, y
+el log de ese servidor enseñó además que, tras el 404, la petición de
+ciudades sigue y acaba con 200 (`Promise.all` no cancela nada), que antes
+también era sólo una afirmación.
+
+## 11 · Enlaces a números de línea que se quedaron viejos
+
+### Prompt
+
+"'## O3 · CORS': lo que pasa sin CORS y con CORS, enlazando
+docs/o3-curl.txt, los dos mensajes de consola y la explicación del 406"
+(prompt 3 de `prompts.md`). Esa sección enlazó `hotels.api.ts:43`, el `fetch`
+de `request`. En el prompt 4 se añadieron
+`City`, `getCities` y `getNope` a `hotels.api.ts` sin revisar esos enlaces.
+Se vio en la revisión final (prompt 5).
+
+### Qué me dio
+
+Un enlace `[hotels.api.ts:43](client/src/hotels.api.ts#L43)` que, después de
+O4, apunta a un comentario: el `fetch` está ahora en la línea 54.
+
+### Qué corregí y por qué
+
+El enlace apunta ahora a la línea 54. Los textos copiados de la consola
+conservan el `hotels.api.ts:43`, porque es lo que salió en O3, y el README
+dice ahora que esos números son los de aquella versión. En la revisión
+pueden pinchar el enlace: si lleva a un comentario, parece que no se sabe
+dónde está el propio código.
+
+## 12 · Un script de comprobación que no lanzó ninguna petición
+
+### Prompt
+
+"Con el servidor recién arrancado, el recorrido de O2 con curl da los mismos
+códigos que la tabla de O1" (prompt 5 de `prompts.md`).
+
+### Qué me dio
+
+Un script con una función `req` que empezaba por
+`local m=$1 u=$2 d=$3 args=(… -X "$m" …)`. Bash expande todos los argumentos
+de `local` antes de ejecutarlo, así que, cuando se construye `args`, `m`
+todavía está vacía: curl recibió `-X ""` y falló en las siete peticiones. La
+salida fue `1 `, `2  ` y varios `TypeError` de Node al leer `data`.
+
+### Qué corregí y por qué
+
+Se separó en dos `local` (primero `m`, `u` y `d`; después `args`). Antes de
+repetir, se miró el log del servidor: sólo tenía el `GET /` del bucle que
+esperaba a que arrancase, así que ningún POST ni DELETE había llegado y el
+servidor seguía con los datos iniciales. No hizo falta reiniciarlo, y la
+repetición dio `1 10` … `6 10` con 200, 201, 200, 200, 204, 200, 200. Como en
+la entrada 4, con peticiones que cambian datos, antes de repetir un script
+hay que saber qué ha llegado ya al servidor.

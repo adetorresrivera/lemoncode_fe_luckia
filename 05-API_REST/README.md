@@ -7,7 +7,9 @@ CORS y con varias peticiones a la vez.
 ## Cómo arrancarlo
 
 Necesita Node.js 22.12 o superior (lo pide Vite 8: `^20.19.0 || >=22.12.0`).
-El DevContainer usa la imagen `javascript-node:24`.
+El DevContainer usa la imagen `javascript-node:24`. Todas las pruebas de este
+README se hicieron con Node 22.23.4 (`node -v` en el contenedor, creado antes
+de cambiar la imagen); al reconstruirlo se usa la 24.
 
 ### Con DevContainer (recomendado)
 
@@ -129,6 +131,26 @@ construido **deja de estar** en http://localhost:3000, así que se usa el de
 desarrollo (5173). Para volver al modo de O2, se para y se arranca con
 `npm run dev` a secas. (En PowerShell la variable se queda puesta en esa
 ventana: `Remove-Item Env:USE_CORS`).
+
+No hay proxy de Vite: el opcional P2 no está hecho, así que desde
+`localhost:5173` la única forma de que el CRUD llegue a funcionar es arreglar
+el servidor (D1, tampoco hecho). Con `USE_CORS=yes` funcionan los GET, pero el
+POST se queda en el preflight (ver O3).
+
+### Comprobar que se instala y construye desde cero
+
+Lo que se comprobó en O5, sobre una copia hecha con `git archive HEAD` (sólo
+lo que está en git: ni `node_modules`, ni `dist`, ni `front/`):
+
+```bash
+(cd 05-API_REST/hotels-server && rm -rf node_modules dist && npm ci)
+(cd 05-API_REST/client && rm -rf node_modules dist && npm ci && npm run build)
+```
+
+Las dos instalaciones acaban con `found 0 vulnerabilities`, y el build
+(`tsc && vite build`) sale sin errores de tipos y genera
+`dist/assets/index-FFWj7YBn.js`, el mismo fichero que aparece como
+*Initiator* en las capturas de O4.
 
 ## Estructura
 
@@ -367,28 +389,42 @@ Las cabeceras que envió cada petición: `Accept: application/json` en las 7, y
 ### Lo que se ve en Network
 
 En http://localhost:3000, F12 → Network, filtro **Fetch/XHR**, al pulsar
-**Probar CRUD**:
+**Probar CRUD**. Lo que enseña la captura
+[docs/o2-network-crud.png](docs/o2-network-crud.png):
 
-- **7 peticiones**: `hotels` GET 200, `hotels` POST **201**, `<uuid>` GET 200,
-  `<uuid>` PUT 200, `<uuid>` DELETE **204**, `<uuid>` GET 200 y `hotels` GET
-  200. No hay ninguna OPTIONS: es el mismo origen y no hay CORS (eso es O3).
-- **Payload del POST**: *Request Payload*
-  `{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120}`,
-  sin `id`. En *Headers* → *Request Headers*: `Accept: application/json` y
-  `Content-Type: application/json`. En *Response*:
-  `{"data":{…,"id":"<uuid>","created":…,"modified":…}}`.
-- **DELETE**: en *Response* no hay nada ("This request has no response
-  data available"), y en *Response Headers* no hay `Content-Type`.
-- **El GET después del DELETE**: 200, y en *Response* sólo `{}`. Network
-  no lo marca en rojo, aunque el hotel ya no existe.
-- **Sin `Accept`**: se probó quitando de `request` el bloque que lo pone y
-  recompilando. Sin esa cabecera, `fetch` (y curl) mandan `Accept: */*`, y el
-  servidor responde **406** `{"error":"Not Acceptable"}`. El recorrido se para
-  en el primer paso: en Network sólo sale un GET `hotels` **406** (en rojo), y
-  en Console, `Probar CRUD: Error: GET /api/hotels → 406 Not Acceptable`. Ni
-  un `undefined` ni un `1 undefined`. Después se volvió a poner el bloque y
-  se recompiló: el fichero quedó idéntico (`cmp`) y el JS construido vuelve a
-  llevar el `Accept`.
+- **7 peticiones** (`7 requests` al pie de la lista), todas `fetch`: un POST
+  **201**, un PUT 200, un DELETE **204** y cuatro GET 200 (dos a `hotels` y
+  dos a `<uuid>`). En la captura la lista está ordenada por la columna
+  *Method*, no por orden de salida; el orden real es el de la tabla de arriba
+  (y el del log del servidor). No hay ninguna OPTIONS: es el mismo origen y
+  no hay CORS (eso es O3).
+- **Console**, en la misma captura: `1 10`,
+  `2 Hotel Tueste f10b3448-9a83-4e77-ae95-fedf92932fa0`, `3 Hotel Tueste`,
+  `4 95`, `5 null`, `6 10`.
+- **El GET después del DELETE**: 200, y Network no lo marca en rojo, aunque
+  el hotel ya no existe. Se distingue por el tamaño: 0,2 kB (cabeceras y
+  `{}`), frente a los 0,4 kB del GET del hotel recién creado.
+
+Lo siguiente no está en la captura; está comprobado con curl, con las mismas
+cabeceras que pone `request`, en [docs/o2-curl.txt](docs/o2-curl.txt). En
+Network es la comprobación 🔎 de abrir cada petición:
+
+- **Payload del POST**: el cuerpo enviado es
+  `{"name":"Hotel Tueste","city":"Seattle","lowRate":90,"highRate":120}`, sin
+  `id`, con `Accept: application/json` y `Content-Type: application/json`. La
+  respuesta es `{"data":{…,"id":"<uuid>","created":…,"modified":…}}`.
+- **DELETE**: 204 sin cuerpo y sin `Content-Type` en la respuesta.
+- **Sin `Accept`**: en O2 se quitó de `request` el bloque que lo pone y se
+  recompiló. Sin esa cabecera, `fetch` y curl mandan `Accept: */*`, y curl
+  confirma que el servidor responde **406** `{"error":"Not Acceptable"}`. Con
+  esa respuesta, `request` lanza
+  `Error: GET /api/hotels → 406 Not Acceptable` (la URL era relativa en O2) y
+  el `catch` del botón lo saca con `console.error`. El recorrido se para en
+  el primer paso: ni un `undefined` ni un `1 undefined`. Después se volvió a
+  poner el bloque y se recompiló: el fichero quedó idéntico (`cmp`) y el JS
+  construido vuelve a llevar el `Accept`. Verlo en el navegador (un GET
+  `hotels` **406** en rojo en Network y ese error en Console) es una
+  comprobación 🔎 que no tiene captura.
 
 ## O3 · CORS
 
@@ -482,17 +518,34 @@ Arreglarlo (que el preflight llegue a `cors()`) es el desafío D1.
 
 ### Los mensajes de consola
 
-El del GET está deducido de la respuesta a de curl; el del POST es el que
-muestra Chrome (copiado de la consola):
+Los dos están copiados de la consola de Chrome. Los números de línea son los
+de `hotels.api.ts` y `main.ts` en O3; desde O4 el `fetch` de `request` está en
+la [línea 54](client/src/hotels.api.ts#L54).
 
-**GET sin CORS** (respuesta a, sin `Access-Control-Allow-Origin`):
+**GET sin CORS** (respuesta a, sin `Access-Control-Allow-Origin`), tal como
+sale en [docs/o3-cors-error.png](docs/o3-cors-error.png):
 
 ```
-Access to fetch at 'http://localhost:3000/api/hotels' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+Access to fetch at 'http://localhost:3000/api/hotels' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+GET http://localhost:3000/api/hotels net::ERR_FAILED 200 (OK)        hotels.api.ts:43
+Probar CRUD: TypeError: Failed to fetch                              main.ts:31
+    at request (hotels.api.ts:43:26)
+    at getHotels (hotels.api.ts:72:24)
+    at testCrud (main.ts:12:27)
+    at HTMLButtonElement.<anonymous> (main.ts:30:3)
 ```
 
-La última frase la añade Chrome cuando la petición es un `fetch`, y es la
-trampa de la bitácora del enunciado: con `mode: "no-cors"` el error
+La segunda línea es la prueba, desde el navegador, de que la petición llegó y
+el servidor respondió **200 (OK)**; aun así, `net::ERR_FAILED`: la respuesta
+no se le entrega al código. La pila es la del recorrido del error: `fetch`
+rechaza dentro de `request`, y el `TypeError` sube por `getHotels` y
+`testCrud` hasta el `catch` del listener.
+
+Antes de tener la captura, el README daba este mensaje deducido y terminado
+en *"If an opaque response serves your needs, set the request's mode to
+'no-cors' to fetch the resource with CORS disabled."*. Esta versión de Chrome
+no añade esa frase (ver la bitácora). La trampa de la bitácora del enunciado
+sigue ahí aunque Chrome no la sugiera: con `mode: "no-cors"` el error
 desaparece, pero la respuesta llega opaca (`status` 0, sin cuerpo ni
 cabeceras), así que `request<T>` no podría leer ni el código ni el `data`.
 
@@ -507,7 +560,8 @@ La respuesta del preflight tiene **dos** fallos: el estado (406, que no es
 2xx) y la falta de `Access-Control-Allow-Origin`. Chrome sólo informa de
 uno, y es el de la cabecera: el mensaje no dice nada del 406, que sólo se ve
 en Network (o en el log del servidor). La segunda línea es la del `fetch`
-que ha fallado ([hotels.api.ts:43](client/src/hotels.api.ts#L43)), sin
+que ha fallado (línea 43 en O3; hoy,
+[hotels.api.ts:54](client/src/hotels.api.ts#L54)), sin
 código de estado, porque el POST no llegó a tener respuesta: ni siquiera se
 envió.
 
@@ -627,8 +681,16 @@ Con una red lenta todo cambia, porque lo que domina es la **espera**: cada
 petición pasa cientos de milisegundos viajando. Las esperas en serie se
 **suman**, y en paralelo se **solapan**, así que cuenta sólo la más lenta.
 Si cada una tardase 500 ms, serían unos 1000 ms en serie y unos 500 ms en
-paralelo. En Network, con Slow 4G, se ve en la columna Waterfall (captura
-opcional `o4-waterfall.png`).
+paralelo. Es lo que enseña [docs/o4-waterfall.png](docs/o4-waterfall.png),
+con Slow 4G, **Cargar todo** y después **Cargar en serie**:
+
+| | `hotels` | `cities` | Waterfall | Total |
+| --- | --- | --- | --- | --- |
+| Cargar todo | 669 ms | 598 ms | las dos barras empiezan a la vez | lo que tarda la más lenta, unos 670 ms |
+| Cargar en serie | 659 ms | 587 ms | la barra de `cities` empieza donde acaba la de `hotels` | **1249,3 ms** (lo que escribe la página): casi la suma, 659 + 587 = 1246 |
+
+(El total de **Cargar todo** no se ve en la captura, porque la página ya
+muestra el de **Cargar en serie**; sale de la columna *Time*.)
 
 ### Promise.all y Promise.allSettled ante el 404
 
@@ -657,8 +719,27 @@ Cargar con fallo
   primera y `City[]` en la segunda), y `describe` mira el `status` antes de
   tocar `value` o `reason`.
 
-En Network salen seis peticiones: `hotels` 200, `cities` 200 y `nope` 404
-(en rojo), dos veces.
+Comprobado en O5 con el `hotels.api.ts` real (cargado con `ssrLoadModule` de
+Vite, como en O3) y los dos bloques de `loadFailing` copiados a un script,
+contra un servidor recién arrancado en una copia del lab en el puerto 3001. La
+salida es la de arriba, con `3001` en la URL. El log del servidor (`morgan`)
+registra las seis peticiones:
+
+```
+GET /api/hotels 200 2.091 ms - 11332
+GET /api/nope 404 2.229 ms - 147
+GET /api/cities 200 2.491 ms - 194      ← después del 404: Promise.all no la ha cancelado
+GET /api/hotels 200 0.626 ms - 11332
+GET /api/cities 200 0.577 ms - 194
+GET /api/nope 404 0.918 ms - 147
+```
+
+La tercera línea lo enseña: el servidor termina `cities` **después** de
+haber respondido el 404 de `nope` (`morgan` escribe la línea al acabar cada
+respuesta), y la responde entera, con sus 194 bytes. Que el `Promise.all`
+rechace con ese 404 no para la petición de las ciudades.
+En Network salen las mismas seis (`nope` en rojo); esa comprobación 🔎 no
+tiene captura.
 
 ### La cancelación (Recargar)
 
@@ -934,13 +1015,13 @@ guardado en la variable de fuera.
 
 | Captura | Qué se ve |
 | --- | --- |
-| *(Opcional)* [docs/o2-network-crud.png](docs/o2-network-crud.png) | Network filtrado por Fetch/XHR tras pulsar Probar CRUD: GET, POST 201, GET, PUT, DELETE 204, GET y GET |
-| [docs/o3-cors-error.png](docs/o3-cors-error.png) | Consola en localhost:5173 con el servidor sin CORS: el fetch a localhost:3000 bloqueado por la política CORS |
+| *(Opcional)* [docs/o2-network-crud.png](docs/o2-network-crud.png) | Network filtrado por Fetch/XHR tras pulsar Probar CRUD: las 7 peticiones (ordenadas por Method), con el POST 201 y el DELETE 204, y en Console `1 10` … `6 10` |
+| [docs/o3-cors-error.png](docs/o3-cors-error.png) | Consola en localhost:5173 con el servidor sin CORS: el fetch a localhost:3000 bloqueado por la política CORS (mensaje completo, el `net::ERR_FAILED 200 (OK)` y el `TypeError: Failed to fetch`) |
 | [docs/o3-options-406.png](docs/o3-options-406.png) | Network con USE_CORS=yes: el preflight OPTIONS a /api/hotels responde 406, y el POST no llega a enviarse |
 | [docs/o4-canceled.png](docs/o4-canceled.png) | Network con Slow 4G tras pulsar Recargar cinco veces: cuatro peticiones (canceled) y la última con 200 |
-| *(Opcional)* [docs/o4-waterfall.png](docs/o4-waterfall.png) | Waterfall de Cargar todo: las dos peticiones empiezan a la vez; en serie, la segunda empieza al acabar la primera |
+| *(Opcional)* [docs/o4-waterfall.png](docs/o4-waterfall.png) | Waterfall con Slow 4G de Cargar todo: las dos peticiones empiezan a la vez; en serie, la segunda empieza al acabar la primera (1249,3 ms) |
 
-![Network filtrado por Fetch/XHR tras pulsar Probar CRUD: GET, POST 201, GET, PUT, DELETE 204, GET y GET](docs/o2-network-crud.png)
+![Network filtrado por Fetch/XHR tras pulsar Probar CRUD: las 7 peticiones (ordenadas por Method), con el POST 201 y el DELETE 204, y en Console 1 10 … 6 10](docs/o2-network-crud.png)
 
 ![Consola en localhost:5173 con el servidor sin CORS: el fetch a localhost:3000 bloqueado por la política CORS](docs/o3-cors-error.png)
 
@@ -948,7 +1029,7 @@ guardado en la variable de fuera.
 
 ![Network con Slow 4G tras pulsar Recargar cinco veces: cuatro peticiones (canceled) y la última con 200](docs/o4-canceled.png)
 
-![Waterfall de Cargar todo: las dos peticiones empiezan a la vez; en serie, la segunda empieza al acabar la primera](docs/o4-waterfall.png)
+![Waterfall con Slow 4G de Cargar todo: las dos peticiones empiezan a la vez; en serie, la segunda empieza al acabar la primera (1249,3 ms)](docs/o4-waterfall.png)
 
 ## Checklist
 
@@ -957,7 +1038,7 @@ guardado en la variable de fuera.
 - [x] O2 · Un cliente con fetch
 - [x] O3 · Llamar desde otro origen: CORS
 - [x] O4 · Gestionar varias peticiones
-- [ ] O5 · README + bitácora de IA
+- [x] O5 · README + bitácora de IA
 
 ### Opcionales
 - [ ] P1 · Lo mismo con axios
@@ -970,6 +1051,472 @@ guardado en la variable de fuera.
 - [ ] D1 · Arreglad el servidor
 - [ ] D2 · Tiempo máximo y reintentos
 - [ ] D3 · Diseñad la API de Tueste
+
+## Preparación para la revisión
+
+Los dos cambios de ejemplo del enunciado ("añade getCities al cliente" y "haz
+que deleteHotel devuelva si existía").
+
+### "Añade getCities al cliente": ya está, desde O4
+
+- **El modelo**: `City` en
+  [hotels.api.ts:16-19](client/src/hotels.api.ts#L16-L19), sólo con `id` y
+  `name`, que es lo que trae `GET /api/cities`
+  ([docs/o1-curl.txt](docs/o1-curl.txt)): `{ data: [{ id, name }, …] }`, 5
+  ciudades.
+- **La función**:
+  [hotels.api.ts:88-91](client/src/hotels.api.ts#L88-L91).
+  `request<City[]>("/cities")` pone el `Accept`, lanza si `!response.ok` y
+  devuelve el `data`. `requireData` convierte en error un `data` que falte:
+  la lista de ciudades siempre tiene que venir, así que, a diferencia del
+  hotel que no existe, un `undefined` no significa "no hay".
+- **Dónde se usa**: en `main.ts`, en **Cargar todo** (con `Promise.all`),
+  **Cargar en serie** (después de `await getHotels()`) y **Cargar con fallo**
+  (las dos versiones).
+
+Si hubiese que hacerlo en directo: el tipo, la función copiando `getHotels`
+(sin `signal`) y una llamada en un botón. Se comprueba en Network: un GET a
+`cities` con `Accept: application/json`, 200 y `{"data":[…]}`.
+
+### "Haz que deleteHotel devuelva si existía" (sin implementar)
+
+**El problema: este servidor no lo dice.** La ruta DELETE
+([index.ts:108-112](hotels-server/src/index.ts#L108-L112)) llama a
+`hotelRepo.delete(id)` y descarta lo que devuelve, que es justo ese dato: un
+`boolean` que dice si estaba
+([hotel.repo.ts:116-118](hotels-server/src/data-layer/hotel.repo.ts#L116-L118)).
+Responde **204** siempre, exista o no (E3 de
+[docs/o1-curl.txt](docs/o1-curl.txt)). Mirando la respuesta del DELETE es
+imposible saberlo.
+
+**Con el servidor tal cual: preguntar antes.**
+
+```ts
+// Antes: Promise<void>
+export async function deleteHotel(id: string): Promise<boolean> {
+  const existed = (await getHotel(id)) !== null; // el {} sin data → null
+  await request(`/hotels/${id}`, { method: "DELETE" });
+  return existed;
+}
+```
+
+- Cambia el tipo de retorno a `Promise<boolean>`. `testCrud` hace
+  `await deleteHotel(created.id)` sin usar el resultado, así que sigue
+  compilando; se podría añadir un `console.log` para verlo (`true`).
+- Son **dos** peticiones (en Network: un GET y un DELETE) en vez de una.
+- **No es atómico**: entre el GET y el DELETE, otro cliente podría borrar el
+  hotel, y la función diría `true` cuando el que lo ha borrado es el otro.
+  Con datos en memoria y un solo usuario no pasa, pero el resultado es "existía
+  hace un momento", no "lo he borrado yo".
+- Se apoya en lo que ya sabe `getHotel`: que un hotel que no existe es un 200
+  con `{}`.
+
+**Si el servidor dijese 404 (desafío D1): una sola petición.** Es lo correcto
+en REST, y no deja de ser idempotente: después del primer DELETE el estado es
+el mismo ("no está"), aunque la respuesta pase de 204 a 404. Pero `request`
+lanza un `Error` con el código metido en el mensaje, y sacar el 404 de un
+texto con una expresión regular sería frágil. Habría que llevar el estado en
+el error:
+
+```ts
+class HttpError extends Error {
+  status: number; // campo normal: los parameter properties no valen con erasableSyntaxOnly
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+// en request: throw new HttpError(response.status, `${method} ${url} → …`);
+
+export async function deleteHotel(id: string): Promise<boolean> {
+  try {
+    await request(`/hotels/${id}`, { method: "DELETE" });
+    return true; // 204
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return false;
+    throw error; // los demás errores (red, 500, 406) siguen siendo errores
+  }
+}
+```
+
+En la revisión, con el servidor sin modificar, la que funciona es la primera.
+
+### Otras cosas que se pueden preguntar
+
+- **¿Por qué el `tsconfig.json` del cliente no tiene `"strict": true`?**
+  Porque viene así de `.start-code`, y con TypeScript 6 no hace falta:
+  `strict` está activado por defecto. Comprobado con TypeScript 6.0.3: sin
+  tocar el `tsconfig`, un parámetro sin tipo da `TS7006` (implicit any) y
+  `const n: number = null` da `TS2322`. El cliente compila igual con
+  `tsc --strict`, sin errores.
+
+## Bitácora de IA
+
+El mismo contenido que [bitacora.md](bitacora.md).
+
+Herramienta: Claude Code en VS Code (dentro del DevContainer), con los prompts
+de [prompts.md](prompts.md).
+
+---
+
+**1 · Un `npx --yes` colado para validar el devcontainer.json**
+
+### Prompt
+
+"DevContainer (.devcontainer/devcontainer.json). Lee el fichero y respeta su
+estilo […] NO ejecutes npm install todavía: dime qué comandos vas a lanzar
+[…] y espera a que te lo confirme." (prompt 0 de `prompts.md`).
+
+### Qué me dio
+
+Para comprobar que el `devcontainer.json` seguía siendo válido después de
+editarlo, lanzó `npx --yes -p jsonc-parser@3 true` seguido de un `node -e` que
+quitaba los comentarios y hacía `JSON.parse`. El `npx --yes` se descargó
+`jsonc-parser` en la caché de npm (`~/.npm/_npx/…`) sin preguntar.
+
+### Qué corregí y por qué
+
+El `npx` sobraba: la validación ya la hacía el `node -e`, que no necesita nada
+instalado. Además, saltarse la confirmación iba en contra de la regla de no
+instalar nada sin preguntar, y justo en el paso en el que el prompt pedía
+esperar antes del `npm install`. Borré la entrada de la caché
+(`rm -rf ~/.npm/_npx/<hash>`) y comprobé que en el repo no había cambiado nada
+(`git status`). Para validar un JSON con comentarios basta con Node.
+
+---
+
+**2 · Un curl sin `-s` que ensuciaba la prueba de O1**
+
+### Prompt
+
+"Lanza con curl -i cada una de las 9 peticiones de la tabla del enunciado, en
+ese orden y con el servidor recién arrancado […] Guarda la salida completa
+(comando + respuesta, con cabeceras […]) en 05-API_REST/docs/o1-curl.txt"
+(prompt 1 de `prompts.md`).
+
+### Qué me dio
+
+Lanzó las 9 peticiones con `curl -i …` redirigiendo la salida a un fichero.
+Sin terminal, curl muestra su barra de progreso (`% Total % Received …
+Dload Upload`) y la mezcló con la respuesta: en algunas peticiones la línea
+`HTTP/1.1 200 OK` quedaba pegada al final de la barra.
+
+### Qué corregí y por qué
+
+La salida tenía que ser la prueba de la tabla, y así no se leía bien el código
+de estado. Se repitió con `curl -s -i` (`-s` quita la barra; las cabeceras de
+`-i` siguen saliendo). Pero no bastaba con volver a lanzar: el DELETE de la
+primera tanda había borrado el hotel 1 y el PUT le había cambiado el
+`lowRate`, así que la segunda tanda ya no empezaba con el servidor recién
+arrancado, como pedía el prompt. Antes de repetir hubo que reiniciar el
+servidor (los datos viven en memoria). En el README queda la nota de usar
+`-s` al redirigir a un fichero.
+
+---
+
+**3 · Un `pkill -f` que se mató a sí mismo**
+
+### Prompt
+
+El mismo paso del prompt 1 de `prompts.md`: reiniciar el servidor para repetir
+las peticiones con los 10 hoteles iniciales.
+
+### Qué me dio
+
+Paró el servidor con `pkill -f "tsx watch ./src/index.ts"` dentro del mismo
+comando que luego lo volvía a arrancar y lanzaba los curl. `pkill -f` busca el
+patrón en la línea de comandos completa de cada proceso, y el propio shell que
+ejecutaba ese comando contenía el texto `tsx watch ./src/index.ts`: lo mató
+también (código de salida 144) y no se lanzó ninguna petición.
+
+### Qué corregí y por qué
+
+Se comprobó con `ps` y `ss -ltnp` que el servidor sí había quedado parado y
+que el puerto 3000 estaba libre, y se arrancó y se lanzaron las peticiones en
+un comando aparte. Para parar un proceso concreto es mejor buscar su PID
+(`ps`, o `ss -ltnp` por el puerto) y hacer `kill <pid>`, o usar un patrón que
+no aparezca en el propio comando.
+
+Al final del prompt el error se repitió con otra forma: para parar el servidor
+filtró `ps` con `awk '/[t]sx watch|[n]pm run dev/'`. El truco de los corchetes
+evita que `awk` se encuentre a sí mismo, pero el mismo script contenía, unas
+líneas más abajo, `npm run dev` literal (para volver a arrancar el servidor),
+así que el shell volvió a matarse. La solución definitiva fue sacar el PID del
+puerto (`ss -ltnp | grep ':3000 '`), subir a sus padres con `ps -o ppid=` y
+hacer `kill` de los tres procesos (`sh -c`, el `tsx watch` y el `node` que
+escucha). Hay que matar también el `tsx watch`: si sólo se para el hijo, el
+watcher lo puede volver a lanzar.
+
+---
+
+**4 · Un script de curl que habría creado dos hoteles**
+
+### Prompt
+
+"Comprueba el recorrido sin navegador: con el servidor recién arrancado,
+reproduce con curl la misma secuencia (GET, POST, GET, PUT, DELETE, GET,
+GET) y confirma los códigos […] Guárdalo en docs/o2-curl.txt" (prompt 2 de
+`prompts.md`).
+
+### Qué me dio
+
+Un primer borrador del script que, para cada paso, lanzaba la petición una
+vez para mostrar la respuesta con `-i` y otra vez para sacar el valor del
+`console.log` (`1 10`, el `id`…). Con el POST y el DELETE, eso es crear dos
+hoteles y borrar dos veces.
+
+### Qué corregí y por qué
+
+Se vio antes de ejecutarlo y se rehízo: cada petición se lanza **una sola
+vez**, su respuesta se guarda en una variable y de ahí salen tanto lo que se
+muestra como el valor (`b.data.length`, `b.data.id`…). Si no, el paso 6 no
+habría dado `6 10` (habría quedado un "Hotel Tueste" de más) y la prueba no
+habría reproducido lo que hace el botón. Con peticiones que cambian datos
+(POST, PUT, DELETE), repetir una petición para "mirarla" no sale gratis.
+
+---
+
+**5 · Una respuesta del README que no cuadraba con mi propio código**
+
+### Prompt
+
+"'### O2' en Respuestas: responde tú las dos preguntas 📝 de O2" (prompt 2
+de `prompts.md`).
+
+### Qué me dio
+
+En "¿qué pasaría si no comprobaseis `response.ok`?", escribió que
+`getHotels` devolvería `undefined` y que `.length` reventaría con
+`TypeError`. Es lo que pasa en un cliente genérico, pero no en este:
+`getHotels` pasa por `requireData`, que lanza su propio error si falta
+`data`.
+
+### Qué corregí y por qué
+
+Al repasar el README contra `hotels.api.ts`, se reescribió la respuesta: sin
+la comprobación de `ok`, `requireData` lanzaría
+`GET /api/hotels: la respuesta no trae data`, un error que no dice el código
+y apunta a otra cosa, y sólo sin `requireData` se llegaría al `TypeError`.
+De paso se comprobó con curl lo del 404 de Express (`Content-Type:
+text/html`, `Cannot GET /api/nope`), que antes estaba sin comprobar. En la
+revisión preguntan por *vuestro* código: una respuesta correcta en general
+pero falsa para el código entregado no sirve.
+
+---
+
+**6 · Un docs/o3-curl.txt con los comandos sin comillas**
+
+### Prompt
+
+"Reproduce con curl lo que va a hacer el navegador y guárdalo en
+docs/o3-curl.txt" (prompt 3 de `prompts.md`).
+
+### Qué me dio
+
+Un script que, para cada petición, escribía el comando con `echo "\$ $*"`
+y después la respuesta. `$*` junta los argumentos con espacios y pierde las
+comillas, así que en el fichero quedaba
+`curl -s -i -H Origin: http://localhost:5173 -H Accept: application/json …`.
+Copiado y pegado en una terminal, ese comando ya no es el mismo: curl toma
+`http://localhost:5173` y `application/json` como URLs sueltas y manda
+cabeceras `Origin:` y `Accept:` vacías. Además, como los cuerpos JSON no
+acaban en salto de línea, el título de la sección siguiente quedaba pegado a
+la respuesta.
+
+### Qué corregí y por qué
+
+Al repasar el fichero antes de enlazarlo en el README. Se cambió el script
+para que ponga entre comillas cada argumento con espacios
+(`-H "Origin: http://localhost:5173"`) y añada un salto de línea tras cada
+cuerpo, y se volvió a generar entero (con el servidor reiniciado, sin y con
+`USE_CORS`). Las respuestas no cambiaron (200 sin `Access-Control-*`, 200 con
+`Access-Control-Allow-Origin: *`, 406 en el preflight). Pero el fichero es la
+prueba que enlaza el README, y un comando que no se puede repetir tal cual no
+prueba nada.
+
+---
+
+**7 · Un mensaje de consola deducido que Chrome no muestra**
+
+### Prompt
+
+"Deduce, a partir de las respuestas de curl del paso 3, el mensaje exacto que
+va a mostrar Chrome en cada caso […] Si cuando yo lo vea en el navegador el
+texto cambia en algo, te lo diré y lo corregimos" (prompt 3 de `prompts.md`).
+
+### Qué me dio
+
+Para el POST con `USE_CORS=yes`, el README decía que Chrome mostraría
+`Response to preflight request doesn't pass access control check: It does
+not have HTTP ok status.`, y que de los dos fallos de la respuesta del
+preflight (estado 406 y sin `Access-Control-Allow-Origin`) Chrome
+informaría del estado. La explicación de la tercera pregunta se apoyaba en
+eso: "el mensaje señala al estado".
+
+### Qué corregí y por qué
+
+En el navegador sale otro mensaje: `Response to preflight request doesn't
+pass access control check: No 'Access-Control-Allow-Origin' header is
+present on the requested resource.`, seguido de
+`hotels.api.ts:43 POST http://localhost:3000/api/hotels net::ERR_FAILED`.
+Chrome informa de la cabecera que falta, no del 406. La deducción partía de
+una respuesta de curl correcta, pero suponía en qué orden hace Chrome sus
+comprobaciones, y eso no sale de curl: sólo se sabe mirándolo en el
+navegador. Se cambió el mensaje en el README (sección "Los mensajes de
+consola" y tercera respuesta de O3) y se reescribió la explicación: el
+motivo es el mismo texto que en el GET sin CORS, y despista porque CORS sí
+está activado. El 406, que es la causa, no sale en la consola; hay que
+buscarlo en Network o en el log del servidor. El README marca ahora qué
+mensaje está copiado del navegador y cuál sigue deducido (el del GET).
+
+---
+
+**8 · Un texto de la página que no cuadraba con el código**
+
+### Prompt
+
+"main.ts, cuatro botones, cada uno mostrando el resultado en la página (una
+zona con aria-live="polite") además de en consola" (prompt 4 de
+`prompts.md`).
+
+### Qué me dio
+
+En `index.html`, el párrafo de arriba decía "Probar CRUD escribe sólo en la
+consola; los botones de O4, también aquí debajo". Pero en el mismo cambio,
+`main.ts` pasó a registrar los cinco botones con un mismo `onClick`, que
+ante cualquier error lo escribe también en la zona `aria-live`. Así que, si
+Probar CRUD fallaba, el error sí salía en la página.
+
+### Qué corregí y por qué
+
+Lo vi al repasar `onClick` antes de redactar el README. Cambié el texto a
+"Probar CRUD escribe sus pasos en la consola; los botones de O4 (y cualquier
+error) salen también aquí debajo" y volví a construir. Es la primera frase
+que lee quien abre la página para hacer las comprobaciones: si dice que algo
+no sale en pantalla y luego sale, despista justo cuando hay un error.
+
+---
+
+**9 · El otro mensaje de consola deducido, que tampoco era el de Chrome**
+
+### Prompt
+
+"Deduce, a partir de las respuestas de curl del paso 3, el mensaje exacto que
+va a mostrar Chrome en cada caso" (prompt 3 de `prompts.md`). Se corrigió en
+la revisión final: "Si el mensaje de consola de la captura no coincide con el
+del README, corrige el README y apúntalo en la bitácora" (prompt 5).
+
+### Qué me dio
+
+Para el GET sin CORS, el prompt ya traía el mensaje, terminado en *"…is
+present on the requested resource."*. Claude le añadió una frase más: *"If
+an opaque response serves your needs, set the request's mode to 'no-cors' to
+fetch the resource with CORS disabled."*. Además escribió un párrafo que lo
+daba por hecho: "La última frase la añade Chrome cuando la petición es un
+`fetch`".
+
+### Qué corregí y por qué
+
+En la captura `docs/o3-cors-error.png` el mensaje acaba en *"…is present on
+the requested resource."*: esta versión de Chrome no añade esa frase. En la
+entrada 7 ya se había visto que deducir los mensajes de Chrome no funciona,
+pero sólo se corrigió el del POST, que fue el que se vio en el navegador. El
+del GET se quedó marcado como "deducido" y con un párrafo que lo explicaba
+como si fuese seguro. Se cambió por el texto copiado de la captura, junto con
+las dos líneas siguientes, que además prueban algo: `GET … net::ERR_FAILED
+200 (OK)` (la petición llegó y el servidor respondió 200) y la pila del
+`TypeError: Failed to fetch`. El párrafo sobre `mode: "no-cors"` se mantiene,
+pero ya no dice que Chrome lo sugiera: la trampa existe igual.
+
+---
+
+**10 · Lo que el README daba por visto en el navegador sin haberlo visto**
+
+### Prompt
+
+"Comprueba tú también el experimento del Accept: quita el Accept de request,
+recompila, comprueba con curl qué recibe una petición sin él (406) y qué
+mensaje lanzaría tu Error" y "lo que se ve en Network (los 7 códigos, el
+Payload del POST, el 406 sin Accept)" (prompt 2 de `prompts.md`). Se corrigió
+en la revisión final, que pide "nada que suene bien pero no se pueda enseñar"
+(prompt 5).
+
+### Qué me dio
+
+Una sección "Lo que se ve en Network" escrita como si se hubiese visto: el
+orden de las 7 peticiones, el panel *Response* del DELETE ("This request has
+no response data available") y, sin `Accept`, "en Network sólo sale un GET
+`hotels` 406 (en rojo), y en Console, `Probar CRUD: Error: …`". En O2 Claude
+no tenía navegador: lo comprobado era curl y el build. El pie de
+`o2-network-crud.png` también daba un orden (GET, POST 201, GET, PUT…), y la
+captura está ordenada por la columna *Method*.
+
+### Qué corregí y por qué
+
+Se separó lo que enseña la captura (las 7 peticiones con sus códigos, la
+consola `1 10` … `6 10`, los tamaños) de lo que está probado con curl en
+`docs/o2-curl.txt` (el cuerpo del POST, el 204 sin `Content-Type`, el 406),
+y lo que queda en el navegador se marca como comprobación 🔎 sin captura. Se
+cambió el pie de la captura. Con el mismo criterio se revisó O4: la salida
+de **Cargar con fallo** estaba en el README sin ninguna prueba detrás. Se
+reprodujo con el `hotels.api.ts` real contra un servidor recién arrancado, y
+el log de ese servidor enseñó además que, tras el 404, la petición de
+ciudades sigue y acaba con 200 (`Promise.all` no cancela nada), que antes
+también era sólo una afirmación.
+
+---
+
+**11 · Enlaces a números de línea que se quedaron viejos**
+
+### Prompt
+
+"'## O3 · CORS': lo que pasa sin CORS y con CORS, enlazando
+docs/o3-curl.txt, los dos mensajes de consola y la explicación del 406"
+(prompt 3 de `prompts.md`). Esa sección enlazó `hotels.api.ts:43`, el `fetch`
+de `request`. En el prompt 4 se añadieron
+`City`, `getCities` y `getNope` a `hotels.api.ts` sin revisar esos enlaces.
+Se vio en la revisión final (prompt 5).
+
+### Qué me dio
+
+Un enlace `[hotels.api.ts:43](client/src/hotels.api.ts#L43)` que, después de
+O4, apunta a un comentario: el `fetch` está ahora en la línea 54.
+
+### Qué corregí y por qué
+
+El enlace apunta ahora a la línea 54. Los textos copiados de la consola
+conservan el `hotels.api.ts:43`, porque es lo que salió en O3, y el README
+dice ahora que esos números son los de aquella versión. En la revisión
+pueden pinchar el enlace: si lleva a un comentario, parece que no se sabe
+dónde está el propio código.
+
+---
+
+**12 · Un script de comprobación que no lanzó ninguna petición**
+
+### Prompt
+
+"Con el servidor recién arrancado, el recorrido de O2 con curl da los mismos
+códigos que la tabla de O1" (prompt 5 de `prompts.md`).
+
+### Qué me dio
+
+Un script con una función `req` que empezaba por
+`local m=$1 u=$2 d=$3 args=(… -X "$m" …)`. Bash expande todos los argumentos
+de `local` antes de ejecutarlo, así que, cuando se construye `args`, `m`
+todavía está vacía: curl recibió `-X ""` y falló en las siete peticiones. La
+salida fue `1 `, `2  ` y varios `TypeError` de Node al leer `data`.
+
+### Qué corregí y por qué
+
+Se separó en dos `local` (primero `m`, `u` y `d`; después `args`). Antes de
+repetir, se miró el log del servidor: sólo tenía el `GET /` del bucle que
+esperaba a que arrancase, así que ningún POST ni DELETE había llegado y el
+servidor seguía con los datos iniciales. No hizo falta reiniciarlo, y la
+repetición dio `1 10` … `6 10` con 200, 201, 200, 200, 204, 200, 200. Como en
+la entrada 4, con peticiones que cambian datos, antes de repetir un script
+hay que saber qué ha llegado ya al servidor.
 
 ## Cómo hacer las capturas
 
