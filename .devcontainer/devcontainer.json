@@ -20,13 +20,22 @@
   // El lab 3 se monta a mano desde un package.json vacío: hasta que exista
   // (obligatorio 1) se salta, en vez de hacer fallar la creación del contenedor.
   // Lab 4: parte de una copia de la demo 02-react, que ya trae package.json.
-  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi && (cd 04-Frameworks/lab-react && npm install)",
+  // Lab 5: hotels-server y client se copian a mano desde .start-code; como en
+  // el lab 3, si todavía no están (no hay package.json) se saltan.
+  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi && (cd 04-Frameworks/lab-react && npm install) && if [ -f 05-API_REST/hotels-server/package.json ]; then (cd 05-API_REST/hotels-server && npm install); fi && if [ -f 05-API_REST/client/package.json ]; then (cd 05-API_REST/client && npm install); fi",
 
   // 5173: npm start / npm run dev (servidor de desarrollo).
   // 4173: npm run preview (sirve la carpeta dist del build).
-  "forwardPorts": [5173, 4173],
+  // Lab 5: 3000: hotels-server (API en /api y el build del cliente en /).
+  "forwardPorts": [3000, 5173, 4173],
   "portsAttributes": {
-    "5173": { "label": "Vite dev server" },
+    // Lab 5: requireLocalPort en 3000 y 5173. Si el puerto está ocupado en
+    // Windows, VS Code reenviaría a otro (3001, 5174…) sin avisar, y ni
+    // VITE_API_BASE=http://localhost:3000/api ni el origen
+    // http://localhost:5173 (CORS, O3) coincidirían con lo que ve el
+    // navegador. Así el reenvío falla y se ve.
+    "3000": { "label": "hotels-server", "requireLocalPort": true },
+    "5173": { "label": "Vite dev server", "requireLocalPort": true },
     "4173": { "label": "Vite preview (dist)" }
   },
   "customizations": {

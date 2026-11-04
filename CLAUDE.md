@@ -4,11 +4,51 @@ Gestor de candidaturas de empleo. Los usuarios registran sus candidaturas, las
 siguen en una tabla o en un tablero kanban, guardan los contactos de cada
 empresa y controlan qué versión de su CV y carta enviaron a cada oferta.
 
-Ahora mismo estoy en el laboratorio 4 del máster (04-Frameworks/lab.md). El
-proyecto vive en 04-Frameworks/lab-react: el catálogo de cafés de Tueste
-(lista con buscador y carrito, detalle, alta y edición).
+Ahora mismo estoy en el laboratorio 5 del máster (05-API_REST/lab.md): API
+REST, en 05-API_REST. Un cliente con fetch (05-API_REST/client) contra el
+servidor de hoteles del módulo (05-API_REST/hotels-server).
 
-## Stack (lab 4)
+## Stack (lab 5)
+- Servidor: `hotels-server` del módulo (Express + `tsx watch`, datos en
+  memoria, puerto 3000, CORS sólo con `USE_CORS=yes`). En los obligatorios NO
+  se modifica (arreglarlo es el desafío D1).
+- Cliente: `client` de `.start-code`, TypeScript sin framework, Vite.
+  `src/hotels.api.ts` con `request<T>` y las cinco funciones (`getHotels`,
+  `getHotel`, `createHotel`, `updateHotel`, `deleteHotel`).
+
+## Reglas (lab 5)
+- fetch: comprobar siempre `response.ok` y lanzar un error con método, URL y
+  estado; no leer JSON en un 204; `Accept: application/json` siempre y
+  `Content-Type: application/json` sólo cuando hay cuerpo.
+- Las respuestas vienen en `{ data: ... }`: `request<T>` devuelve el `data`.
+- Modelo `Hotel` sólo con los campos que usa el front (`id`, `name`, `city`,
+  `lowRate`, `highRate`); `NewHotel = Omit<Hotel, "id">`.
+- CORS se arregla en el servidor (o con el proxy de Vite en desarrollo),
+  nunca con `mode: "no-cors"` ni con extensiones del navegador.
+- Un `AbortError` no se muestra como error.
+- Peticiones en orden con `for...of` + `await`, nunca `forEach(async …)`.
+  Peticiones "para luego" como funciones: `[() => fetch(a), …]`.
+- Variables de entorno con `import.meta.env.VITE_X` (lab 3); nada secreto en
+  `VITE_`.
+- Código TypeScript (heredado del lab 2): nada de `any` ni `enum`, nada de
+  `as` para callar errores, tipos con `import type { ... }`.
+- Cada dependencia que se instale tiene que hacer falta (axios sólo en P1,
+  zod sólo en P5).
+- No modificar otros entregables (en particular, P4 tocaría el lab 4: no se
+  hace).
+- README sin huecos: Claude responde todas las preguntas 📝 con lo que se ha
+  comprobado de verdad (curl, build, scripts de medida). Nada de `TODO`.
+- Bitácora: cada vez que Claude corrija algo suyo (o el usuario le corrija),
+  se añade una entrada a `05-API_REST/bitacora.md` con el formato del
+  enunciado (`### Prompt`, `### Qué me dio`, `### Qué corregí y por qué`) y el
+  número de prompt de `prompts.md`.
+
+## Lab 4 (cerrado)
+React (04-Frameworks/lab-react): el catálogo de cafés de Tueste (lista con
+buscador y carrito, detalle, alta y edición). Estas reglas NO aplican al lab 5
+salvo lo indicado en "Reglas (lab 5)"; se conservan como referencia.
+
+### Stack (lab 4)
 - Copia de la demo `01-de-javascript-a-react/demos/02-react`: Vite 8,
   TypeScript 7 estricto, React 19 y Tailwind 4 (`@tailwindcss/vite`).
 - Desde O5: TanStack Router con rutas por archivos (`@tanstack/router-plugin`,
@@ -17,7 +57,7 @@ proyecto vive en 04-Frameworks/lab-react: el catálogo de cafés de Tueste
 - Datos: `public/coffees.json`; modelo en `src/model.ts` (en O7 pasa a
   `src/core/coffees/model.ts`).
 
-## Reglas (lab 4)
+### Reglas (lab 4)
 - Componentes como funciones, con las props tipadas. Nada de clases.
 - El estado nunca se muta: nada de `push`, `splice` ni `coffee.price = …`;
   spread, `map` y `filter` (`setCart(previous => [...previous, coffee])`).
@@ -101,6 +141,12 @@ lab 4 salvo lo indicado en "Reglas (lab 4)"; se conservan como referencia.
   cada dato, cuándo se ejecuta cada efecto y qué limpia, y lista las
   comprobaciones 🔎 que tengo que hacer en el navegador y las preguntas 📝
   que tocan para el README.
+- Lab 5: un obligatorio cada vez. Después de cada uno, explícame cada
+  petición (método, URL, cabeceras que envía, código que recibe y por qué),
+  qué hace cada función de hotels.api.ts con los errores, y lista las
+  comprobaciones 🔎 que tengo que hacer en el navegador (pestaña Network) y
+  las capturas que tengo que hacer (qué tiene que verse, nombre de fichero y
+  carpeta).
 - Si dudas entre dos enfoques, pregúntame antes de elegir.
 - Todas las soluciones deben funcionar con DevContainers. No instales dependencies en local sin confirmar antes.
 - El proyecto está estructurado en laboratorios entregables dentro de cada carpeta (lab.md) que irán desarrollandose hasta el producto final. Cada uno es una fase distinta del proyecto. No modifiques varios entregables a la vez.

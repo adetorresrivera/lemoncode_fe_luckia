@@ -1,0 +1,9 @@
+# Dependencias (las instala npm install / postCreateCommand)
+node_modules/
+
+# Salida de tsc si alguien compila el servidor (tsconfig.json: outDir ./dist)
+dist/
+
+# Build del cliente: lo copia aquí el postbuild de client (npm run build) y
+# el servidor lo sirve como estáticos en http://localhost:3000
+front/
