@@ -1,0 +1,158 @@
+# O1 · Salida real de curl contra hotels-server (lab 5)
+#
+# Servidor recién arrancado (npm run dev en 05-API_REST/hotels-server, sin USE_CORS),
+# peticiones lanzadas en este orden el 2026-11-04.
+# Los arrays largos están recortados al primer elemento + "…" (por eso el
+# Content-Length de esas respuestas es mayor que el cuerpo que se ve).
+# Las peticiones E1-E3 son extra: no están en la tabla del enunciado, pero
+# justifican dos afirmaciones del README (Accept compuesto, ids que no existen).
+
+### 1 · GET /api/hotels sin cabecera Accept
+$ curl -s -i http://localhost:3000/api/hotels
+HTTP/1.1 406 Not Acceptable
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 26
+ETag: W/"1a-fX47ke7NTmnIbAjYBIBUoJWqdg4"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Not Acceptable"}
+
+### 2 · GET /api/hotels con Accept: application/json
+$ curl -s -i -H 'Accept: application/json' http://localhost:3000/api/hotels
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 11332
+ETag: W/"2c44-xlGvxTrVPajVvMyI7Zg/AUp1FA4"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":[{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1464777618676,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenceRating":52,"countryCode":"US","deepLink":"http://www.travelnow.com/templates/55505/hotels/125727/overview?lang=en&amp;currency=USD&amp;standardCheckin=null/null/null&amp;standardCheckout=null/null/null","highRate":289,"hotelId":1257278,"hotelInDestination":true,"hotelRating":4,"location":{"latitude":47.60985,"longitude":-122.33475},"locationDescription":"Near Pike Place Market","lowRate":259,"metadata":{"path":"/hotels/1"},"postalCode":98101,"propertyCategory":1,"proximityDistance":11.168453,"proximityUnit":"MI","rateCurrencyCode":"USD","shortDescription":"With a stay at Motif Seattle, you will be centrally located in Seattle, steps from 5th Avenue Theater and minutes from Pike Place Market. This 4-star hotel is within","stateProvinceCode":"WA","thumbNailUrl":"/thumbnails/50947_264_t.jpg","tripAdvisorRating":3.5,"tripAdvisorRatingUrl":"http://www.tripadvisor.com/img/cdsi/img2/ratings/traveler/3.5-12345-4.gif"},…] }   ← recortado: 10 elementos
+
+### 3 · GET /api/hotels/1
+$ curl -s -i -H 'Accept: application/json' http://localhost:3000/api/hotels/1
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 1125
+ETag: W/"465-8evgduvWKqJyxUy/zo6iOdNOYhM"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1464777618676,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenceRating":52,"countryCode":"US","deepLink":"http://www.travelnow.com/templates/55505/hotels/125727/overview?lang=en&amp;currency=USD&amp;standardCheckin=null/null/null&amp;standardCheckout=null/null/null","highRate":289,"hotelId":1257278,"hotelInDestination":true,"hotelRating":4,"location":{"latitude":47.60985,"longitude":-122.33475},"locationDescription":"Near Pike Place Market","lowRate":259,"metadata":{"path":"/hotels/1"},"postalCode":98101,"propertyCategory":1,"proximityDistance":11.168453,"proximityUnit":"MI","rateCurrencyCode":"USD","shortDescription":"With a stay at Motif Seattle, you will be centrally located in Seattle, steps from 5th Avenue Theater and minutes from Pike Place Market. This 4-star hotel is within","stateProvinceCode":"WA","thumbNailUrl":"/thumbnails/50947_264_t.jpg","tripAdvisorRating":3.5,"tripAdvisorRatingUrl":"http://www.tripadvisor.com/img/cdsi/img2/ratings/traveler/3.5-12345-4.gif"}}
+
+### 4 · GET /api/hotels/999
+$ curl -s -i -H 'Accept: application/json' http://localhost:3000/api/hotels/999
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+ETag: W/"2-vyGp6PvFo4RvsFtPoIWeCReyIC8"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{}
+
+### 5 · GET /api/cities
+$ curl -s -i -H 'Accept: application/json' http://localhost:3000/api/cities
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 194
+ETag: W/"c2-4ntpoL51uqhIzPb7y8PFwf+nXGI"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":[{"id":"Seattle","name":"Seattle"},…] }   ← recortado: 5 elementos
+
+### 6 · POST /api/hotels con un hotel en JSON
+$ curl -s -i -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -d '{"name":"Grand Hyatt Seattle","city":"Seattle","lowRate":210,"highRate":320}' http://localhost:3000/api/hotels
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 178
+ETag: W/"b2-02cthh3dzaPXZwY7Ybaq7WQndeY"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"name":"Grand Hyatt Seattle","city":"Seattle","lowRate":210,"highRate":320,"id":"2b7fdf45-8778-49e9-a7d5-fae6cfac35b2","created":1793803435197,"modified":1793803435197}}
+
+### 7 · PUT /api/hotels/1 cambiando lowRate
+$ curl -s -i -X PUT -H 'Accept: application/json' -H 'Content-Type: application/json' -d '{"lowRate":199}' http://localhost:3000/api/hotels/1
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 1125
+ETag: W/"465-2zHMNFbUNyW2XulL/PnvsRLP0Ss"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":{"id":"1","type":"hotel","name":"Motif Seattle","created":1464777092568,"modified":1793803435204,"address1":"1415 5th Ave","airportCode":"SEA","amenityMask":7798786,"city":"Seattle","confidenceRating":52,"countryCode":"US","deepLink":"http://www.travelnow.com/templates/55505/hotels/125727/overview?lang=en&amp;currency=USD&amp;standardCheckin=null/null/null&amp;standardCheckout=null/null/null","highRate":289,"hotelId":1257278,"hotelInDestination":true,"hotelRating":4,"location":{"latitude":47.60985,"longitude":-122.33475},"locationDescription":"Near Pike Place Market","lowRate":199,"metadata":{"path":"/hotels/1"},"postalCode":98101,"propertyCategory":1,"proximityDistance":11.168453,"proximityUnit":"MI","rateCurrencyCode":"USD","shortDescription":"With a stay at Motif Seattle, you will be centrally located in Seattle, steps from 5th Avenue Theater and minutes from Pike Place Market. This 4-star hotel is within","stateProvinceCode":"WA","thumbNailUrl":"/thumbnails/50947_264_t.jpg","tripAdvisorRating":3.5,"tripAdvisorRatingUrl":"http://www.tripadvisor.com/img/cdsi/img2/ratings/traveler/3.5-12345-4.gif"}}
+
+### 8 · DELETE /api/hotels/1
+$ curl -s -i -X DELETE -H 'Accept: application/json' http://localhost:3000/api/hotels/1
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+
+### 9 · GET /api/hotels/1 después de borrarlo
+$ curl -s -i -H 'Accept: application/json' http://localhost:3000/api/hotels/1
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+ETag: W/"2-vyGp6PvFo4RvsFtPoIWeCReyIC8"
+Date: Wed, 04 Nov 2026 14:43:55 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{}
+
+# --- Extra ---
+
+### E1 · Accept compuesto (el que envía axios por defecto)
+$ curl -s -i -H 'Accept: application/json, text/plain, */*' http://localhost:3000/api/hotels/2
+HTTP/1.1 406 Not Acceptable
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 26
+ETag: W/"1a-fX47ke7NTmnIbAjYBIBUoJWqdg4"
+Date: Wed, 04 Nov 2026 14:44:03 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Not Acceptable"}
+
+### E2 · PUT /api/hotels/999 (no existe)
+$ curl -s -i -X PUT -H 'Accept: application/json' -H 'Content-Type: application/json' -d '{"lowRate":1}' http://localhost:3000/api/hotels/999
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 13
+ETag: W/"d-XXcxLjB/sjfS0AB6+CxvXcLGrm4"
+Date: Wed, 04 Nov 2026 14:44:03 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"data":null}
+
+### E3 · DELETE /api/hotels/999 (no existe)
+$ curl -s -i -X DELETE -H 'Accept: application/json' http://localhost:3000/api/hotels/999
+HTTP/1.1 204 No Content
+X-Powered-By: Express
+Date: Wed, 04 Nov 2026 14:44:03 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
