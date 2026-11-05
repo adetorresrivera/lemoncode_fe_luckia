@@ -47,3 +47,29 @@ contenedor tiene npm 10.9) y que npm 10 haya quitado esas marcas, pero no lo
 he podido comprobar. Lo apunto como lo que es: una suposición. A partir de
 aquí, el commit `L6 - Preparacion` lleva el lock reescrito, y cualquier
 cambio posterior se verá con `git diff package-lock.json`.
+
+## 3 · El `tsconfig.json` reformateado de rebote
+
+### Prompt
+
+"Añade config/test/config.d.ts y config/test/setup.ts al include del
+tsconfig.json, y comprueba que los futuros src/**/*.spec.ts(x) también
+entran en el type-check." (prompt 1 de `prompts.md`).
+
+### Qué me dio
+
+Para añadir el `include` (y los scripts del `package.json`), Claude leyó el
+JSON con Node, lo modificó y lo volvió a escribir con
+`JSON.stringify(t, null, 2)`. El `include` quedó bien, pero el diff también
+cambiaba `"paths": { "#*": ["./src/*"] }`, que pasó a ocupar tres líneas,
+sin que nadie lo hubiera pedido.
+
+### Qué corregí y por qué
+
+Lo vio en el `git diff` antes de seguir. Volvió al `tsconfig.json` de antes
+(guardado en el scratchpad) y cambió sólo la línea del `include`. Ahora el
+diff del `tsconfig.json` es únicamente el `include`. Un cambio de formato
+que nadie ha pedido hace más difícil revisar el diff, y en este lab el
+`tsconfig.json` es justo uno de los ficheros que hay que poder defender
+línea a línea. En el `package.json`, `JSON.stringify` no cambió nada más que
+los dos scripts.
