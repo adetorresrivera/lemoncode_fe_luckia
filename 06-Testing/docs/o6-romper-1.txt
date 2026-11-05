@@ -1,0 +1,43 @@
+💥 O6: en src/catalog/use-cart.ts, add usa el cart del render en vez de la función de actualización.
+
+@@ -8 +8 @@ export const useCart = (coffees: Coffee[]) => {
+-  const add = (coffee: Coffee) => setCart((previous) => addToCart(previous, coffee.id));
++  const add = (coffee: Coffee) => setCart(addToCart(cart, coffee.id));
+
+Ejecutado con NO_COLOR=1 npx vitest run -c ./config/test/config.ts src/catalog/use-cart.spec.ts
+==================================================================
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/use-cart.spec.ts (4 tests | 1 failed) 29ms
+   ❯ useCart (4)
+     × debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/catalog/use-cart.spec.ts:73:34
+     71|
+     72|     // Assert
+     73|     expect(result.current.units).toBe(2);
+       |                                  ^
+     74|   });
+     75| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  20:30:39
+   Duration  828ms (environment 70%, setup 13%, transform 6%, import 6%, tests 4%, worker 1%)
+
+(deshecho: git diff limpio)

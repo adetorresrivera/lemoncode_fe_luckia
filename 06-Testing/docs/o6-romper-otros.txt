@@ -1,0 +1,75 @@
+💥 extra de O6 (además de o6-romper-1), para ver en rojo cada test al menos una vez.
+Cada bloque: un único cambio en src/catalog/use-cart.ts, deshecho después con git checkout -- y git diff --exit-code limpio.
+Ejecutado con NO_COLOR=1 npx vitest run -c ./config/test/config.ts src/catalog/use-cart.spec.ts; la salida está filtrada con grep (líneas ✓/×, FAIL, errores, Expected/Received y Tests).
+
+==================================================================
+💥 el carrito empieza con un café a cantidad 0 (units y total siguen a 0, cart ya no es [])
+
+@@ -6 +6 @@ export const useCart = (coffees: Coffee[]) => {
+-  const [cart, setCart] = React.useState<CartItem[]>([]);
++  const [cart, setCart] = React.useState<CartItem[]>([{ coffeeId: 3, quantity: 0 }]);
+
+     × debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 19ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook
+AssertionError: expected [ { coffeeId: 3, quantity: +0 } ] to deeply equal []
+- []
++ [
++   {
++     "coffeeId": 3,
++     "quantity": 0,
++   },
++ ]
+      Tests  1 failed | 3 passed (4)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 units cuenta líneas del carrito en vez de bolsas
+
+@@ -12 +12 @@ export const useCart = (coffees: Coffee[]) => {
+-  const units = cart.reduce((sum, item) => sum + item.quantity, 0);
++  const units = cart.length;
+
+     × debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 7ms
+     × debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos
+AssertionError: expected 1 to be 2 // Object.is equality
+- 2
++ 1
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act
+AssertionError: expected 1 to be 2 // Object.is equality
+- 2
++ 1
+      Tests  2 failed | 2 passed (4)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 total se calcula con un catálogo vacío (siempre 0)
+
+@@ -13 +13 @@ export const useCart = (coffees: Coffee[]) => {
+-  const total = cartTotal(cart, coffees);
++  const total = cartTotal(cart, []);
+
+     × debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 5ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos
+AssertionError: expected +0 to be close to 21, received difference is 21, but expected 0.005
+      Tests  1 failed | 3 passed (4)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 clear no vacía el carrito
+
+@@ -10 +10 @@ export const useCart = (coffees: Coffee[]) => {
+-  const clear = () => setCart([]);
++  const clear = () => setCart((previous) => previous);
+
+     × debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito
+AssertionError: expected 1 to be +0 // Object.is equality
+- 0
++ 1
+      Tests  1 failed | 3 passed (4)
+(deshecho: git diff limpio)

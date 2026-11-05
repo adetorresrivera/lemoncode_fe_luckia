@@ -238,3 +238,39 @@ sigue siendo cierta (no hay ningún `validateDOMNesting`), pero la prueba que
 di no demostraba nada. Corregí las dos frases del README de O4 para que
 digan lo que se ve de verdad y enlacen la salida buena; `o4-verde.txt` se
 queda como estaba, sólo como prueba de que los tests pasan.
+
+## 10 · "React lanza `Invalid hook call`" (y el 💥 que deja tres tests en verde)
+
+### Prompt
+
+"README: \"## O6 · useCart\": cada test y por qué renderHook." y "💥 Rompe el
+código […] Tiene que ponerse rojo el caso 4 (dos add en el mismo act) y no
+el 2." (prompt 6 de `prompts.md`).
+
+### Qué me dio
+
+1. En el README, para justificar `renderHook`, escribí de memoria que si se
+   llama `useCart(coffees)` fuera de un componente "React lanza `Invalid
+   hook call`".
+2. Con el 💥 del enunciado (`setCart(addToCart(cart, coffee.id))`) se pone
+   en rojo sólo el caso 4. Los casos 1, 2 y 3 siguen en verde
+   ([docs/o6-romper-1.txt](docs/o6-romper-1.txt)). Era lo que se buscaba
+   (que el 2 no fallara), pero con eso esos tres tests míos no se habían
+   visto fallar nunca.
+
+### Qué corregí y por qué
+
+1. Lo probé con un spec temporal (ya borrado). React no lanza ese error:
+   lo escribe en consola (`Invalid hook call. Hooks can only be called
+   inside of the body of a function component…`). Lo que hace fallar el
+   test es otro error, `TypeError: Cannot read properties of null (reading
+   'useState')`. Cambié la frase del README para que diga las dos cosas tal
+   como salen.
+2. Hice 4 💥 más en `use-cart.ts`, uno cada vez y deshecho con `git
+   checkout --` ([docs/o6-romper-otros.txt](docs/o6-romper-otros.txt)), y
+   cada test se puso en rojo al menos una vez: estado inicial con un café a
+   cantidad 0 (caso 1, por el `toEqual([])`), `units = cart.length` (casos
+   2 y 4), `cartTotal(cart, [])` (caso 2, por el `toBeCloseTo(21)`) y
+   `clear` que no vacía (caso 3). El del estado inicial demuestra que el
+   `toEqual([])` del caso 1 sirve para algo: `units` y `total` seguían a 0 y
+   sólo falló esa línea.

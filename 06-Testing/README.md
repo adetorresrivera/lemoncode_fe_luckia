@@ -625,6 +625,72 @@ Decisiones:
   sin `onClick={clear}` (el de vaciar); y `disabled` siempre (el de activar y
   el de vaciar).
 
+## O6 · useCart
+
+`src/catalog/use-cart.spec.ts`: 4 tests de `useCart` sin ningún componente,
+con `renderHook` y `act` de `@testing-library/react`. Los datos son los tres
+cafés de `test-data.ts`. Se usa Brasil Cerrado (10.5 €, sin `discount`) para
+que el total salga redondo: 2 × 10.5 = 21. Ningún test depende de otro: cada
+uno hace su propio `renderHook`, y Testing Library desmonta el hook después
+de cada test.
+
+### Por qué `renderHook`
+
+Un hook sólo se puede llamar dentro de un componente que React esté
+renderizando. Comprobado con un spec temporal (ya borrado): si se llama
+`useCart(coffees)` a pelo desde el test, React escribe en consola `Invalid
+hook call. Hooks can only be called inside of the body of a function
+component…` y el test falla con `TypeError: Cannot read properties of null
+(reading 'useState')`. `renderHook(() => useCart(coffees))` monta un
+componente de prueba (`TestComponent`, el nombre que sale en el aviso de
+[docs/o6-sin-act.txt](docs/o6-sin-act.txt)) que llama al hook en cada render
+y guarda lo que devuelve en `result.current`. Así se prueba el hook directamente:
+no hace falta inventar un componente con botones para pulsarlos ni leer
+textos del DOM. Lo que se comprueba son los valores que devuelve (`cart`,
+`units`, `total`).
+
+**`result.current` se lee después de cada `act`.** Cada render deja en
+`result.current` un objeto nuevo. Si se guardara en una constante antes
+(`const { add, units } = result.current`), esa constante se quedaría con el
+objeto del primer render: `units` valdría 0 para siempre. El comentario está
+en el caso 2 del spec.
+
+### Los tests
+
+| Test | Act | Assert |
+| --- | --- | --- |
+| debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook | sólo `renderHook` | `cart` → `toEqual([])` (es un array: `toBe` compararía referencias); `units` → `toBe(0)`; `total` → `toBe(0)` (`cartTotal` de un carrito vacío es 0 exacto, no hay decimales que redondear) |
+| debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos | `act(() => add(brazil))` dos veces, por separado | `units` → `toBe(2)`; `total` → `toBeCloseTo(21)` (sale de multiplicar decimales) |
+| debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito | Arrange: `act(() => add(brazil))`; Act: `act(() => clear())` | `units` → `toBe(0)` |
+| debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act | `act(() => { add(brazil); add(brazil); })` | `units` → `toBe(2)` |
+
+No se mockea nada: el hook no sale del proceso (ni `fetch` ni tiempo).
+
+### Comprobado
+
+- [docs/o6-verde.txt](docs/o6-verde.txt) (con `--silent=false`): `Test
+  Files  5 passed (5)`, `Tests  35 passed (35)` (12 de O2 + 6 de O3 + 4 de
+  O4 + 9 de O5 + 4 de O6). El spec de O6 no imprime nada: ni avisos de
+  `act` ni el del JSX transform, porque no renderiza JSX. Los dos únicos
+  bloques `stderr` son los de O4 y O5 que ya se explicaron arriba. `npm run
+  type-check` limpio.
+- [docs/o6-sin-act.txt](docs/o6-sin-act.txt): un spec temporal
+  (`use-cart-sin-act.spec.ts`, ya borrado) con el caso 2 y con un solo
+  `add`, los dos sin `act`. Los dos se ponen en rojo con el valor viejo
+  (`expected +0 to be 2` y `expected +0 to be 1`), y cada `add` imprime
+  `An update to TestComponent inside a test was not wrapped in act(...)`.
+  En esta versión (React 19.2, Testing Library 16.3, Vitest 5.1) no pasa
+  igual: sale el aviso **y** el test lee el valor viejo.
+- [docs/o6-romper-1.txt](docs/o6-romper-1.txt): el 💥 del enunciado sólo
+  pone en rojo el caso 4. Para ver fallar los otros tres se hicieron 4 💥
+  más, uno cada vez y deshecho después:
+  [docs/o6-romper-otros.txt](docs/o6-romper-otros.txt). Fueron estos: el
+  estado inicial `[{ coffeeId: 3, quantity: 0 }]` (falla el caso 1 sólo por
+  el `toEqual([])`, porque `units` y `total` siguen a 0); `units =
+  cart.length` (los casos 2 y 4: `expected 1 to be 2`); `cartTotal(cart,
+  [])` (el caso 2 por el total: `expected +0 to be close to 21`); y `clear`
+  que no vacía (el caso 3: `expected 1 to be +0`).
+
 ## Romper el código (💥)
 
 Cada 💥 es un único cambio en `src/catalog`, con `git diff --exit-code` limpio
@@ -642,6 +708,7 @@ comprueba que el diff vuelve a estar limpio y los tests en verde.
 | O5 🤔 | `coffee-catalog.tsx`, `includes(filter.toLowerCase())` → `includes(filter)`, **con el test de "BRA" saltado** (`it.skip`, temporal) | **Ninguno**: `Tests  30 passed \| 1 skipped (31)` | [docs/o5-romper-2-sin-test.txt](docs/o5-romper-2-sin-test.txt) |
 | O5 🤔 | el mismo cambio, con el test de "BRA" activo | `CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas` (`Unable to find an accessible element with the role "listitem"`: `"brasil cerrado".includes("BRA")` es `false`) | [docs/o5-romper-2.txt](docs/o5-romper-2.txt) |
 | O5 | `coffee-catalog.tsx`, botón: se quita `disabled={units === 0}` | `CoffeeCatalog > carrito (integración) > debería tener "Vaciar carrito" desactivado cuando el carrito está vacío` (`expect(element).toBeDisabled()` / `Received element is not disabled`) | [docs/o5-romper-3.txt](docs/o5-romper-3.txt) |
+| O6 | `use-cart.ts`, `add`: `setCart((previous) => addToCart(previous, coffee.id))` → `setCart(addToCart(cart, coffee.id))` | `useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act` (`expected 1 to be 2`: los dos `add` leen el mismo `cart` vacío) | [docs/o6-romper-1.txt](docs/o6-romper-1.txt) |
 
 Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
 en verde: el resultado es correcto, lo que está mal es que el original
@@ -668,6 +735,10 @@ arriba.
 Con el 💥 3 de O5, el test `…activar "Vaciar carrito"…` sigue en verde: sin
 `disabled`, el botón siempre está activado. Sólo lo detecta el test del
 carrito vacío.
+
+Con el 💥 de O6, el caso 2 (dos `add` en dos `act` seguidos) sigue en
+verde, y también el 1 y el 3 (no añaden dos veces). Por qué, en la respuesta
+📝 de O6.
 
 ### 🪤 El test del try/catch
 
@@ -726,6 +797,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
             ├── coffee-card.tsx    ← CoffeeCard: nombre, origen, precio, descuento y botón Añadir
             ├── coffee-card.spec.tsx ← O4: 4 tests de la tarjeta con render, screen y userEvent
             ├── use-cart.ts        ← useCart: estado del carrito, units, total, add, remove y clear
+            ├── use-cart.spec.ts   ← O6: 4 tests del hook con renderHook y act
             ├── coffee-catalog.tsx ← CoffeeCatalog: carga, error, buscador y carrito (no se monta en index.tsx)
             ├── coffee-catalog.spec.tsx ← O5: 9 tests del catálogo con getCoffees espiado (carga, error, buscador y carrito)
             └── test-data.ts       ← los tres cafés de prueba que usan todos los tests
@@ -739,7 +811,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
 - [x] O3 · Código asíncrono: la llamada a la API
 - [x] O4 · Un componente presentacional: la tarjeta
 - [x] O5 · Un componente con datos: el catálogo
-- [ ] O6 · Un custom hook: useCart
+- [x] O6 · Un custom hook: useCart
 - [ ] O7 · README + bitácora de IA
 
 ### Opcionales
@@ -1002,3 +1074,55 @@ del `render` es precisamente "Cargando…", que sí está en el primer render.
   directas a funciones de O2. Por eso conviene tener los dos tipos: los
   unitarios dicen dónde está el fallo, y el de integración dice que el
   conjunto funciona.
+
+### O6
+
+**¿Para qué sirve `act`? ¿Qué pasaba en la demo 09 sin él?**
+
+`act` agrupa el código que cambia el estado y, al terminar, espera a que
+React aplique esas actualizaciones y vuelva a renderizar. Así el test ve lo
+mismo que vería la persona usuaria. `add` sólo llama a `setCart`, y
+`setCart` no cambia nada en el momento: deja la actualización en la cola de
+React. Dentro de `act`, cuando el callback termina, React vacía la cola,
+vuelve a llamar al hook y `renderHook` guarda el objeto nuevo en
+`result.current`. Por eso los `expect` van después del `act`.
+
+La demo 09 no está en este repo, así que lo comprobamos nosotros con un spec
+temporal sin `act` ([docs/o6-sin-act.txt](docs/o6-sin-act.txt)). Pasan las
+dos cosas:
+
+1. Cada `add` imprime `An update to TestComponent inside a test was not
+   wrapped in act(...)`. Testing Library activa
+   `IS_REACT_ACT_ENVIRONMENT`, así que React espera que cada actualización
+   vaya dentro de `act` y avisa cuando no es así.
+2. El test lee el valor viejo: `expected +0 to be 2` con dos `add` y
+   `expected +0 to be 1` con uno. Cuando se ejecuta el `expect`, React
+   todavía no ha vuelto a renderizar, y `result.current` sigue siendo el
+   objeto del primer render, con `units` 0.
+
+En esta versión el test no pasa igual: además del aviso, se pone en rojo.
+
+**Según el 💥: ¿por qué el caso 4 detecta el fallo y el caso 2 no?**
+
+Con el 💥, `add` hace `setCart(addToCart(cart, coffee.id))`: usa el `cart`
+que tenía el hook en el render en el que se creó ese `add`, no el último
+valor. Es la trampa de "sumar tres" (`setCount(count + 1)` tres veces suma
+1).
+
+- **Caso 4** (los dos `add` en el mismo `act`): entre una llamada y otra no
+  hay render. Las dos son el `add` del primer render y las dos leen el mismo
+  `cart` viejo, `[]`. Las dos calculan `addToCart([], 3)` →
+  `[{ coffeeId: 3, quantity: 1 }]` y la segunda pisa a la primera con el
+  mismo valor. Resultado: `expected 1 to be 2`
+  ([docs/o6-romper-1.txt](docs/o6-romper-1.txt)). Con el código bueno,
+  `setCart((previous) => …)` encola funciones, y React las aplica en orden
+  pasando a cada una el resultado de la anterior: `[]` → cantidad 1 →
+  cantidad 2.
+- **Caso 2** (dos `act` seguidos): al terminar el primer `act`, React
+  vuelve a renderizar. `result.current` pasa a ser un objeto nuevo, con un
+  `add` nuevo que ve el `cart` ya actualizado
+  (`[{ coffeeId: 3, quantity: 1 }]`). El segundo `act` llama a ese `add`
+  nuevo, así que suma bien y llega a 2. El 💥 sólo se nota cuando hay
+  varias actualizaciones en el mismo render, y eso es justo lo que hace el
+  caso 4. En el navegador pasaría con dos `setCart` en el mismo evento; con
+  dos clics separados no, porque entre uno y otro hay un render.
