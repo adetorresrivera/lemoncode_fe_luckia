@@ -1,0 +1,118 @@
+================================================================
+💥 D2-1 · return [] en vez de return data
+   fichero: src/catalog/coffee.api.ts
+ 06-Testing/lab-testing/src/catalog/coffee.api.ts | 2 +-
+-  return data;
++  return [];
+       × debería devolver los cafés del campo data cuando la API responde 200 43ms
+       × debería mostrar "Cargando…" cuando la API todavía no ha respondido 1051ms
+       × debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 1014ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+TestingLibraryElementError: Unable to find role="listitem"
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200
+TestingLibraryElementError: Unable to find role="listitem"
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería devolver los cafés del campo data cuando la API responde 200
+AssertionError: expected [] to deeply equal [ { id: 1, …(4) }, …(2) ]
+ Test Files  2 failed (2)
+      Tests  3 failed | 7 passed (10)
+   deshecho: git diff --exit-code limpio
+================================================================
+💥 D2-2 · fetch sin cabeceras
+   fichero: src/catalog/coffee.api.ts
+ 06-Testing/lab-testing/src/catalog/coffee.api.ts | 2 +-
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url);
+       × debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 12ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees
+AssertionError: expected '*/*' to be 'application/json' // Object.is equality
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   deshecho: git diff --exit-code limpio
+================================================================
+💥 D2-3 · sin comprobar response.ok
+   fichero: src/catalog/coffee.api.ts
+ 06-Testing/lab-testing/src/catalog/coffee.api.ts | 2 +-
+-  if (!response.ok) {
++  if (false) {
+       × debería rechazar con "Catálogo no encontrado" cuando la API responde 404 11ms
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 13ms
+       × debería rechazar con "Error inesperado" cuando la API responde 500 10ms
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 15ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+Error: expect(element).toHaveTextContent()
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Catálogo no encontrado" cuando la API responde 404
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Error inesperado" cuando la API responde 500
+AssertionError: promise resolved "[ { id: 1, …(4) }, …(2) ]" instead of rejecting
+ Test Files  2 failed (2)
+      Tests  4 failed | 6 passed (10)
+   deshecho: git diff --exit-code limpio
+================================================================
+💥 D2-4 · un catch que convierte el error de red en Error inesperado
+   fichero: src/catalog/coffee.api.ts
+ 06-Testing/lab-testing/src/catalog/coffee.api.ts | 2 +-
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url, { headers: { Accept: 'application/json' } }).catch(() => { throw new Error('Error inesperado'); });
+       × debería propagar el TypeError "fetch failed" de Node cuando la red falla 13ms
+       × debería mostrar una alerta con "fetch failed" cuando la red falla 12ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla
+Error: expect(element).toHaveTextContent()
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando falla la red > debería propagar el TypeError "fetch failed" de Node cuando la red falla
+AssertionError: expected error to be instance of TypeError
+ Test Files  2 failed (2)
+      Tests  2 failed | 8 passed (10)
+   deshecho: git diff --exit-code limpio
+================================================================
+💥 D2-5 · otro mensaje para el 503
+   fichero: src/catalog/coffee.api.ts
+ 06-Testing/lab-testing/src/catalog/coffee.api.ts | 2 +-
+-        throw new Error('Servicio no disponible');
++        throw new Error('Servicio caído');
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 12ms
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 15ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+Error: expect(element).toHaveTextContent()
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+AssertionError: expected [Function] to throw error including 'Servicio no disponible' but got 'Servicio caído'
+ Test Files  2 failed (2)
+      Tests  2 failed | 8 passed (10)
+   deshecho: git diff --exit-code limpio
+================================================================
+💥 D2-6 · loading empieza en false
+   fichero: src/catalog/coffee-catalog.tsx
+ 06-Testing/lab-testing/src/catalog/coffee-catalog.tsx | 2 +-
+-  const [loading, setLoading] = React.useState(true);
++  const [loading, setLoading] = React.useState(false);
+       × debería mostrar "Cargando…" cuando la API todavía no ha respondido 52ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+TestingLibraryElementError: Unable to find an element with the text: Cargando…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   deshecho: git diff --exit-code limpio
+================================================================
+💥 D2-7 · sin .catch en el efecto
+   fichero: src/catalog/coffee-catalog.tsx
+ 06-Testing/lab-testing/src/catalog/coffee-catalog.tsx | 1 -
+-      .catch((e: Error) => setError(e.message))
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 1010ms
+       × debería mostrar una alerta con "fetch failed" cuando la red falla 1008ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+TestingLibraryElementError: Unable to find role="alert"
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla
+TestingLibraryElementError: Unable to find role="alert"
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: Servicio no disponible
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: fetch failed
+Serialized Error: { url: '', redirected: false, status: 0, statusText: '', headers: { constructor: 'Function<Headers>', append: 'Function<append>', delete: 'Function<delete>', get: 'Function<get>', has: 'Function<has>', set: 'Function<set>', getSetCookie: 'Function<getSetCookie>', keys: 'Function<keys>', values: 'Function<values>', entries: 'Function<entries>', forEach: 'Function<forEach>' }, body: null, bodyUsed: false, clone: 'Function<clone>', blob: 'Function<blob>', arrayBuffer: 'Function<arrayBuffer>', text: 'Function<text>', json: 'Function<json>', formData: 'Function<formData>', bytes: 'Function<bytes>' }
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 8 passed (10)
+   deshecho: git diff --exit-code limpio

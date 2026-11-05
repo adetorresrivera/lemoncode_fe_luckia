@@ -60,6 +60,8 @@ npm run test:coverage   # una vez, con la tabla de cobertura y el informe HTML (
 - `npm run test:run` es `vitest run -c ./config/test/config.ts`. Los ejecuta
   una vez y vuelve a la terminal, con código de salida 0 si todo pasa y 1 si
   algo falla. Equivale a `npx vitest run -c ./config/test/config.ts`.
+- Sólo los tests de MSW (D2): `npx vitest run -c ./config/test/config.ts msw`
+  (el filtro `msw` selecciona los ficheros cuyo nombre lo contiene).
 - Si no hay ningún `*.spec.ts(x)` (como al acabar O1), Vitest dice `No test
   files found, exiting with code 1`. Es normal: los tests llegan en O2.
 
@@ -877,6 +879,170 @@ carrito con un único café, y se quedaba en `% Branch 75` (líneas 6 y 11: el
 💥 borra la rama del `??`. Romper el código puede hacer que suba la
 cobertura (ver la bitácora).
 
+## D2 · MSW
+
+En O3 y O5 se espía la red (`vi.spyOn(globalThis, 'fetch')` y
+`vi.spyOn(api, 'getCoffees')`). En D2 se simula **el servidor** con Mock
+Service Worker: `getCoffees`, `fetch` y `Response` se ejecutan de verdad, y
+MSW intercepta la petición antes de que salga del proceso y la contesta. Los
+specs de O3 y O5 se quedan como estaban; los de MSW van en ficheros nuevos
+para poder comparar.
+
+### Instalación
+
+```bash
+npm install -D msw@3.0.3
+```
+
+`msw@3.0.3` era la `latest` de npm. Pide Node `>=22.12.0` (el DevContainer
+tiene `v22.23.4`); sus peers (`vite`, `typescript`, `graphql`) son opcionales
+y los que usamos se cumplen. `npm audit` sigue con las mismas 8
+vulnerabilidades de antes: `msw` no añade ninguna.
+
+Dos cosas de la versión 3 comprobadas en `node_modules/msw` (tipos y
+runtime), distintas de lo que suele aparecer en ejemplos de la 2.x:
+
+- La opción para las peticiones sin handler se llama **`onUnhandledFrame`**,
+  no `onUnhandledRequest`: el nombre antiguo no aparece ni en los tipos ni en
+  el código. Se usa `server.listen({ onUnhandledFrame: 'error' })`.
+- `http` y `HttpResponse` se pueden importar de `msw` (o de `msw/http`);
+  `setupServer`, de `msw/node`.
+
+### Ficheros
+
+| Fichero | Qué hace |
+| --- | --- |
+| `src/catalog/mocks/handlers.ts` | `http.get(url, () => HttpResponse.json({ data: coffees }))`: el "servidor feliz" por defecto, con la `url` de `coffee.api.ts` |
+| `src/catalog/mocks/server.ts` | `setupServer(...handlers)` |
+| `src/catalog/coffee.api.msw.spec.ts` | 6 tests de `getCoffees`: los mismos casos que O3 |
+| `src/catalog/coffee-catalog.msw.spec.tsx` | 4 tests de carga y error del catálogo, sin ningún `vi.spyOn` (`.tsx` porque lleva JSX) |
+
+Cada spec arranca y para el servidor él mismo:
+
+```ts
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+**Por fichero y no en `setup.ts`.** Con el servidor en `setup.ts`, MSW
+escucharía en todos los ficheros de test (`cart.spec`, `coffee-card.spec`,
+los de O3 y O5 con spies…): no se podría olvidar y cualquier petición sin
+handler en cualquier test daría error, pero los specs con spy correrían con
+MSW debajo (el spy tapa el `fetch` parcheado por MSW) y la comparación dejaría
+de ser limpia, y todos los ficheros pagarían la interceptación. Por fichero,
+sólo los dos `.msw` interceptan; el coste son tres líneas repetidas y el
+riesgo de olvidarlas en un spec nuevo.
+
+### La URL relativa
+
+`getCoffees` llama a `fetch('/api/coffees')`. En jsdom, `fetch` la resuelve
+contra `location`, y en esta configuración (Vitest + jsdom sin `url`)
+`location.origin` es `http://localhost:3000`. MSW ve la petición como
+`GET http://localhost:3000/api/coffees` y el handler con ruta relativa
+`'/api/coffees'` la casa porque MSW también la resuelve contra
+`location.origin`. Comprobado con un spec de sonda (borrado) que imprimía
+`location.origin` y el `request.url` de `server.events.on('request:start')`:
+
+```
+location.origin = http://localhost:3000 | document.baseURI = http://localhost:3000/
+MSW ve: GET http://localhost:3000/api/coffees
+status 200 body {"data":[{"id":1,"name":"Etiopía Yirgacheffe",...
+```
+
+La misma sonda pidió `/api/otra` (sin handler): con `'error'`, MSW imprime
+`[MSW] Error: intercepted a request without a matching request handler` y el
+`fetch` rechaza con `TypeError: fetch failed`. El test falla porque la promesa
+rechaza, no por arte de magia: por eso en el verde se busca `[MSW]` en la
+salida (0 apariciones).
+
+### Los tests
+
+`coffee.api.msw.spec.ts`:
+
+| Test | Arrange | Assert |
+| --- | --- | --- |
+| debería devolver los cafés del campo data cuando la API responde 200 | handler por defecto | `toEqual(coffees)` |
+| debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees | `server.use` con un handler que guarda `request.headers.get('accept')` | `toBe('application/json')` |
+| debería rechazar con "$message" cuando la API responde $status (`it.each` 404/503/500) | `server.use(http.get(url, () => HttpResponse.json({ data: coffees }, { status })))` | `await expect(…).rejects.toThrow(message)` |
+| debería propagar el TypeError "fetch failed" de Node cuando la red falla | `server.use(http.get(url, () => HttpResponse.error()))` | `rejects.toThrow(TypeError)` y `rejects.toThrow('fetch failed')` |
+
+`coffee-catalog.msw.spec.tsx`:
+
+| Test | Arrange | Assert |
+| --- | --- | --- |
+| debería mostrar "Cargando…" cuando la API todavía no ha respondido | handler por defecto | `getByText('Cargando…')`, y después `await findAllByRole('listitem')` para que el `setState` no quede fuera de `act` |
+| debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 | handler por defecto | `findAllByRole('listitem')` de longitud 3; `queryByText('Cargando…')` no está |
+| debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 | `server.use` con un 503 | `findByRole('alert')` con `toHaveTextContent` |
+| debería mostrar una alerta con "fetch failed" cuando la red falla | `HttpResponse.error()` | `findByRole('alert')` con `toHaveTextContent('fetch failed')` |
+
+`server.use` añade el handler **delante** de los de `setupServer` sólo hasta
+el `afterEach(resetHandlers)`, que vuelve a dejar el de `handlers.ts`: así
+ningún test depende de otro.
+
+Dos diferencias con los tests de O3 que sólo salen con MSW:
+
+- **El mensaje de red es el de verdad.** Con el spy, `'Failed to fetch'` lo
+  escribíamos nosotros en `mockRejectedValue` (es el mensaje de Chrome). Con
+  `HttpResponse.error()` el `fetch` real de Node rechaza con
+  `TypeError: fetch failed`.
+- **La cabecera es la que se manda, no el argumento.** En O3,
+  `toHaveBeenCalledWith` comprueba con qué objeto se llamó a `fetch`. Aquí el
+  handler lee la petición que construyó `fetch`. Con el 💥 D2-2 (sin
+  `headers`) el handler ve `Accept: */*`, el valor que pone `fetch` por
+  defecto (`expected '*/*' to be 'application/json'`).
+
+### Comprobado
+
+- [docs/d2-verde.txt](docs/d2-verde.txt): `Test Files  7 passed (7)`,
+  `Tests  47 passed (47)` (los 37 de antes + 10 de MSW), 0 líneas con `[MSW]`
+  y `npm run type-check` con salida 0.
+- [docs/d2-romper.txt](docs/d2-romper.txt): 7 💥 (tabla de "Romper el
+  código"); los 10 tests de MSW se ven en rojo al menos una vez.
+- [docs/d2-axios.txt](docs/d2-axios.txt): el experimento de axios, abajo.
+
+### ¿Y si mañana `getCoffees` usa axios?
+
+`axios@1.18.1` ya venía en el `package.json` del `.start-code` (commit
+`c2fc696 L6 - Setup`), así que se probó con axios de verdad **sin instalar
+nada**. En un spec temporal (`src/catalog/tmp-axios.spec.ts`, borrado; su
+código está al principio de `docs/d2-axios.txt`) se escribió un
+`getCoffeesAxios` igual que `getCoffees` pero con `axios.get(url, { headers:
+{ Accept: 'application/json' }, validateStatus: () => true })` y el mismo
+`switch`, y se le pasaron los casos de O3 dos veces: con el spy de
+`globalThis.fetch` y con MSW. `src/catalog` no se tocó.
+
+| Caso | Spy de `globalThis.fetch` (O3) | MSW (D2) |
+| --- | --- | --- |
+| 200 → cafés | ❌ `promise rejected "AxiosError: Network Error"` | ✅ |
+| cabecera Accept | ❌ `expected "fetch" to be called 1 times, but got 0 times` | ✅ (el handler lee `application/json`) |
+| 404 | ❌ `got 'Network Error'` | ✅ |
+| 503 | ❌ `got 'Network Error'` | ✅ |
+| 500 | ❌ `got 'Network Error'` | ✅ |
+| error de red | ❌ `got 'Network Error'` | ❌ `expected error to be instance of TypeError` |
+
+Resultado: `Tests  7 failed | 6 passed (13)`. Con el spy fallan los 6. En
+jsdom axios elige el adaptador `xhr` (`adapter: [ 'xhr', 'http', 'fetch' ]`)
+y usa el `XMLHttpRequest` de jsdom: no llama nunca a `fetch`, el spy no se
+entera y la petición sale de verdad a `http://localhost:3000`, donde no hay
+nada (`Network Error`). Con MSW pasan 5 de 6: `setupServer` intercepta
+también `XMLHttpRequest`, y al test le da igual cómo se haga la petición.
+
+El que falla con MSW falla **con razón**: con axios el error de red ya no es
+un `TypeError` sino un `AxiosError: Network Error`, y el catálogo pasaría a
+enseñar "Network Error". Es un cambio de comportamiento real, no del test.
+
+### Spy contra MSW
+
+| | Spy (`vi.spyOn(globalThis, 'fetch')` en O3, `vi.spyOn(api, 'getCoffees')` en O5) | MSW (`setupServer` + handlers) |
+| --- | --- | --- |
+| Qué se sustituye | La función: `fetch` (O3) o `getCoffees` entero (O5) | El servidor: la petición se intercepta antes de salir del proceso |
+| Qué código real se ejecuta | Ni `fetch` ni `Response` de verdad: el spy devuelve una `Response` construida en el test (O3); en O5 tampoco se ejecuta `getCoffees` | `getCoffees`, el `fetch` de Node, la petición (`Request` con sus cabeceras), la `Response` y su `.json()`; en el catálogo, la cadena entera componente → `getCoffees` → `fetch` |
+| Qué se comprueba | Cómo se llamó a la función (`toHaveBeenCalledWith('/api/coffees', …)`, `toHaveBeenCalledTimes(1)`) y qué hace el código con lo que devuelve | Lo que llega al "servidor" (método, URL, cabeceras, leídas en el handler) y lo que hace el código con la respuesta; los errores de red son los reales (`fetch failed`) |
+| Si cambia la forma de llamar (axios) | Se rompen los 6 tests aunque el comportamiento sea el mismo, y la petición sale a la red de verdad ([docs/d2-axios.txt](docs/d2-axios.txt)) | Siguen pasando 5 de 6; sólo falla el de error de red, que de verdad cambia |
+| Cuánto cuesta montarlo | Nada: `vi.spyOn` viene con Vitest y `restoreMocks` lo deshace solo | Una dependencia (`msw`), `handlers.ts` y `server.ts`, y `listen`/`resetHandlers`/`close` en cada fichero (o en `setup.ts`); hay que saber cómo resuelve la URL relativa |
+| Cuándo conviene | Para probar un componente aislado de la red (O5: el buscador o el carrito no dependen de cómo se pidan los cafés) | Para probar la integración con la API sin depender de cómo se hace la petición |
+
 ## Romper el código (💥)
 
 Cada 💥 es un único cambio en `src/catalog`, con `git diff --exit-code` limpio
@@ -898,6 +1064,13 @@ comprueba que el diff vuelve a estar limpio y los tests en verde.
 | P1 | `use-cart.ts`, `remove`: `setCart((previous) => removeFromCart(previous, coffeeId))` → `setCart((previous) => previous)` | `useCart > debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita` (`expected [ { coffeeId: 3, quantity: 1 } ] to deeply equal []`) y `useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil` (`expected [ { coffeeId: 2, quantity: 1 }, …(1) ] to deeply equal [ { coffeeId: 2, quantity: 1 } ]`) | [docs/p1-romper-1.txt](docs/p1-romper-1.txt) |
 | P1 | `use-cart.ts`, `remove`: `setCart((previous) => removeFromCart(previous, coffeeId))` → `setCart([])` | `useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil` (`expected [] to deeply equal [ { coffeeId: 2, quantity: 1 } ]`) | [docs/p1-romper-2.txt](docs/p1-romper-2.txt) |
 | P1 🤔 | `cart.ts`, el 💥 de `finalPrice` de O2, con sólo el spec temporal sin `expect` y `--coverage` | **Ninguno**: `Tests  1 passed (1)` y `cart.ts` al 100 % en las cuatro columnas | [docs/p1-sin-asserts.txt](docs/p1-sin-asserts.txt) |
+| D2-1 | `coffee.api.ts`, `return data;` → `return [];` (sólo con los specs `.msw`, como todos los D2) | `getCoffees (MSW) > … 200` (`expected [] to deeply equal [ { id: 1, …(4) }, …(2) ]`) y los dos de carga del catálogo (`Unable to find role="listitem"`) | [docs/d2-romper.txt](docs/d2-romper.txt) |
+| D2-2 | `coffee.api.ts`, `fetch(url, { headers: { Accept: 'application/json' } })` → `fetch(url)` | `getCoffees (MSW) > debería mandar la cabecera Accept: application/json…` (`expected '*/*' to be 'application/json'`) | [docs/d2-romper.txt](docs/d2-romper.txt) |
+| D2-3 | `coffee.api.ts`, `if (!response.ok)` → `if (false)` | los tres del `it.each` (`promise resolved "[ { id: 1, …(4) }, …(2) ]" instead of rejecting`) y la alerta del 503 del catálogo | [docs/d2-romper.txt](docs/d2-romper.txt) |
+| D2-4 | `coffee.api.ts`, `fetch(…)` → `fetch(…).catch(() => { throw new Error('Error inesperado'); })` | `getCoffees (MSW) > debería propagar el TypeError "fetch failed"…` (`expected error to be instance of TypeError`) y la alerta de red del catálogo | [docs/d2-romper.txt](docs/d2-romper.txt) |
+| D2-5 | `coffee.api.ts`, `'Servicio no disponible'` → `'Servicio caído'` | el 503 del `it.each` (`but got 'Servicio caído'`) y la alerta del 503 del catálogo | [docs/d2-romper.txt](docs/d2-romper.txt) |
+| D2-6 | `coffee-catalog.tsx`, `useState(true)` → `useState(false)` (loading) | `CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…"…` (`Unable to find an element with the text: Cargando…`) | [docs/d2-romper.txt](docs/d2-romper.txt) |
+| D2-7 | `coffee-catalog.tsx`, se quita `.catch((e: Error) => setError(e.message))` | las dos alertas del catálogo (`Unable to find role="alert"`, y Vitest avisa de dos `Unhandled Rejection`) | [docs/d2-romper.txt](docs/d2-romper.txt) |
 
 Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
 en verde: el resultado es correcto, lo que está mal es que el original
@@ -995,6 +1168,11 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
             ├── use-cart.spec.ts   ← O6: 4 tests del hook con renderHook y act; P1: 2 más de remove
             ├── coffee-catalog.tsx ← CoffeeCatalog: carga, error, buscador y carrito (no se monta en index.tsx)
             ├── coffee-catalog.spec.tsx ← O5: 9 tests del catálogo con getCoffees espiado (carga, error, buscador y carrito)
+            ├── coffee.api.msw.spec.ts ← D2: 6 tests de getCoffees con MSW (los casos de O3)
+            ├── coffee-catalog.msw.spec.tsx ← D2: 4 tests de carga y error del catálogo con MSW, sin vi.spyOn
+            ├── mocks/
+            │   ├── handlers.ts    ← D2: GET /api/coffees → { data: coffees }
+            │   └── server.ts      ← D2: setupServer(...handlers)
             └── test-data.ts       ← los tres cafés de prueba que usan todos los tests
 ```
 
@@ -1019,7 +1197,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
 
 ### Desafíos
 - [ ] D1 · TDD: primero el test
-- [ ] D2 · Simular la red con MSW
+- [x] D2 · Simular la red con MSW
 - [ ] D3 · Los tests en cada push
 
 ## Respuestas

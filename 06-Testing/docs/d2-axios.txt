@@ -1,0 +1,315 @@
+# D2 · paso 6: ¿qué pasa si getCoffees usa axios en vez de fetch?
+# axios 1.18.1 ya venía en el .start-code (commit c2fc696); no se instaló nada.
+# Spec temporal src/catalog/tmp-axios.spec.ts (borrado después). Su código:
+
+    // Spec TEMPORAL (D2, paso 6): se borra después de guardar docs/d2-axios.txt.
+    import axios from 'axios';
+    import { http, HttpResponse } from 'msw';
+    import type { Coffee } from './model';
+    import { url } from './coffee.api';
+    import { server } from './mocks/server';
+    import { coffees } from './test-data';
+    
+    // El mismo getCoffees que coffee.api.ts, pero "mañana": con axios en vez de fetch.
+    // validateStatus: () => true para que axios no lance solo y el switch sea el mismo.
+    const getCoffeesAxios = async (): Promise<Coffee[]> => {
+      const response = await axios.get<{ data: Coffee[] }>(url, {
+        headers: { Accept: 'application/json' },
+        validateStatus: () => true,
+      });
+      if (response.status < 200 || response.status >= 300) {
+        switch (response.status) {
+          case 404:
+            throw new Error('Catálogo no encontrado');
+          case 503:
+            throw new Error('Servicio no disponible');
+          default:
+            throw new Error('Error inesperado');
+        }
+      }
+      return response.data.data;
+    };
+    
+    const cases = [
+      { status: 404, message: 'Catálogo no encontrado' },
+      { status: 503, message: 'Servicio no disponible' },
+      { status: 500, message: 'Error inesperado' },
+    ];
+    
+    describe('con el spy de globalThis.fetch (O3) y axios', () => {
+      it('debería devolver los cafés del campo data cuando la API responde 200', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+          new Response(JSON.stringify({ data: coffees }), { status: 200 }),
+        );
+        await expect(getCoffeesAxios()).resolves.toEqual(coffees);
+      });
+    
+      it('debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json', async () => {
+        const fetchSpy = vi
+          .spyOn(globalThis, 'fetch')
+          .mockResolvedValue(new Response(JSON.stringify({ data: coffees }), { status: 200 }));
+        await getCoffeesAxios().catch(() => undefined);
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+      });
+    
+      it.each(cases)('debería rechazar con "$message" cuando la API responde $status', async ({ status, message }) => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status }));
+        await expect(getCoffeesAxios()).rejects.toThrow(message);
+      });
+    
+      it('debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza', async () => {
+        vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+        await expect(getCoffeesAxios()).rejects.toThrow('Failed to fetch');
+      });
+    });
+    
+    describe('con MSW y axios', () => {
+      beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
+      afterEach(() => server.resetHandlers());
+      afterAll(() => server.close());
+    
+      it('debería devolver los cafés del campo data cuando la API responde 200', async () => {
+        await expect(getCoffeesAxios()).resolves.toEqual(coffees);
+      });
+    
+      it('debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees', async () => {
+        let accept: string | null = null;
+        server.use(
+          http.get(url, ({ request }) => {
+            accept = request.headers.get('accept');
+            return HttpResponse.json({ data: coffees });
+          }),
+        );
+        await getCoffeesAxios();
+        expect(accept).toBe('application/json');
+      });
+    
+      it.each(cases)('debería rechazar con "$message" cuando la API responde $status', async ({ status, message }) => {
+        server.use(http.get(url, () => HttpResponse.json({ data: coffees }, { status })));
+        await expect(getCoffeesAxios()).rejects.toThrow(message);
+      });
+    
+      it('debería propagar el TypeError "fetch failed" de Node cuando la red falla', async () => {
+        server.use(http.get(url, () => HttpResponse.error()));
+        await expect(getCoffeesAxios()).rejects.toThrow(TypeError);
+      });
+    
+      it('(informativo) qué rechaza axios cuando la red falla', async () => {
+        server.use(http.get(url, () => HttpResponse.error()));
+        const error = await getCoffeesAxios().catch((e: unknown) => e);
+        console.log('axios rechaza con:', error instanceof Error ? `${error.name}: ${error.message}` : error);
+        console.log('adaptador usado por axios:', axios.defaults.adapter);
+      });
+    });
+
+$ npx vitest run -c ./config/test/config.ts tmp-axios --reporter=verbose --silent=false
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ × src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería devolver los cafés del campo data cuando la API responde 200 37ms
+   → promise rejected "AxiosError: Network Error { …(5) }" instead of resolving
+ × src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json 4ms
+   → expected "fetch" to be called 1 times, but got 0 times
+ × src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería rechazar con "Catálogo no encontrado" cuando la API responde 404 8ms
+   → expected [Function] to throw error including 'Catálogo no encontrado' but got 'Network Error'
+ × src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería rechazar con "Servicio no disponible" cuando la API responde 503 5ms
+   → expected [Function] to throw error including 'Servicio no disponible' but got 'Network Error'
+ × src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería rechazar con "Error inesperado" cuando la API responde 500 4ms
+   → expected [Function] to throw error including 'Error inesperado' but got 'Network Error'
+ × src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza 4ms
+   → expected [Function] to throw error including 'Failed to fetch' but got 'Network Error'
+ ✓ src/catalog/tmp-axios.spec.ts > con MSW y axios > debería devolver los cafés del campo data cuando la API responde 200 33ms
+stdout | src/catalog/tmp-axios.spec.ts > con MSW y axios > (informativo) qué rechaza axios cuando la red falla
+axios rechaza con: AxiosError: Network Error
+adaptador usado por axios: [ 'xhr', 'http', 'fetch' ]
+
+ ✓ src/catalog/tmp-axios.spec.ts > con MSW y axios > debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 12ms
+ ✓ src/catalog/tmp-axios.spec.ts > con MSW y axios > debería rechazar con "Catálogo no encontrado" cuando la API responde 404 16ms
+ ✓ src/catalog/tmp-axios.spec.ts > con MSW y axios > debería rechazar con "Servicio no disponible" cuando la API responde 503 7ms
+ ✓ src/catalog/tmp-axios.spec.ts > con MSW y axios > debería rechazar con "Error inesperado" cuando la API responde 500 9ms
+ × src/catalog/tmp-axios.spec.ts > con MSW y axios > debería propagar el TypeError "fetch failed" de Node cuando la red falla 8ms
+   → expected error to be instance of TypeError
+ ✓ src/catalog/tmp-axios.spec.ts > con MSW y axios > (informativo) qué rechaza axios cuando la red falla 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería devolver los cafés del campo data cuando la API responde 200
+AssertionError: promise rejected "AxiosError: Network Error { …(5) }" instead of resolving
+ ❯ src/catalog/tmp-axios.spec.ts:40:36
+     38|       new Response(JSON.stringify({ data: coffees }), { status: 200 }),
+     39|     );
+     40|     await expect(getCoffeesAxios()).resolves.toEqual(coffees);
+       |                                    ^
+     41|   });
+     42|
+
+Caused by: AxiosError: Network Error
+ ❯ XMLHttpRequest.handleError node_modules/axios/lib/adapters/xhr.js:124:21
+ ❯ XMLHttpRequest.invokeTheCallbackFunction node_modules/jsdom/lib/generated/idl/EventHandlerNonNull.js:14:28
+ ❯ XMLHttpRequest.<anonymous> node_modules/jsdom/lib/jsdom/living/helpers/create-event-accessor.js:69:32
+ ❯ innerInvokeEventListeners node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:392:16
+ ❯ invokeEventListeners node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:337:3
+ ❯ XMLHttpRequestImpl._dispatch node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:9
+ ❯ fireAnEvent node_modules/jsdom/lib/jsdom/living/helpers/events.js:16:36
+ ❯ requestErrorSteps node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js:162:3
+ ❯ dispatchError node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js:128:3
+ ❯ node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js:777:13
+ ❯ Axios.request node_modules/axios/lib/core/Axios.js:46:41
+ ❯ getCoffeesAxios src/catalog/tmp-axios.spec.ts:12:20
+ ❯ src/catalog/tmp-axios.spec.ts:40:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { description: undefined, number: undefined, config: { transitional: { silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false, legacyInterceptorReqResOrdering: true, advertiseZstdAcceptEncoding: false, validateStatusUndefinedResolves: true }, adapter: [ 'xhr', 'http', 'fetch' ], transformRequest: [ 'Function<transformRequest>' ], transformResponse: [ 'Function<transformResponse>' ], timeout: 0, xsrfCookieName: 'XSRF-TOKEN', xsrfHeaderName: 'X-XSRF-TOKEN', maxContentLength: -1, maxBodyLength: -1, env: { FormData: 'Function<FormData>', Blob: 'Function<Blob>' }, validateStatus: 'Function<validateStatus>', headers: { Accept: 'application/json' }, method: 'get', url: '/api/coffees', allowAbsoluteUrls: true }, code: 'ERR_NETWORK', status: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json
+AssertionError: expected "fetch" to be called 1 times, but got 0 times
+ ❯ src/catalog/tmp-axios.spec.ts:48:22
+     46|       .mockResolvedValue(new Response(JSON.stringify({ data: coffees }…
+     47|     await getCoffeesAxios().catch(() => undefined);
+     48|     expect(fetchSpy).toHaveBeenCalledTimes(1);
+       |                      ^
+     49|   });
+     50|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería rechazar con "Catálogo no encontrado" cuando la API responde 404
+AssertionError: expected [Function] to throw error including 'Catálogo no encontrado' but got 'Network Error'
+
+Expected: "Catálogo no encontrado"
+Received: "Network Error"
+
+ ❯ src/catalog/tmp-axios.spec.ts:53:36
+     51|   it.each(cases)('debería rechazar con "$message" cuando la API respon…
+     52|     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}',…
+     53|     await expect(getCoffeesAxios()).rejects.toThrow(message);
+       |                                    ^
+     54|   });
+     55|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería rechazar con "Servicio no disponible" cuando la API responde 503
+AssertionError: expected [Function] to throw error including 'Servicio no disponible' but got 'Network Error'
+
+Expected: "Servicio no disponible"
+Received: "Network Error"
+
+ ❯ src/catalog/tmp-axios.spec.ts:53:36
+     51|   it.each(cases)('debería rechazar con "$message" cuando la API respon…
+     52|     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}',…
+     53|     await expect(getCoffeesAxios()).rejects.toThrow(message);
+       |                                    ^
+     54|   });
+     55|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería rechazar con "Error inesperado" cuando la API responde 500
+AssertionError: expected [Function] to throw error including 'Error inesperado' but got 'Network Error'
+
+Expected: "Error inesperado"
+Received: "Network Error"
+
+ ❯ src/catalog/tmp-axios.spec.ts:53:36
+     51|   it.each(cases)('debería rechazar con "$message" cuando la API respon…
+     52|     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}',…
+     53|     await expect(getCoffeesAxios()).rejects.toThrow(message);
+       |                                    ^
+     54|   });
+     55|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con el spy de globalThis.fetch (O3) y axios > debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza
+AssertionError: expected [Function] to throw error including 'Failed to fetch' but got 'Network Error'
+
+Expected: "Failed to fetch"
+Received: "Network Error"
+
+ ❯ src/catalog/tmp-axios.spec.ts:58:36
+     56|   it('debería propagar el TypeError "Failed to fetch" tal cual cuando …
+     57|     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Fai…
+     58|     await expect(getCoffeesAxios()).rejects.toThrow('Failed to fetch');
+       |                                    ^
+     59|   });
+     60| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/catalog/tmp-axios.spec.ts > con MSW y axios > debería propagar el TypeError "fetch failed" de Node cuando la red falla
+AssertionError: expected error to be instance of TypeError
+
+- Expected:
+[Function TypeError]
+
++ Received:
+AxiosError {
+  "message": "Network Error",
+  "name": "AxiosError",
+  "isAxiosError": true,
+  "code": "ERR_NETWORK",
+  "config": {
+    "adapter": [
+      "xhr",
+      "http",
+      "fetch",
+    ],
+    "allowAbsoluteUrls": true,
+    "data": undefined,
+    "env": {
+      "Blob": [Function Blob],
+      "FormData": [Function FormData],
+    },
+    "headers": AxiosHeaders {
+      "Accept": "application/json",
+      "Content-Type": undefined,
+    },
+    "maxBodyLength": -1,
+    "maxContentLength": -1,
+    "method": "get",
+    "timeout": 0,
+    "transformRequest": [
+      [Function transformRequest],
+    ],
+    "transformResponse": [
+      [Function transformResponse],
+    ],
+    "transitional": {
+      "advertiseZstdAcceptEncoding": false,
+      "clarifyTimeoutError": false,
+      "forcedJSONParsing": true,
+      "legacyInterceptorReqResOrdering": true,
+      "silentJSONParsing": true,
+      "validateStatusUndefinedResolves": true,
+    },
+    "url": "/api/coffees",
+    "validateStatus": [Function validateStatus],
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+  },
+  "request": XMLHttpRequest {
+    "send": [Function anonymous],
+  },
+  "event": ProgressEvent {
+    "isTrusted": true,
+  },
+}
+
+ ❯ src/catalog/tmp-axios.spec.ts:90:36
+     88|   it('debería propagar el TypeError "fetch failed" de Node cuando la r…
+     89|     server.use(http.get(url, () => HttpResponse.error()));
+     90|     await expect(getCoffeesAxios()).rejects.toThrow(TypeError);
+       |                                    ^
+     91|   });
+     92|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 6 passed (13)
+   Start at  21:04:44
+   Duration  946ms (environment 52%, tests 20%, import 15%, setup 8%, transform 3%, worker 1%)
+

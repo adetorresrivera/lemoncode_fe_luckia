@@ -1,0 +1,76 @@
+$ npx vitest run -c ./config/test/config.ts --reporter=verbose
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts > formatPrice > debería devolver "14.90 €" cuando el precio es 14.9 4ms
+ ✓ src/catalog/cart.spec.ts > formatPrice > debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 1ms
+ ✓ src/catalog/cart.spec.ts > finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+ ✓ src/catalog/cart.spec.ts > finalPrice > debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 1ms
+ ✓ src/catalog/cart.spec.ts > finalPrice > debería devolver el precio tal cual cuando el discount es 0 0ms
+ ✓ src/catalog/cart.spec.ts > addToCart > debería añadir el café con cantidad 1 cuando el carrito está vacío 2ms
+ ✓ src/catalog/cart.spec.ts > addToCart > debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+ ✓ src/catalog/cart.spec.ts > addToCart > no debería modificar el carrito que recibe cuando el café ya está en él 3ms
+ ✓ src/catalog/cart.spec.ts > removeFromCart > debería quitar el café indicado y dejar los demás cuando está en el carrito 2ms
+ ✓ src/catalog/cart.spec.ts > cartTotal > debería devolver 0 cuando el carrito está vacío 1ms
+ ✓ src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 1ms
+ ✓ src/catalog/cart.spec.ts > cartTotal > debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+ ✓ src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde 200 > debería devolver los cafés del campo data cuando la API responde 200 10ms
+ ✓ src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde 200 > debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json 2ms
+ ✓ src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Catálogo no encontrado" cuando la API responde 404 3ms
+ ✓ src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503 1ms
+ ✓ src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Error inesperado" cuando la API responde 500 1ms
+ ✓ src/catalog/coffee.api.spec.ts > getCoffees > cuando falla la red > debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza 1ms
+ ✓ src/catalog/use-cart.spec.ts > useCart > debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 28ms
+ ✓ src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 7ms
+ ✓ src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 5ms
+ ✓ src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 3ms
+ ✓ src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 2ms
+ ✓ src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 2ms
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ✓ src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería devolver los cafés del campo data cuando la API responde 200 47ms
+ ✓ src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 10ms
+ ✓ src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Catálogo no encontrado" cuando la API responde 404 12ms
+ ✓ src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503 7ms
+ ✓ src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Error inesperado" cuando la API responde 500 6ms
+ ✓ src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 93ms
+ ✓ src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando falla la red > debería propagar el TypeError "fetch failed" de Node cuando la red falla 12ms
+ ✓ src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento 13ms
+ ✓ src/catalog/coffee-card.spec.tsx > CoffeeCard > no debería mostrar ninguna etiqueta de descuento cuando el café no tiene descuento 7ms
+ ✓ src/catalog/coffee-card.spec.tsx > CoffeeCard > debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir 42ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido 181ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 28ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 15ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla 15ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 121ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 23ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > error > debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 13ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 56ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 45ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 24ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 10ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 31ms
+ ✓ src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 39ms
+
+ Test Files  7 passed (7)
+      Tests  47 passed (47)
+   Start at  21:03:48
+   Duration  1.98s (environment 67%, setup 12%, tests 9%, import 6%, transform 4%, worker 1%)
+
+
+$ grep -c '\[MSW\]' (avisos de MSW en la salida anterior)
+0
+
+$ npm run type-check
+
+> 05-testing-01-react@1.0.0 type-check
+> tsc --noEmit
+
+(exit 0)
