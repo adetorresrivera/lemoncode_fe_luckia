@@ -1,0 +1,6 @@
+$ npm run type-check
+
+> 05-testing-01-react@1.0.0 type-check
+> tsc --noEmit
+
+(código de salida: 0)

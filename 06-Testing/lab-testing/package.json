@@ -1,0 +1,31 @@
+{
+  "name": "05-testing-01-react",
+  "version": "1.0.0",
+  "description": "Learn testing React by sample, each of the samples contains a readme.md file that indicates the purpose of the sample plus an step by step guide to reproduce it.",
+  "type": "module",
+  "scripts": {
+    "start": "run-p -l type-check:watch start:dev",
+    "start:dev": "vite --open",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch"
+  },
+  "imports": {
+    "#*": "./src/*"
+  },
+  "author": "Lemoncode",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.18.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0"
+  }
+}

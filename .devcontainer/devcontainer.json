@@ -22,11 +22,15 @@
   // Lab 4: parte de una copia de la demo 02-react, que ya trae package.json.
   // Lab 5: hotels-server y client se copian a mano desde .start-code; como en
   // el lab 3, si todavía no están (no hay package.json) se saltan.
-  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi && (cd 04-Frameworks/lab-react && npm install) && if [ -f 05-API_REST/hotels-server/package.json ]; then (cd 05-API_REST/hotels-server && npm install); fi && if [ -f 05-API_REST/client/package.json ]; then (cd 05-API_REST/client && npm install); fi",
+  // Lab 6: lab-testing se copia a mano desde .start-code; igual que en los
+  // labs 3 y 5, si todavía no tiene package.json se salta.
+  "postCreateCommand": "(cd 01-Maquetacion/postula && npm install) && (cd 02-Lenguajes/lab-lenguajes && npm install) && if [ -f 03-Bundling/lab-bundling/package.json ]; then (cd 03-Bundling/lab-bundling && npm install); fi && (cd 04-Frameworks/lab-react && npm install) && if [ -f 05-API_REST/hotels-server/package.json ]; then (cd 05-API_REST/hotels-server && npm install); fi && if [ -f 05-API_REST/client/package.json ]; then (cd 05-API_REST/client && npm install); fi && if [ -f 06-Testing/lab-testing/package.json ]; then (cd 06-Testing/lab-testing && npm install); fi",
 
   // 5173: npm start / npm run dev (servidor de desarrollo).
   // 4173: npm run preview (sirve la carpeta dist del build).
   // Lab 5: 3000: hotels-server (API en /api y el build del cliente en /).
+  // Lab 6: Vitest no abre ningún puerto; el npm start del .start-code
+  // (vite --open) usa el 5173, que ya está aquí.
   "forwardPorts": [3000, 5173, 4173],
   "portsAttributes": {
     // Lab 5: requireLocalPort en 3000 y 5173. Si el puerto está ocupado en

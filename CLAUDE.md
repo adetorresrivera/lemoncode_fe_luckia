@@ -4,11 +4,62 @@ Gestor de candidaturas de empleo. Los usuarios registran sus candidaturas, las
 siguen en una tabla o en un tablero kanban, guardan los contactos de cada
 empresa y controlan qué versión de su CV y carta enviaron a cada oferta.
 
-Ahora mismo estoy en el laboratorio 5 del máster (05-API_REST/lab.md): API
-REST, en 05-API_REST. Un cliente con fetch (05-API_REST/client) contra el
-servidor de hoteles del módulo (05-API_REST/hotels-server).
+Ahora mismo estoy en el laboratorio 6 del máster (06-Testing/lab.md):
+Testing, en 06-Testing/lab-testing. Tests con Vitest y Testing Library sobre
+un trozo del catálogo de Tueste ya escrito (src/catalog).
 
-## Stack (lab 5)
+## Stack (lab 6)
+- Proyecto: `.start-code` del módulo (React 19 + TypeScript 6, Vite 8), con
+  los dos arreglos del enunciado: `tsconfig.json` con `"module": "esnext"` y
+  `"moduleResolution": "bundler"`, y el `!` en
+  `document.getElementById('root')!` (`src/index.tsx`).
+- Vitest + jsdom + Testing Library (`@testing-library/react`,
+  `@testing-library/dom`, `@testing-library/jest-dom`,
+  `@testing-library/user-event`), configurado como en la demo 05:
+  `config/test/config.ts` con `globals`, `restoreMocks`, `environment:
+  'jsdom'` y `setupFiles` con `@testing-library/jest-dom/vitest`; script
+  `"test"`.
+
+## Reglas (lab 6)
+- El código de `src/catalog` NO se cambia, salvo en los pasos 💥, que se
+  deshacen siempre (`git checkout --` y `git diff --exit-code` limpio).
+- Cada test con Arrange / Act / Assert (en comentarios); nombres que digan qué
+  se espera y en qué caso ("debería … cuando …"); ningún test depende de otro.
+- Vitest, nunca Jest (`vi.fn`, `vi.spyOn`, `vi.mock`; nada de `jest.*`).
+- Consultas por rol, label y texto (`screen.getByRole` con `name`…); nada de
+  `container.querySelector` ni clases CSS. `getBy` para lo que está, `queryBy`
+  + `not.toBeInTheDocument` para lo que no está, `await findBy` para lo que
+  aparece después de una promesa.
+- `userEvent` (con `userEvent.setup()`), no `fireEvent`.
+- Rechazos con `await expect(…).rejects.toThrow(…)`, nunca try/catch sin
+  `expect.assertions`; `expect(…).rejects` siempre con `await`.
+- `toEqual` para objetos y arrays, `toBeCloseTo` para decimales.
+- Nada de snapshots de todo el componente (sólo en P2, si se hace).
+- Mockear sólo lo que sale del proceso (`fetch`, `getCoffees`, el tiempo);
+  nada de mockear el hook, el carrito ni la tarjeta.
+- Cada test que escriba Claude se ve fallar (💥) antes de darlo por bueno.
+- `npx vitest run` en verde y `npm run type-check` sin errores.
+- Código TypeScript (heredado del lab 2): nada de `any` ni `enum`, nada de
+  `as` para callar errores (la única excepción es el try/catch temporal del 🪤
+  de O3, que no se queda), tipos con `import type { ... }`.
+- Cada dependencia que se instale tiene que hacer falta (las de O1 las indica
+  el enunciado; `@vitest/coverage-v8` sólo en P1, `msw` sólo en D2).
+- No modificar otros entregables (P5 tocaría el lab 4: no se hace).
+- README sin huecos: Claude responde todas las preguntas 📝 con lo que se ha
+  comprobado de verdad (salidas de vitest en `docs/`). Nada de `TODO`.
+- Bitácora: cada vez que Claude corrija algo suyo (o el usuario le corrija), o
+  un test suyo no se ponga rojo con un 💥, se añade una entrada a
+  `06-Testing/bitacora.md` con el formato del enunciado (`### Prompt`,
+  `### Qué me dio`, `### Qué corregí y por qué`) y el número de prompt de
+  `prompts.md`.
+
+## Lab 5 (cerrado)
+API REST (05-API_REST): un cliente con fetch (05-API_REST/client) contra el
+servidor de hoteles del módulo (05-API_REST/hotels-server). Estas reglas NO
+aplican al lab 6 salvo lo indicado en "Reglas (lab 6)"; se conservan como
+referencia.
+
+### Stack (lab 5)
 - Servidor: `hotels-server` del módulo (Express + `tsx watch`, datos en
   memoria, puerto 3000, CORS sólo con `USE_CORS=yes`). En los obligatorios NO
   se modifica (arreglarlo es el desafío D1).
@@ -16,7 +67,7 @@ servidor de hoteles del módulo (05-API_REST/hotels-server).
   `src/hotels.api.ts` con `request<T>` y las cinco funciones (`getHotels`,
   `getHotel`, `createHotel`, `updateHotel`, `deleteHotel`).
 
-## Reglas (lab 5)
+### Reglas (lab 5)
 - fetch: comprobar siempre `response.ok` y lanzar un error con método, URL y
   estado; no leer JSON en un 204; `Accept: application/json` siempre y
   `Content-Type: application/json` sólo cuando hay cuerpo.
@@ -147,6 +198,12 @@ lab 4 salvo lo indicado en "Reglas (lab 4)"; se conservan como referencia.
   comprobaciones 🔎 que tengo que hacer en el navegador (pestaña Network) y
   las capturas que tengo que hacer (qué tiene que verse, nombre de fichero y
   carpeta).
+- Lab 6: un obligatorio cada vez. Después de cada uno, explícame cada test:
+  qué prepara (Arrange), qué hace (Act) y qué comprueba cada expect; por qué
+  esa consulta (getBy/queryBy/findBy, por rol o por label) y ese matcher
+  (toBe/toEqual/toBeCloseTo); qué se mockea y por qué; qué 💥 lo pone en
+  rojo; y lista las comprobaciones 🔎 que tengo que hacer yo y las preguntas
+  📝 que tocan para el README.
 - Si dudas entre dos enfoques, pregúntame antes de elegir.
 - Todas las soluciones deben funcionar con DevContainers. No instales dependencies en local sin confirmar antes.
 - El proyecto está estructurado en laboratorios entregables dentro de cada carpeta (lab.md) que irán desarrollandose hasta el producto final. Cada uno es una fase distinta del proyecto. No modifiques varios entregables a la vez.

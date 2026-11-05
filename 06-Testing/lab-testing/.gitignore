@@ -1,0 +1,16 @@
+# Dependencias (npm install / npm ci las vuelve a crear)
+node_modules/
+# Build de Vite (npm run build no existe en este proyecto, pero vite build lo crearía)
+dist/
+# Informe de cobertura (P1: vitest --coverage)
+coverage/
+
+# Lo que ya traía el .gitignore del .start-code
+# Informes de tests en otros formatos (reporters html/json/junit)
+test-report.*
+junit.xml
+# Logs de npm y ficheros de copia de seguridad de git merge
+*.log
+*.orig
+# Venía en el .start-code; el proyecto no tiene carpeta public/
+public/
