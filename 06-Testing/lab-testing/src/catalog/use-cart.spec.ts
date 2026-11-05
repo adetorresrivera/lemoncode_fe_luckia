@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useCart } from './use-cart';
 import { coffees } from './test-data';
 
-const [, , brazil] = coffees;
+const [, colombia, brazil] = coffees;
 
 describe('useCart', () => {
   it('debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook', () => {
@@ -71,5 +71,44 @@ describe('useCart', () => {
 
     // Assert
     expect(result.current.units).toBe(2);
+  });
+
+  it('debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita', () => {
+    // Arrange
+    const { result } = renderHook(() => useCart(coffees));
+    act(() => {
+      result.current.add(brazil);
+    });
+
+    // Act
+    act(() => {
+      result.current.remove(brazil.id);
+    });
+
+    // Assert
+    expect(result.current.cart).toEqual([]);
+    expect(result.current.units).toBe(0);
+    expect(result.current.total).toBe(0);
+  });
+
+  it('debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil', () => {
+    // Arrange
+    const { result } = renderHook(() => useCart(coffees));
+    act(() => {
+      result.current.add(colombia);
+    });
+    act(() => {
+      result.current.add(brazil);
+    });
+
+    // Act
+    act(() => {
+      result.current.remove(brazil.id);
+    });
+
+    // Assert
+    expect(result.current.cart).toEqual([{ coffeeId: colombia.id, quantity: 1 }]);
+    expect(result.current.units).toBe(1);
+    expect(result.current.total).toBeCloseTo(12.9);
   });
 });

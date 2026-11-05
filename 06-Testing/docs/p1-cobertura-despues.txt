@@ -1,0 +1,37 @@
+
+> 05-testing-01-react@1.0.0 test:coverage
+> vitest run -c ./config/test/config.ts --coverage
+
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Coverage enabled with v8
+
+ ✓ src/catalog/cart.spec.ts (12 tests) 16ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 28ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 46ms
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 177ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 376ms
+
+ Test Files  5 passed (5)
+      Tests  37 passed (37)
+   Start at  20:50:58
+   Duration  1.78s (environment 61%, setup 15%, tests 11%, import 6%, worker 4%, transform 3%)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |     100 |      100 |     100 |     100 |                   
+ cart.ts           |     100 |      100 |     100 |     100 |                   
+ coffee-card.tsx   |     100 |      100 |     100 |     100 |                   
+ ...ee-catalog.tsx |     100 |      100 |     100 |     100 |                   
+ coffee.api.ts     |     100 |      100 |     100 |     100 |                   
+ model.ts          |       0 |        0 |       0 |       0 |                   
+ use-cart.ts       |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------

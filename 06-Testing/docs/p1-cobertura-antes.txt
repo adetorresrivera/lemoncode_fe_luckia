@@ -1,0 +1,37 @@
+
+> 05-testing-01-react@1.0.0 test:coverage
+> vitest run -c ./config/test/config.ts --coverage
+
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Coverage enabled with v8
+
+ ✓ src/catalog/cart.spec.ts (12 tests) 10ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 19ms
+ ✓ src/catalog/use-cart.spec.ts (4 tests) 38ms
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 135ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 357ms
+
+ Test Files  5 passed (5)
+      Tests  35 passed (35)
+   Start at  20:48:39
+   Duration  1.73s (environment 59%, setup 15%, tests 9%, transform 8%, import 5%, worker 4%)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   96.77 |      100 |   92.59 |     100 |                   
+ cart.ts           |     100 |      100 |     100 |     100 |                   
+ coffee-card.tsx   |     100 |      100 |     100 |     100 |                   
+ ...ee-catalog.tsx |     100 |      100 |     100 |     100 |                   
+ coffee.api.ts     |     100 |      100 |     100 |     100 |                   
+ model.ts          |       0 |        0 |       0 |       0 |                   
+ use-cart.ts       |   85.71 |      100 |   71.42 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------

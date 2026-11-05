@@ -1,0 +1,63 @@
+## 1) Código sin tocar
+$ npx vitest run -c ./config/test/config.ts src/catalog/tmp-sin-asserts.spec.ts --coverage --coverage.include=src/catalog/cart.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Coverage enabled with v8
+
+ ✓ src/catalog/tmp-sin-asserts.spec.ts (1 test) 3ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  20:51:47
+   Duration  716ms (environment 76%, setup 13%, worker 5%, transform 5%, import 1%, tests 1%)
+
+ % Coverage report from v8
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |     100 |      100 |     100 |     100 |                   
+ cart.ts  |     100 |      100 |     100 |     100 |                   
+----------|---------|----------|---------|---------|-------------------
+
+## 2) Con el 💥 de finalPrice de O2 (git diff de src/catalog/cart.ts)
+diff --git a/06-Testing/lab-testing/src/catalog/cart.ts b/06-Testing/lab-testing/src/catalog/cart.ts
+index 957fa25..36eea4f 100644
+--- a/06-Testing/lab-testing/src/catalog/cart.ts
++++ b/06-Testing/lab-testing/src/catalog/cart.ts
+@@ -3,7 +3,7 @@ import type { CartItem, Coffee } from './model';
+ export const formatPrice = (price: number): string => `${price.toFixed(2)} €`;
+ 
+ export const finalPrice = (coffee: Coffee): number =>
+-  coffee.price * (1 - (coffee.discount ?? 0));
++  coffee.price;
+ 
+ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.some((item) => item.coffeeId === coffeeId)
+$ npx vitest run -c ./config/test/config.ts src/catalog/tmp-sin-asserts.spec.ts --coverage --coverage.include=src/catalog/cart.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Coverage enabled with v8
+
+ ✓ src/catalog/tmp-sin-asserts.spec.ts (1 test) 3ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  20:51:48
+   Duration  755ms (environment 76%, setup 14%, worker 5%, transform 3%, import 1%, tests 1%)
+
+ % Coverage report from v8
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |     100 |      100 |     100 |     100 |                   
+ cart.ts  |     100 |      100 |     100 |     100 |                   
+----------|---------|----------|---------|---------|-------------------
+
+## 3) El mismo 💥 con la suite de verdad (npx vitest run -c ./config/test/config.ts src/catalog/cart.spec.ts)
+     × debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 4ms
+     × debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 14.9 to be close to 13.41, received difference is 1.4900000000000002, but expected 0.005
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)
+AssertionError: expected 40.3 to be close to 37.32, received difference is 2.979999999999997, but expected 0.005
+      Tests  2 failed | 10 passed (12)

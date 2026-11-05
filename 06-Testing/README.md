@@ -26,6 +26,7 @@ reconstruirlo se usa la 24.
    ```
 4. Los tests no usan ningún puerto. `npm start` (heredado del `.start-code`:
    `vite --open` + `tsc --watch`) usa el 5173, que ya está en `forwardPorts`.
+   El informe de cobertura de P1 se sirve en el 4173, que también lo está.
 
 Las versiones instaladas son las del `package-lock.json`: React 19.2.7,
 TypeScript 6.0.3 y Vite 8.1.0. `npm install` avisa de 8 vulnerabilidades en
@@ -50,6 +51,7 @@ hay errores, no muestra nada.
 cd 06-Testing/lab-testing
 npm test           # modo vigilancia
 npm run test:run   # una vez y termina
+npm run test:coverage   # una vez, con la tabla de cobertura y el informe HTML (P1)
 ```
 
 - `npm test` es `vitest -c ./config/test/config.ts`. Ejecuta los tests y se
@@ -691,6 +693,190 @@ No se mockea nada: el hook no sale del proceso (ni `fetch` ni tiempo).
   [])` (el caso 2 por el total: `expected +0 to be close to 21`); y `clear`
   que no vacía (el caso 3: `expected 1 to be +0`).
 
+## P1 · Cobertura
+
+```bash
+cd 06-Testing/lab-testing
+npm run test:coverage
+```
+
+Es `vitest run -c ./config/test/config.ts --coverage`. Pasa todos los tests
+una vez y, al acabar, imprime la tabla de cobertura y escribe el informe HTML
+en `lab-testing/coverage/`. Esa carpeta está en el `.gitignore` y no aparece
+en `git status`. `npm test` y `npm run test:run` no miden nada, porque la
+cobertura sólo se activa con `--coverage`.
+
+### Instalación y configuración
+
+```bash
+npm install -D @vitest/coverage-v8@5.1.0
+```
+
+Va con la misma versión que `vitest` (5.1.0, `node -p
+"require('vitest/package.json').version"`), porque su `peerDependencies`
+pide `vitest: '5.1.0'` exacta (`npm view @vitest/coverage-v8@5.1.0
+peerDependencies`). En `config/test/config.ts`:
+
+```ts
+coverage: {
+  provider: 'v8',
+  reporter: ['text', 'html'],
+  include: ['src/catalog/**/*.{ts,tsx}'],
+  exclude: ['src/catalog/**/*.spec.{ts,tsx}', 'src/catalog/test-data.ts'],
+},
+```
+
+Los nombres están comprobados en los tipos de la versión instalada
+(`interface CoverageOptions` en `node_modules/vitest/dist/`):
+
+- `provider: 'v8'`: usa los contadores que ya trae el motor V8 de Node, sin
+  reescribir el código (`'istanbul'` sí lo instrumenta). Es el valor por
+  defecto, pero queda escrito para que se vea qué paquete hace falta.
+- `reporter`, en singular. `test.reporters`, en plural, es otra opción: la
+  de los resultados de los tests. Por defecto serían `['text', 'html',
+  'clover', 'json']`. Los dos últimos son para herramientas de CI y aquí no
+  se usan.
+- `include`: los ficheros que salen en el informe, aunque ningún test los
+  importe. Sin `include` sólo aparecen los que algún test carga.
+- `exclude`: se aplica después de `include` y quita los propios tests y los
+  datos de prueba, que si no inflarían el porcentaje.
+
+⚠️ **Vitest 5 cambia la tabla cuando lo lanza un agente de IA.** Mira
+variables como `CLAUDECODE` o `AI_AGENT` (con `std-env`). Si las encuentra,
+pone `skipFull: true` en el reporter `text`, que oculta las filas al 100 %, y
+añade un `text-summary`. En una terminal normal sale la tabla entera. Las
+salidas de `docs/` se generaron sin esas variables (`env -u AI_AGENT -u
+CLAUDECODE -u CLAUDE_CODE NO_COLOR=1 npm run test:coverage`), para que sean
+lo que ve una persona.
+
+### Abrir el informe HTML
+
+`coverage/index.html` se sirve en el puerto 4173, que ya está en
+`forwardPorts` del DevContainer. No hay que instalar nada:
+
+```bash
+cd 06-Testing/lab-testing
+npx vite preview --outDir coverage --port 4173 --strictPort
+```
+
+Después se abre `http://localhost:4173/` en el navegador de Windows y se
+sale con `Ctrl+C`. `vite preview` sirve una carpeta ya generada (por
+defecto `dist`, aquí `coverage`). Con `--strictPort` falla si el 4173 está
+ocupado, en vez de cambiar de puerto sin avisar. Alternativa con el python3
+del contenedor: `python3 -m http.server 4173 -d coverage`. Las dos
+comprobadas con `curl`: `/` devuelve `200` con `<title>Code coverage report
+for All files</title>`, y `/use-cart.ts.html` también devuelve `200`.
+
+### Líneas, ramas y funciones
+
+- **Sentencias y líneas** (`% Stmts`, `% Lines`): si cada sentencia (o
+  línea) se ha ejecutado al menos una vez.
+- **Funciones** (`% Funcs`): si cada función se ha llamado al menos una vez,
+  contando también las flechas que van dentro de otras.
+- **Ramas** (`% Branch`): si se ha recorrido cada camino de cada decisión
+  (`if`, `? :`, `??`, `&&`, cada `case`).
+  - En `coffee-card.tsx`, `{coffee.discount ? <p>…</p> : null}` son dos
+    ramas. Las dos se recorren porque los tests de O4 pintan Etiopía (con
+    `discount`) y Colombia (sin él). Con un solo café, la línea saldría al
+    100 % y las ramas no.
+  - En `coffee.api.ts`, el `if (!response.ok)` tiene dos ramas y el `switch`
+    tres más (`404`, `503`, `default`). O3 prueba la respuesta buena, el 404,
+    el 503 y el 500. Sin el test del 503, la línea `throw new Error('Servicio
+    no disponible')` saldría sin cubrir.
+
+### Antes ([docs/p1-cobertura-antes.txt](docs/p1-cobertura-antes.txt))
+
+```
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+All files          |   96.77 |      100 |   92.59 |     100 |
+ cart.ts           |     100 |      100 |     100 |     100 |
+ coffee-card.tsx   |     100 |      100 |     100 |     100 |
+ ...ee-catalog.tsx |     100 |      100 |     100 |     100 |
+ coffee.api.ts     |     100 |      100 |     100 |     100 |
+ model.ts          |       0 |        0 |       0 |       0 |
+ use-cart.ts       |   85.71 |      100 |   71.42 |     100 |
+```
+
+- **`use-cart.ts`**: lo único sin cubrir es `remove` (línea 9). Ningún test
+  de O6 la llama. Faltan 2 de 7 funciones (la flecha `remove` y la
+  `(previous) => removeFromCart(…)` de dentro) y 2 de 14 sentencias (sus
+  cuerpos). Aun así **las líneas salen al 100 %**: `const remove = …` se
+  ejecuta en cada render, porque crear la función ya cuenta como ejecutar la
+  línea, aunque nunca se llame. Por eso `Uncovered Line #s` sale vacío. En el HTML,
+  `coverage/use-cart.ts.html` marca `remove = (c…` y `setCart((…` con
+  `title="function not covered"`.
+- **`model.ts`**: sólo tiene `interface`. TypeScript las borra al compilar,
+  así que no hay nada que ejecutar (0 de 0) y no baja el total.
+- **El resto**, al 100 %: los tests de O2 a O5 recorren todas sus ramas.
+
+### Tests añadidos
+
+En `src/catalog/use-cart.spec.ts`, después de los cuatro de O6:
+
+| Test | Arrange | Act | Assert |
+| --- | --- | --- | --- |
+| debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita | `act(() => add(brazil))` | `act(() => remove(brazil.id))` | `cart` → `toEqual([])`; `units` → `toBe(0)`; `total` → `toBe(0)` |
+| debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil | `add(colombia)` y `add(brazil)`, cada uno en su `act` | `act(() => remove(brazil.id))` | `cart` → `toEqual([{ coffeeId: colombia.id, quantity: 1 }])`; `units` → `toBe(1)`; `total` → `toBeCloseTo(12.9)` |
+
+Para cubrir la línea bastaba con el primero. El segundo está porque un
+`remove` que vacía todo el carrito (el 💥 2 de P1) deja el primero en verde:
+sólo se nota si queda otro café que no se tenía que ir. Que `removeFromCart`
+quite todas las unidades a la vez y no mute el carrito ya lo prueba
+`cart.spec.ts`, así que no se repite aquí. No se mockea nada.
+
+### Después ([docs/p1-cobertura-despues.txt](docs/p1-cobertura-despues.txt))
+
+```
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+All files          |     100 |      100 |     100 |     100 |
+ cart.ts           |     100 |      100 |     100 |     100 |
+ coffee-card.tsx   |     100 |      100 |     100 |     100 |
+ ...ee-catalog.tsx |     100 |      100 |     100 |     100 |
+ coffee.api.ts     |     100 |      100 |     100 |     100 |
+ model.ts          |       0 |        0 |       0 |       0 |
+ use-cart.ts       |     100 |      100 |     100 |     100 |
+```
+
+`Tests  37 passed (37)` (35 de O1-O6 + 2 de P1). `npm run type-check`
+limpio.
+
+### Por qué un 100 % no quiere decir "bien probado"
+
+La cobertura mide **qué se ejecuta**, no **qué se comprueba**. Un test sin
+ningún `expect` ejecuta el código igual que uno bueno, así que "cubre" lo
+mismo. Para demostrarlo
+([docs/p1-sin-asserts.txt](docs/p1-sin-asserts.txt)) se usó un spec temporal,
+`src/catalog/tmp-sin-asserts.spec.ts`, ya borrado. Llama a todas las
+funciones de `cart.ts` (`formatPrice`, `finalPrice` con y sin descuento,
+`addToCart` con un café que está y con otro que no, `removeFromCart` y
+`cartTotal` con un id que no existe) **sin ningún `expect`**. Se midió sólo
+`cart.ts` con:
+
+```bash
+npx vitest run -c ./config/test/config.ts src/catalog/tmp-sin-asserts.spec.ts --coverage --coverage.include=src/catalog/cart.ts
+```
+
+| | `cart.ts` | Tests |
+| --- | --- | --- |
+| Código sin tocar | 100 / 100 / 100 / 100 | `1 passed (1)` |
+| Con el 💥 de `finalPrice` de O2 (`coffee.price * (1 - (coffee.discount ?? 0))` → `coffee.price`) | 100 / 100 / 100 / 100 | `1 passed (1)` |
+| El mismo 💥 con `cart.spec.ts` | — | `2 failed \| 10 passed (12)` (`expected 14.9 to be close to 13.41`, `expected 40.3 to be close to 37.32`) |
+
+Con el precio mal calculado, la cobertura sigue al 100 % y todo en verde.
+Los 💥 son lo que dice si un test sirve: si se rompe el código y ningún test
+se pone en rojo, ese código no está probado, salga el porcentaje que salga.
+Es lo mismo que el 🪤 de O3: el try/catch sin `expect.assertions` pasaba con
+un 200 sin llegar a ejecutar el `expect`, y ese test también "cubría" el
+`getCoffees`. La cobertura sirve para lo contrario: una línea **sin**
+cubrir seguro que no está probada (como `remove`). Una línea cubierta sólo
+dice que se ha ejecutado.
+
+Un detalle de la primera versión del spec temporal: sólo usaba Etiopía y un
+carrito con un único café, y se quedaba en `% Branch 75` (líneas 6 y 11: el
+`?? 0` y el `: item` del `map`). Con el 💥 **subía** a 83,33 %, porque el
+💥 borra la rama del `??`. Romper el código puede hacer que suba la
+cobertura (ver la bitácora).
+
 ## Romper el código (💥)
 
 Cada 💥 es un único cambio en `src/catalog`, con `git diff --exit-code` limpio
@@ -709,6 +895,9 @@ comprueba que el diff vuelve a estar limpio y los tests en verde.
 | O5 🤔 | el mismo cambio, con el test de "BRA" activo | `CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas` (`Unable to find an accessible element with the role "listitem"`: `"brasil cerrado".includes("BRA")` es `false`) | [docs/o5-romper-2.txt](docs/o5-romper-2.txt) |
 | O5 | `coffee-catalog.tsx`, botón: se quita `disabled={units === 0}` | `CoffeeCatalog > carrito (integración) > debería tener "Vaciar carrito" desactivado cuando el carrito está vacío` (`expect(element).toBeDisabled()` / `Received element is not disabled`) | [docs/o5-romper-3.txt](docs/o5-romper-3.txt) |
 | O6 | `use-cart.ts`, `add`: `setCart((previous) => addToCart(previous, coffee.id))` → `setCart(addToCart(cart, coffee.id))` | `useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act` (`expected 1 to be 2`: los dos `add` leen el mismo `cart` vacío) | [docs/o6-romper-1.txt](docs/o6-romper-1.txt) |
+| P1 | `use-cart.ts`, `remove`: `setCart((previous) => removeFromCart(previous, coffeeId))` → `setCart((previous) => previous)` | `useCart > debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita` (`expected [ { coffeeId: 3, quantity: 1 } ] to deeply equal []`) y `useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil` (`expected [ { coffeeId: 2, quantity: 1 }, …(1) ] to deeply equal [ { coffeeId: 2, quantity: 1 } ]`) | [docs/p1-romper-1.txt](docs/p1-romper-1.txt) |
+| P1 | `use-cart.ts`, `remove`: `setCart((previous) => removeFromCart(previous, coffeeId))` → `setCart([])` | `useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil` (`expected [] to deeply equal [ { coffeeId: 2, quantity: 1 } ]`) | [docs/p1-romper-2.txt](docs/p1-romper-2.txt) |
+| P1 🤔 | `cart.ts`, el 💥 de `finalPrice` de O2, con sólo el spec temporal sin `expect` y `--coverage` | **Ninguno**: `Tests  1 passed (1)` y `cart.ts` al 100 % en las cuatro columnas | [docs/p1-sin-asserts.txt](docs/p1-sin-asserts.txt) |
 
 Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
 en verde: el resultado es correcto, lo que está mal es que el original
@@ -739,6 +928,11 @@ carrito vacío.
 Con el 💥 de O6, el caso 2 (dos `add` en dos `act` seguidos) sigue en
 verde, y también el 1 y el 3 (no añaden dos veces). Por qué, en la respuesta
 📝 de O6.
+
+Con el 💥 2 de P1, el primer test de `remove` sigue en verde: con un solo
+café en el carrito, "quitar Brasil" y "vaciarlo todo" dan lo mismo. Con el
+🤔 de P1 no falla nada porque el spec no comprueba nada (ver "Por qué un
+100 % no quiere decir bien probado").
 
 ### 🪤 El test del try/catch
 
@@ -779,10 +973,11 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
 ├── docs/             ← salidas de type-check y vitest (.txt) que prueban cada paso
 └── lab-testing/      ← copia de 06-testing/.start-code (React + TypeScript + Vite)
     ├── index.html    ← <div id="root"> y carga src/index.tsx
-    ├── package.json  ← scripts start, type-check, test y test:run
+    ├── package.json  ← scripts start, type-check, test, test:run y test:coverage (P1)
+    ├── coverage/     ← informe de cobertura (lo genera test:coverage; en el .gitignore)
     ├── tsconfig.json ← con los dos arreglos de arriba; include con config/test
     ├── config/test/
-    │   ├── config.ts   ← configuración de Vitest (globals, restoreMocks, jsdom, setupFiles)
+    │   ├── config.ts   ← configuración de Vitest (globals, restoreMocks, jsdom, setupFiles y coverage de P1)
     │   ├── config.d.ts ← tipos de los globals de Vitest para tsc
     │   └── setup.ts    ← carga los matchers de jest-dom antes de cada fichero de test
     └── src/
@@ -797,7 +992,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
             ├── coffee-card.tsx    ← CoffeeCard: nombre, origen, precio, descuento y botón Añadir
             ├── coffee-card.spec.tsx ← O4: 4 tests de la tarjeta con render, screen y userEvent
             ├── use-cart.ts        ← useCart: estado del carrito, units, total, add, remove y clear
-            ├── use-cart.spec.ts   ← O6: 4 tests del hook con renderHook y act
+            ├── use-cart.spec.ts   ← O6: 4 tests del hook con renderHook y act; P1: 2 más de remove
             ├── coffee-catalog.tsx ← CoffeeCatalog: carga, error, buscador y carrito (no se monta en index.tsx)
             ├── coffee-catalog.spec.tsx ← O5: 9 tests del catálogo con getCoffees espiado (carga, error, buscador y carrito)
             └── test-data.ts       ← los tres cafés de prueba que usan todos los tests
@@ -815,7 +1010,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
 - [ ] O7 · README + bitácora de IA
 
 ### Opcionales
-- [ ] P1 · Cobertura
+- [x] P1 · Cobertura
 - [ ] P2 · Snapshots: a favor y en contra
 - [ ] P3 · Temporizadores falsos
 - [ ] P4 · Context: un carrito compartido

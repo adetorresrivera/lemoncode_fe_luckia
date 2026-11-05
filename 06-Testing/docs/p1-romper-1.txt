@@ -1,0 +1,96 @@
+diff --git a/06-Testing/lab-testing/src/catalog/use-cart.ts b/06-Testing/lab-testing/src/catalog/use-cart.ts
+index 0d364bd..5599373 100644
+--- a/06-Testing/lab-testing/src/catalog/use-cart.ts
++++ b/06-Testing/lab-testing/src/catalog/use-cart.ts
+@@ -6,7 +6,7 @@ export const useCart = (coffees: Coffee[]) => {
+   const [cart, setCart] = React.useState<CartItem[]>([]);
+ 
+   const add = (coffee: Coffee) => setCart((previous) => addToCart(previous, coffee.id));
+-  const remove = (coffeeId: number) => setCart((previous) => removeFromCart(previous, coffeeId));
++  const remove = (coffeeId: number) => setCart((previous) => previous);
+   const clear = () => setCart([]);
+ 
+   const units = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (12 tests) 18ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 24ms
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ❯ src/catalog/use-cart.spec.ts (6 tests | 2 failed) 58ms
+   ❯ useCart (6)
+     ✓ debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 23ms
+     ✓ debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 5ms
+     ✓ debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 5ms
+     ✓ debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 4ms
+     × debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 11ms
+     × debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 4ms
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 131ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 352ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita
+AssertionError: expected [ { coffeeId: 3, quantity: 1 } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "coffeeId": 3,
++     "quantity": 1,
++   },
++ ]
+
+ ❯ src/catalog/use-cart.spec.ts:89:33
+     87|
+     88|     // Assert
+     89|     expect(result.current.cart).toEqual([]);
+       |                                 ^
+     90|     expect(result.current.units).toBe(0);
+     91|     expect(result.current.total).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil
+AssertionError: expected [ { coffeeId: 2, quantity: 1 }, …(1) ] to deeply equal [ { coffeeId: 2, quantity: 1 } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "coffeeId": 2,
+      "quantity": 1,
+    },
++   {
++     "coffeeId": 3,
++     "quantity": 1,
++   },
+  ]
+
+ ❯ src/catalog/use-cart.spec.ts:110:33
+    108|
+    109|     // Assert
+    110|     expect(result.current.cart).toEqual([{ coffeeId: colombia.id, quan…
+       |                                 ^
+    111|     expect(result.current.units).toBe(1);
+    112|     expect(result.current.total).toBeCloseTo(12.9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  2 failed | 35 passed (37)
+   Start at  20:52:12
+   Duration  1.51s (environment 68%, setup 13%, tests 11%, import 5%, transform 2%, worker 1%)
+

@@ -274,3 +274,55 @@ el 2." (prompt 6 de `prompts.md`).
    `clear` que no vacía (caso 3). El del estado inicial demuestra que el
    `toEqual([])` del caso 1 sirve para algo: `units` y `total` seguían a 0 y
    sólo falló esa línea.
+
+## 11 · Las salidas de P1 en la carpeta equivocada
+
+### Prompt
+
+"Ejecuta npm run test:coverage y guarda la tabla de texto en
+docs/p1-cobertura-antes.txt (NO_COLOR=1)." (prompt P1 de `prompts.md`).
+
+### Qué me dio
+
+Ejecuté el comando desde `lab-testing/` y escribí `docs/` desde allí, así
+que creé una carpeta nueva, `lab-testing/docs/`, con
+`p1-cobertura-antes.txt` y `p1-cobertura-despues.txt`. Las salidas de todo
+el lab van en `06-Testing/docs/`, que es a donde enlaza el README.
+
+### Qué corregí y por qué
+
+Moví los dos ficheros a `06-Testing/docs/` y borré `lab-testing/docs/`. Las
+salidas siguientes (`p1-sin-asserts.txt`, `p1-romper-1.txt` y
+`p1-romper-2.txt`) se escribieron directamente en `../docs/`. Antes de
+guardarlas también vi que Vitest 5 detecta que lo lanza un agente (por
+`CLAUDECODE` y `AI_AGENT`, con `std-env`) y oculta en la tabla las filas al
+100 %. Por eso todas se generaron sin esas variables: así salen igual que
+en tu terminal.
+
+## 12 · El spec "sin asserts" no llegaba al 100 %
+
+### Prompt
+
+"Demuestra que 100 % de cobertura no es estar bien probado: un spec temporal
+que llame a todas las funciones de cart.ts SIN ningún expect […] cobertura
+100 % y todo verde." (prompt P1 de `prompts.md`).
+
+### Qué me dio
+
+La primera versión del spec temporal llamaba a cada función una vez: sólo
+con Etiopía y con un carrito de un único café. La tabla daba `% Branch 75`,
+con las líneas 6 y 11 sin cubrir. No se recorrían el lado `0` del
+`coffee.discount ?? 0` (Etiopía tiene descuento) ni el `: item` del `map` de
+`addToCart` (no había otro café que dejar igual). Con el 💥 de `finalPrice`
+las ramas subían a 83,33 %, porque el 💥 borra la rama del `??`. "Llamar a
+todas las funciones" no es lo mismo que recorrer todas las ramas.
+
+### Qué corregí y por qué
+
+Añadí `finalPrice(colombia)` (sin descuento) y un carrito con dos cafés en
+el que se suma uno que no está, y sigue sin ningún `expect`. Con esos
+cambios sale 100 % en las cuatro columnas, con y sin el 💥, y el test en
+verde ([docs/p1-sin-asserts.txt](docs/p1-sin-asserts.txt)). Lo que se
+quería demostrar sólo se ve si la cobertura de verdad es del 100 %. Dejé la
+primera versión contada en el README porque enseña otra cosa: romper el
+código puede hacer que suba la cobertura.
