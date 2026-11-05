@@ -242,6 +242,95 @@ Vitest 5 detecta si lo lanza un agente de IA (variables `AI_AGENT`,
 se generaron sin esas variables (`env -u AI_AGENT -u CLAUDECODE …`), para
 que se vean como en tu terminal, con el reporter `default`.
 
+## O2 · El carrito
+
+Fichero `lab-testing/src/catalog/cart.spec.ts`: 12 tests, con un `describe`
+por función. Los cafés salen de `test-data.ts` (Etiopía 14.9 con `discount:
+0.1`, Colombia 12.9 y Brasil 10.5, sin descuento). El único café inventado es
+`{ ...colombia, discount: 0 }`, y se construye en el Arrange de su test. Cada
+test escribe su propio carrito literal, así que ninguno depende de otro.
+
+| `describe` | Test | Matcher |
+| --- | --- | --- |
+| formatPrice | debería devolver "14.90 €" cuando el precio es 14.9 | `toBe` |
+| formatPrice | debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") | `toBe` |
+| finalPrice | debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) | `toBeCloseTo(13.41, 2)` |
+| finalPrice | debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) | `toBe` |
+| finalPrice | debería devolver el precio tal cual cuando el discount es 0 | `toBe` |
+| addToCart | debería añadir el café con cantidad 1 cuando el carrito está vacío | `toEqual` |
+| addToCart | debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito | `toEqual` |
+| addToCart | no debería modificar el carrito que recibe cuando el café ya está en él | `toEqual` + `not.toBe` |
+| removeFromCart | debería quitar el café indicado y dejar los demás cuando está en el carrito | `toEqual` |
+| cartTotal | debería devolver 0 cuando el carrito está vacío | `toBe` |
+| cartTotal | debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) | `toBeCloseTo(37.32, 2)` |
+| cartTotal | debería contar como 0 un coffeeId que no existe en el catálogo | `toBe` |
+
+### Por qué cada matcher
+
+- **`toBe`** (`Object.is`) para los strings de `formatPrice` y para los
+  números que salen exactos. `12.9 * (1 - 0)` es `12.9 * 1`, sin redondeo.
+  `0` es el valor inicial del `reduce`. `10.5` es `0 + 10.5 * 1`. Si alguno
+  no fuese exacto, el test se pondría rojo y se vería enseguida.
+- **`toEqual`** para los carritos (arrays de objetos). Compara el contenido,
+  recursivamente. Con `toBe` el test fallaría siempre, porque `addToCart` y
+  `removeFromCart` devuelven un array nuevo y `Object.is` compara referencias.
+- **`toBeCloseTo(x, 2)`** cuando hay que multiplicar decimales (el descuento
+  de Etiopía y el total). Pasa si `|recibido − esperado| < 0.005`.
+  Comprobado con `node -e`: con estos números el resultado sí es exacto.
+  `14.9 * (1 - 0.1) === 13.41` da `true` (con `toPrecision(20)`, los dos son
+  `13.410000000000000142`) y `2 × 13.41 + 10.5 === 37.32` también. En cambio,
+  `0.1 + 0.2` da `0.30000000000000004`. Que el redondeo caiga justo en el
+  double de `13.41` es casualidad. Con otro precio o descuento podría no
+  pasar, y un test que dependa de eso es frágil. Ver la entrada 4 de la
+  [bitácora](bitacora.md).
+- **`toEqual` + `not.toBe` para la mutación.** El original se copia con
+  `structuredClone`, que hace una copia profunda. Después se comprueba
+  `expect(cart).toEqual(original)`: el carrito que se pasó sigue teniendo el
+  mismo contenido, item a item. También se comprueba
+  `expect(result).not.toBe(cart)`: lo devuelto es otro array. Cada uno detecta
+  un fallo distinto (ver la tabla de 💥):
+  - `toEqual` detecta que se **cambie algo dentro** del carrito (el 💥 1 suma
+    1 al item original). Sólo funciona con la copia profunda. Con
+    `[...cart]`, la copia es otro array pero con **los mismos objetos**, así
+    que cuando `addToCart` muta el item cambia también la copia, y el
+    `toEqual` sigue en verde. Comprobado con `node -e`: tras la mutación,
+    la copia superficial quedó con `quantity: 3`, igual que `cart`, y la de
+    `structuredClone` se quedó con `quantity: 2`.
+  - `not.toBe` detecta que se **devuelva el mismo array** (por ejemplo, si
+    `addToCart` lo hiciera con `push` y `return cart`). No detecta el 💥 1,
+    porque `map` crea siempre un array nuevo aunque los items sean los
+    originales.
+  - El test añade un café **que ya está** en el carrito. Si añadiese uno
+    nuevo, se ejecutaría la rama `[...cart, { coffeeId, quantity: 1 }]` y el
+    código del 💥 1 no se ejecutaría.
+
+### Comprobado
+
+- [docs/o2-verde.txt](docs/o2-verde.txt): `Tests  12 passed (12)`, con
+  `--reporter=verbose` para que salga el nombre de cada test.
+  `npm run type-check` limpio.
+- Los dos 💥 del enunciado, en la tabla de abajo. Además, para que cada test
+  se vea fallar al menos una vez (los dos 💥 del enunciado sólo ponen en rojo
+  3 de los 12), se hicieron 8 💥 más, uno cada vez y deshecho después:
+  [docs/o2-romper-otros.txt](docs/o2-romper-otros.txt).
+
+## Romper el código (💥)
+
+Cada 💥 es un único cambio en `src/catalog`, con `git diff --exit-code` limpio
+antes. La salida es la de `NO_COLOR=1 npx vitest run -c
+./config/test/config.ts`. Después se deshace con `git checkout --` y se
+comprueba que el diff vuelve a estar limpio y los tests en verde.
+
+| Obligatorio | Qué se cambió | Test(s) en rojo | Salida |
+| --- | --- | --- | --- |
+| O2 | `cart.ts`, `addToCart`: `{ ...item, quantity: item.quantity + 1 }` → `((item.quantity += 1), item)` | `addToCart > no debería modificar el carrito que recibe cuando el café ya está en él` (falla el `toEqual`: `quantity` 3 en vez de 2) | [docs/o2-romper-1.txt](docs/o2-romper-1.txt) |
+| O2 | `cart.ts`, `finalPrice`: `coffee.price * (1 - (coffee.discount ?? 0))` → `coffee.price` | `finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)` (14.9) y `cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)` (40.3) | [docs/o2-romper-2.txt](docs/o2-romper-2.txt) |
+
+Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
+en verde: el resultado es correcto, lo que está mal es que el original
+también cambia. Con el 💥 2, los dos tests de Colombia siguen en verde: sin
+descuento, `coffee.price` y la fórmula dan lo mismo.
+
 ## Estructura
 
 ```
@@ -265,6 +354,7 @@ que se vean como en tu terminal, con el reporter `default`.
         └── catalog/  ← el código que se prueba, copiado tal cual del enunciado
             ├── model.ts           ← interfaces Coffee y CartItem
             ├── cart.ts            ← funciones puras: formatPrice, finalPrice, addToCart, removeFromCart, cartTotal
+            ├── cart.spec.ts       ← O2: 12 tests de las funciones del carrito
             ├── coffee.api.ts      ← getCoffees: fetch a /api/coffees y un error por cada estado
             ├── coffee-card.tsx    ← CoffeeCard: nombre, origen, precio, descuento y botón Añadir
             ├── use-cart.ts        ← useCart: estado del carrito, units, total, add, remove y clear
@@ -276,7 +366,7 @@ que se vean como en tu terminal, con el reporter `default`.
 
 ### Obligatorios
 - [x] O1 · Configurar Vitest
-- [ ] O2 · Funciones puras: el carrito
+- [x] O2 · Funciones puras: el carrito
 - [ ] O3 · Código asíncrono: la llamada a la API
 - [ ] O4 · Un componente presentacional: la tarjeta
 - [ ] O5 · Un componente con datos: el catálogo
@@ -354,3 +444,34 @@ fichero. En la segunda fila, el segundo test falla sólo porque el primero se
 ha ejecutado antes. Si lo ejecutas solo, pasa. Con `restoreMocks: true` cada
 test empieza con los objetos reales, y la regla "ningún test depende de
 otro" se cumple sin tener que escribir `mockRestore()` a mano en cada uno.
+
+### O2
+
+**¿Por qué las funciones puras (laboratorio 2) son las más fáciles de probar? ¿Qué habéis tenido que preparar en el Arrange?**
+
+Una función pura sólo depende de sus argumentos y sólo produce su valor de
+retorno. No lee nada de fuera (ni red, ni reloj, ni DOM, ni estado global) y
+no cambia nada de fuera (ni siquiera lo que recibe). Por eso el test es
+siempre el mismo: unos datos, una llamada y un `expect` sobre lo que
+devuelve. No hace falta jsdom, ni `render`, ni `await`, ni mockear nada, y
+el resultado no depende del orden de los tests ni de la máquina. Los 12
+tests de `cart.spec.ts` tardan entre 0 y 2 ms cada uno
+([docs/o2-verde.txt](docs/o2-verde.txt)). Y cuando uno falla, el mensaje
+apunta directamente a la función: `expected 14.9 to be close to 13.41`.
+
+Lo único que hay que preparar en el Arrange son las entradas:
+
+- **Los cafés**: los tres de `test-data.ts`, desestructurados como
+  `ethiopia`, `colombia` y `brazil`, que no se modifican nunca. El catálogo
+  completo (`coffees`) se pasa a `cartTotal`. El único café que no está en
+  `test-data.ts` es `{ ...colombia, discount: 0 }`, y se construye en su
+  propio Arrange con spread, sin tocar `colombia`.
+- **Los carritos**: cada test escribe el suyo como un array literal
+  (vacío, `[{1, 2}, {3, 1}]`…). Así ninguno comparte un carrito que otro
+  pueda haber cambiado, y aunque `addToCart` mutase (💥 1) no afectaría a
+  los demás tests.
+- **Un `coffeeId` que no existe** (`99`) para comprobar que `cartTotal` lo
+  cuenta como 0.
+- **La copia para la mutación**: `structuredClone(cart)` antes del Act. Tiene
+  que ser profunda, porque el 💥 1 muta el item, no el array, y una copia
+  con `[...cart]` compartiría ese item y cambiaría con él (ver O2 arriba).

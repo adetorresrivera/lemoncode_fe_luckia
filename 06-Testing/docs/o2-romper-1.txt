@@ -1,0 +1,58 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/cart.spec.ts (12 tests | 1 failed) 12ms
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 1ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ❯ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 0ms
+     × no debería modificar el carrito que recibe cuando el café ya está en él 6ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 0ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > addToCart > no debería modificar el carrito que recibe cuando el café ya está en él
+AssertionError: expected [ { coffeeId: 1, quantity: 3 }, …(1) ] to deeply equal [ { coffeeId: 1, quantity: 2 }, …(1) ]
+
+- Expected
++ Received
+
+@@ -1,9 +1,9 @@
+  [
+    {
+      "coffeeId": 1,
+-     "quantity": 2,
++     "quantity": 3,
+    },
+    {
+      "coffeeId": 3,
+      "quantity": 1,
+    },
+
+ ❯ src/catalog/cart.spec.ts:114:18
+    112|
+    113|     // Assert
+    114|     expect(cart).toEqual(original);
+       |                  ^
+    115|     expect(result).not.toBe(cart);
+    116|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 passed (12)
+   Start at  19:53:47
+   Duration  668ms (environment 77%, setup 12%, transform 6%, tests 2%, import 1%, worker 1%)
+

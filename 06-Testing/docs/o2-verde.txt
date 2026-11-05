@@ -1,0 +1,21 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts > formatPrice > debería devolver "14.90 €" cuando el precio es 14.9 2ms
+ ✓ src/catalog/cart.spec.ts > formatPrice > debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+ ✓ src/catalog/cart.spec.ts > finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+ ✓ src/catalog/cart.spec.ts > finalPrice > debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+ ✓ src/catalog/cart.spec.ts > finalPrice > debería devolver el precio tal cual cuando el discount es 0 0ms
+ ✓ src/catalog/cart.spec.ts > addToCart > debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+ ✓ src/catalog/cart.spec.ts > addToCart > debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 0ms
+ ✓ src/catalog/cart.spec.ts > addToCart > no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+ ✓ src/catalog/cart.spec.ts > removeFromCart > debería quitar el café indicado y dejar los demás cuando está en el carrito 0ms
+ ✓ src/catalog/cart.spec.ts > cartTotal > debería devolver 0 cuando el carrito está vacío 0ms
+ ✓ src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+ ✓ src/catalog/cart.spec.ts > cartTotal > debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  19:53:41
+   Duration  748ms (environment 72%, setup 13%, transform 12%, import 1%, tests 1%, worker 1%)
+

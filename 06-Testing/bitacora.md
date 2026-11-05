@@ -73,3 +73,31 @@ que nadie ha pedido hace más difícil revisar el diff, y en este lab el
 `tsconfig.json` es justo uno de los ficheros que hay que poder defender
 línea a línea. En el `package.json`, `JSON.stringify` no cambió nada más que
 los dos scripts.
+
+## 4 · "14.9 * 0.9 da 13.410000000000002"
+
+### Prompt
+
+"toBe para strings y números exactos, toEqual para arrays y objetos,
+toBeCloseTo para decimales. Explica en un comentario sólo donde no sea obvio
+(p. ej. por qué 14.9 * 0.9 necesita toBeCloseTo: comprueba con node -e cuánto
+da de verdad y pon el valor en el comentario)." (prompt 2 de `prompts.md`).
+
+### Qué me dio
+
+Escribió el comentario de memoria, antes de ejecutar `node -e`: "14.9 * (1 -
+0.1) da 13.410000000000002 en JavaScript, no 13.41: con toBe fallaría". En el
+de `cartTotal` puso "37.32000000000001".
+
+### Qué corregí y por qué
+
+Al ejecutar `node -e` salió `13.41` y `37.32`, y `14.9 * (1 - 0.1) === 13.41`
+da `true` (con `toPrecision(20)` los dos son `13.410000000000000142`, el mismo
+double). Con estos números, `toBe` pasaría. El enunciado dice lo contrario
+("no da exactamente 13.41"), pero la cuenta da justo el double más cercano a
+13.41. El que no cuadra es otro, por ejemplo `0.1 + 0.2`, que da
+`0.30000000000000004`. Cambié los dos comentarios para que digan lo que se
+ha comprobado. `toBeCloseTo` se queda: no hace falta porque falle `toBe`,
+sino porque un resultado con decimales no tiene por qué ser exacto, y el
+test no puede depender de que el redondeo caiga bien. Lo mismo va en el
+README (O2).

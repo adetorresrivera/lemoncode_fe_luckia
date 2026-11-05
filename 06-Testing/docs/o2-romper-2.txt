@@ -1,0 +1,54 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/cart.spec.ts (12 tests | 2 failed) 14ms
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 1ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ❯ finalPrice (3)
+     × debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 4ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+   ❯ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     × debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 1ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)
+AssertionError: expected 14.9 to be close to 13.41, received difference is 1.4900000000000002, but expected 0.005
+ ❯ src/catalog/cart.spec.ts:44:20
+     42|     // Un resultado con decimales no tiene por qué ser exacto, así que…
+     43|     // (…, 2): acepta una diferencia menor que 0.005 y no depende de e…
+     44|     expect(result).toBeCloseTo(13.41, 2);
+       |                    ^
+     45|   });
+     46|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)
+AssertionError: expected 40.3 to be close to 37.32, received difference is 2.979999999999997, but expected 0.005
+ ❯ src/catalog/cart.spec.ts:164:20
+    162|     // Decimales, igual que en finalPrice: toBeCloseTo (con node -e da…
+    163|     // pero sería casualidad).
+    164|     expect(result).toBeCloseTo(37.32, 2);
+       |                    ^
+    165|   });
+    166|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 10 passed (12)
+   Start at  19:53:56
+   Duration  738ms (environment 79%, setup 12%, transform 5%, tests 2%, import 1%, worker 1%)
+

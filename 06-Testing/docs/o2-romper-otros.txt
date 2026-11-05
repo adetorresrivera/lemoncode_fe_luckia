@@ -1,0 +1,286 @@
+💥 extra de O2 (además de o2-romper-1 y o2-romper-2), para ver en rojo cada test al menos una vez.
+Cada bloque: un único cambio en src/catalog/cart.ts, deshecho después con git checkout -- y git diff --exit-code limpio.
+Ejecutado con NO_COLOR=1 npx vitest run -c ./config/test/config.ts; la salida está filtrada con grep (líneas ✓/×, FAIL, AssertionError y Tests).
+Al final, otra vez 12 passed (12).
+
+==================================================================
+💥 formatPrice: toFixed(2) → toFixed(1)
+
+@@ -1,6 +1,6 @@
+ import type { CartItem, Coffee } from './model';
+ 
+-export const formatPrice = (price: number): string => `${price.toFixed(2)} €`;
++export const formatPrice = (price: number): string => `${price.toFixed(1)} €`;
+ 
+ export const finalPrice = (coffee: Coffee): number =>
+   coffee.price * (1 - (coffee.discount ?? 0));
+
+     × debería devolver "14.90 €" cuando el precio es 14.9 6ms
+     × debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 1ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 1ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > formatPrice > debería devolver "14.90 €" cuando el precio es 14.9
+AssertionError: expected '14.9 €' to be '14.90 €' // Object.is equality
+ FAIL  src/catalog/cart.spec.ts > formatPrice > debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €")
+AssertionError: expected '10.0 €' to be '10.00 €' // Object.is equality
+      Tests  2 failed | 10 passed (12)
+
+==================================================================
+💥 finalPrice: discount ?? 0 → discount || 0.5
+
+@@ -3,7 +3,7 @@ import type { CartItem, Coffee } from './model';
+ export const formatPrice = (price: number): string => `${price.toFixed(2)} €`;
+ 
+ export const finalPrice = (coffee: Coffee): number =>
+-  coffee.price * (1 - (coffee.discount ?? 0));
++  coffee.price * (1 - (coffee.discount || 0.5));
+ 
+ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.some((item) => item.coffeeId === coffeeId)
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 1ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     × debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 5ms
+     × debería devolver el precio tal cual cuando el discount es 0 1ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 0ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 0ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 0ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 0ms
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     × debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     × debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > finalPrice > debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9)
+AssertionError: expected 6.45 to be 12.9 // Object.is equality
+ FAIL  src/catalog/cart.spec.ts > finalPrice > debería devolver el precio tal cual cuando el discount es 0
+AssertionError: expected 6.45 to be 12.9 // Object.is equality
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)
+AssertionError: expected 32.07 to be close to 37.32, received difference is 5.25, but expected 0.005
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería contar como 0 un coffeeId que no existe en el catálogo
+AssertionError: expected 5.25 to be 10.5 // Object.is equality
+      Tests  4 failed | 8 passed (12)
+
+==================================================================
+💥 addToCart: café nuevo con quantity: 1 → quantity: 0
+
+@@ -10,7 +10,7 @@ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+     ? cart.map((item) =>
+         item.coffeeId === coffeeId ? { ...item, quantity: item.quantity + 1 } : item
+       )
+-    : [...cart, { coffeeId, quantity: 1 }];
++    : [...cart, { coffeeId, quantity: 0 }];
+ 
+ export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.filter((item) => item.coffeeId !== coffeeId);
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 2ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+     × debería añadir el café con cantidad 1 cuando el carrito está vacío 6ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 0ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 0ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > addToCart > debería añadir el café con cantidad 1 cuando el carrito está vacío
+AssertionError: expected [ { coffeeId: 1, quantity: +0 } ] to deeply equal [ { coffeeId: 1, quantity: 1 } ]
+      Tests  1 failed | 11 passed (12)
+
+==================================================================
+💥 addToCart: item.quantity + 1 → item.quantity + 2
+
+@@ -8,7 +8,7 @@ export const finalPrice = (coffee: Coffee): number =>
+ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.some((item) => item.coffeeId === coffeeId)
+     ? cart.map((item) =>
+-        item.coffeeId === coffeeId ? { ...item, quantity: item.quantity + 1 } : item
++        item.coffeeId === coffeeId ? { ...item, quantity: item.quantity + 2 } : item
+       )
+     : [...cart, { coffeeId, quantity: 1 }];
+ 
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 2ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     × debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 6ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 0ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > addToCart > debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito
+AssertionError: expected [ { coffeeId: 1, quantity: 4 }, …(1) ] to deeply equal [ { coffeeId: 1, quantity: 3 }, …(1) ]
+      Tests  1 failed | 11 passed (12)
+
+==================================================================
+💥 addToCart: ? cart.map(…) → ? cart (devuelve el mismo array sin tocarlo)
+
+@@ -7,9 +7,7 @@ export const finalPrice = (coffee: Coffee): number =>
+ 
+ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.some((item) => item.coffeeId === coffeeId)
+-    ? cart.map((item) =>
+-        item.coffeeId === coffeeId ? { ...item, quantity: item.quantity + 1 } : item
+-      )
++    ? cart
+     : [...cart, { coffeeId, quantity: 1 }];
+ 
+ export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 2ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     × debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 7ms
+     × no debería modificar el carrito que recibe cuando el café ya está en él 2ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > addToCart > debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito
+AssertionError: expected [ { coffeeId: 1, quantity: 2 }, …(1) ] to deeply equal [ { coffeeId: 1, quantity: 3 }, …(1) ]
+ FAIL  src/catalog/cart.spec.ts > addToCart > no debería modificar el carrito que recibe cuando el café ya está en él
+AssertionError: expected [ { coffeeId: 1, quantity: 2 }, …(1) ] not to be [ { coffeeId: 1, quantity: 2 }, …(1) ] // Object.is equality
+      Tests  2 failed | 10 passed (12)
+
+==================================================================
+💥 removeFromCart: !== → ===
+
+@@ -13,7 +13,7 @@ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+     : [...cart, { coffeeId, quantity: 1 }];
+ 
+ export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+-  cart.filter((item) => item.coffeeId !== coffeeId);
++  cart.filter((item) => item.coffeeId === coffeeId);
+ 
+ export const cartTotal = (cart: CartItem[], coffees: Coffee[]): number =>
+   cart.reduce((total, item) => {
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 2ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 0ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+     × debería quitar el café indicado y dejar los demás cuando está en el carrito 7ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un coffeeId que no existe en el catálogo 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > removeFromCart > debería quitar el café indicado y dejar los demás cuando está en el carrito
+AssertionError: expected [ { coffeeId: 2, quantity: 2 } ] to deeply equal [ { coffeeId: 1, quantity: 1 }, …(1) ]
+      Tests  1 failed | 11 passed (12)
+
+==================================================================
+💥 cartTotal: valor inicial }, 0) → }, 1)
+
+@@ -19,4 +19,4 @@ export const cartTotal = (cart: CartItem[], coffees: Coffee[]): number =>
+   cart.reduce((total, item) => {
+     const coffee = coffees.find((c) => c.id === item.coffeeId);
+     return coffee ? total + finalPrice(coffee) * item.quantity : total;
+-  }, 0);
++  }, 1);
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 1ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 0ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 0ms
+     × debería devolver 0 cuando el carrito está vacío 5ms
+     × debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 1ms
+     × debería contar como 0 un coffeeId que no existe en el catálogo 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería devolver 0 cuando el carrito está vacío
+AssertionError: expected 1 to be +0 // Object.is equality
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)
+AssertionError: expected 38.32 to be close to 37.32, received difference is 1, but expected 0.005
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería contar como 0 un coffeeId que no existe en el catálogo
+AssertionError: expected 11.5 to be 10.5 // Object.is equality
+      Tests  3 failed | 9 passed (12)
+
+==================================================================
+💥 cartTotal: café que no existe : total → : total + 1
+
+@@ -18,5 +18,5 @@ export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] =
+ export const cartTotal = (cart: CartItem[], coffees: Coffee[]): number =>
+   cart.reduce((total, item) => {
+     const coffee = coffees.find((c) => c.id === item.coffeeId);
+-    return coffee ? total + finalPrice(coffee) * item.quantity : total;
++    return coffee ? total + finalPrice(coffee) * item.quantity : total + 1;
+   }, 0);
+
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 2ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 0ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 1ms
+   ✓ removeFromCart (1)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     × debería contar como 0 un coffeeId que no existe en el catálogo 5ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería contar como 0 un coffeeId que no existe en el catálogo
+AssertionError: expected 11.5 to be 10.5 // Object.is equality
+      Tests  1 failed | 11 passed (12)
+
