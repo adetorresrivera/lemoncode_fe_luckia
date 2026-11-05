@@ -1,0 +1,183 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 2 failed) 331ms
+   ❯ CoffeeCatalog (9)
+     ❯ buscador (3)
+       × debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 52ms
+       × debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 30ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar
+TestingLibraryElementError: Unable to find an accessible element with the role "listitem"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Cafés del mes":
+  [36m<h2 />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Buscar":
+  [36m<input[39m
+    [33mid[39m=[32m"filter"[39m
+    [33mvalue[39m=[32m"bra"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Vaciar carrito":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m"bra"[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/catalog/coffee-catalog.spec.tsx:65:28
+     63|
+     64|       // Assert
+     65|       const items = screen.getAllByRole('listitem');
+       |                            ^
+     66|       expect(items).toHaveLength(1);
+     67|       expect(within(items[0]).getByRole('heading', { name: 'Brasil Cer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas
+TestingLibraryElementError: Unable to find an accessible element with the role "listitem"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Cafés del mes":
+  [36m<h2 />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Buscar":
+  [36m<input[39m
+    [33mid[39m=[32m"filter"[39m
+    [33mvalue[39m=[32m"BRA"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Vaciar carrito":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m"BRA"[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/catalog/coffee-catalog.spec.tsx:98:28
+     96|
+     97|       // Assert
+     98|       const items = screen.getAllByRole('listitem');
+       |                            ^
+     99|       expect(items).toHaveLength(1);
+    100|       expect(within(items[0]).getByRole('heading', { name: 'Brasil Cer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 29 passed (31)
+   Start at  20:20:25
+   Duration  1.30s (environment 67%, tests 13%, setup 12%, import 6%, transform 2%, worker 1%)
+

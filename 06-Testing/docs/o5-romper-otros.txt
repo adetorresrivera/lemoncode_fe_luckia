@@ -1,0 +1,106 @@
+💥 extra de O5 (además de o5-romper-1, -2 y -3), para ver en rojo cada test al menos una vez.
+Cada bloque: un único cambio en src/catalog/coffee-catalog.tsx, deshecho después con git checkout -- y git diff --exit-code limpio.
+Ejecutado con NO_COLOR=1 npx vitest run -c ./config/test/config.ts src/catalog/coffee-catalog.spec.tsx; la salida está filtrada con grep (líneas ✓/×, FAIL, errores, Expected/Received y Tests).
+
+==================================================================
+💥 "Cargando…" → "Cargando..." (tres puntos en vez del carácter …)
+
+@@ -22 +22 @@ export const CoffeeCatalog: React.FC = () => {
+-  if (loading) return <p>Cargando…</p>;
++  if (loading) return <p>Cargando...</p>;
+
+       × debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+TestingLibraryElementError: Unable to find an element with the text: Cargando…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+      Tests  1 failed | 8 passed (9)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 se quita .finally(() => setLoading(false)) (la carga no termina nunca)
+
+@@ -19 +19 @@ export const CoffeeCatalog: React.FC = () => {
+-      .finally(() => setLoading(false));
++      ;
+
+       × debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 
+       × debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 
+       × debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 
+       × debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 
+       × debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 
+       × debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 
+       × debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 
+       × debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 
+       × debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+TestingLibraryElementError: Unable to find role="listitem"
+TestingLibraryElementError: Unable to find role="listitem"
+TestingLibraryElementError: Unable to find role="alert"
+TestingLibraryElementError: Unable to find a label with the text of: Buscar
+TestingLibraryElementError: Unable to find a label with the text of: Buscar
+TestingLibraryElementError: Unable to find a label with the text of: Buscar
+TestingLibraryElementError: Unable to find role="button" and name "Vaciar carrito"
+TestingLibraryElementError: Unable to find role="button" and name "Añadir Etiopía Yirgacheffe al carrito"
+TestingLibraryElementError: Unable to find role="button" and name "Añadir Etiopía Yirgacheffe al carrito"
+      Tests  9 failed (9)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 setError(e.message) → setError("Error") (se pierde el mensaje)
+
+@@ -18 +18 @@ export const CoffeeCatalog: React.FC = () => {
+-      .catch((e: Error) => setError(e.message))
++      .catch((e: Error) => setError('Error'))
+
+       × debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Error: expect(element).toHaveTextContent()
+Expected element to have text content:
+Received:
+      Tests  1 failed | 8 passed (9)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 visible.length === 0 → visible.length < 0 (nunca se pinta "Sin resultados")
+
+@@ -32 +32 @@ export const CoffeeCatalog: React.FC = () => {
+-      {visible.length === 0 ? (
++      {visible.length < 0 ? (
+
+       × debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+TestingLibraryElementError: Unable to find an element with the text: Sin resultados. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+      Tests  1 failed | 8 passed (9)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 se quita onClick={clear} del botón Vaciar carrito
+
+@@ -44 +44 @@ export const CoffeeCatalog: React.FC = () => {
+-      <button onClick={clear} disabled={units === 0}>Vaciar carrito</button>
++      <button disabled={units === 0}>Vaciar carrito</button>
+
+       × debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+TestingLibraryElementError: Unable to find an element with the text: 0 bolsas · 0.00 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+      Tests  1 failed | 8 passed (9)
+(deshecho: git diff limpio)
+
+==================================================================
+💥 disabled={units === 0} → disabled (siempre desactivado)
+
+@@ -44 +44 @@ export const CoffeeCatalog: React.FC = () => {
+-      <button onClick={clear} disabled={units === 0}>Vaciar carrito</button>
++      <button onClick={clear} disabled>Vaciar carrito</button>
+
+       × debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 
+       × debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+Error: expect(element).toBeEnabled()
+Received element is not enabled:
+TestingLibraryElementError: Unable to find an element with the text: 0 bolsas · 0.00 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+      Tests  2 failed | 7 passed (9)
+(deshecho: git diff limpio)
+
+==================================================================
+Al final, sin cambios:
+      Tests  9 passed (9)

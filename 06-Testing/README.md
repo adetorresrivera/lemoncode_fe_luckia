@@ -457,8 +457,14 @@ Decisiones:
   configuración.
 - **Sin `<ul>` alrededor.** `CoffeeCard` pinta un `<li>`, y `render` lo mete
   en un `<div>` dentro de `document.body`. Lo comprobé: con React 19.2.7 la
-  ejecución no muestra ningún bloque `stderr` ni aviso de `validateDOMNesting`
-  ([docs/o4-verde.txt](docs/o4-verde.txt)). React sólo avisa de los
+  ejecución no da ningún aviso de `validateDOMNesting`
+  ([docs/o4-consola.txt](docs/o4-consola.txt), con `--silent=false`: Vitest 5
+  no enseña la consola de los tests que pasan, y por eso
+  [docs/o4-verde.txt](docs/o4-verde.txt) no sirve para esto). El único
+  bloque `stderr` es el aviso `Your app (or one of its dependencies) is using
+  an outdated JSX transform`, que React da en el primer render del fichero
+  por el `"jsx": "react"` del `tsconfig.json` y no tiene que ver con el
+  `<li>`. React sólo avisa de los
   anidamientos que el parser de HTML corregiría (un `<div>` dentro de un
   `<p>`, un `<tr>` fuera de `<tbody>`…), y un `<li>` dentro de un `<div>` no
   es uno de ellos. Como no hay aviso, no hace falta la opción `container`
@@ -479,8 +485,13 @@ Decisiones:
 ### Comprobado
 
 - [docs/o4-verde.txt](docs/o4-verde.txt): `Test Files  3 passed (3)`,
-  `Tests  22 passed (22)` (12 de O2 + 6 de O3 + 4 de O4), sin avisos en
-  consola. `npm run type-check` limpio.
+  `Tests  22 passed (22)` (12 de O2 + 6 de O3 + 4 de O4). `npm run
+  type-check` limpio. Esta salida no enseña la consola (Vitest 5 la esconde
+  en los tests que pasan), así que no prueba que no haya avisos.
+- [docs/o4-consola.txt](docs/o4-consola.txt): sólo el spec de O4, con
+  `--silent=false`. `Tests  4 passed (4)` y un único bloque `stderr`, en el
+  primer test: `… is using an outdated JSX transform` (por el `"jsx":
+  "react"` del `tsconfig.json`). Ningún `validateDOMNesting`.
 - [docs/o4-sin-cleanup.txt](docs/o4-sin-cleanup.txt): sólo el spec de O4 con
   `RTL_SKIP_AUTO_CLEANUP=true`. `Tests  3 failed | 1 passed (4)`, el primero
   pasa porque el DOM todavía está vacío.
@@ -490,6 +501,129 @@ Decisiones:
   **pasa** (`Test Files  1 failed | 1 passed (2)`: el que falla es el spec
   bueno). Por eso el spec bueno compara el café entero.
 - El 💥 del enunciado, en la tabla de abajo.
+
+## O5 · El catálogo
+
+Fichero `lab-testing/src/catalog/coffee-catalog.spec.tsx`: 9 tests en cuatro
+`describe` (carga, error, buscador y carrito). Cada test crea su propio spy de
+`getCoffees`, hace su propio `render(<CoffeeCatalog />)` y, si interactúa,
+crea su propio `userEvent.setup()`. Ningún test depende de otro.
+
+### Qué se mockea y qué no
+
+- **Sólo `getCoffees`**, con `vi.spyOn(api, 'getCoffees')` sobre
+  `import * as api from './coffee.api'`, como en la demo 08. Es lo único que
+  sale del proceso: llama a `fetch`, y en jsdom no hay ninguna API en
+  `/api/coffees`. `mockResolvedValue(coffees)` devuelve los tres cafés de
+  `test-data.ts`, y `mockRejectedValue(new Error('Servicio no disponible'))`
+  da el caso de error. `restoreMocks: true` deshace el spy después de cada
+  test.
+- **El spy funciona con esta versión** (Vitest 5.1.0, ESM): no da `Cannot
+  redefine property`, y el componente recibe la función espiada. Se nota en
+  que los tests de carga ven los 3 cafés: con el `getCoffees` real, `fetch`
+  fallaría, se vería la alerta y no habría ningún `listitem`. No ha hecho
+  falta `vi.mock`.
+- **No se mockea nada más.** `useCart`, las funciones de `cart.ts`
+  (`addToCart`, `cartTotal`, `finalPrice`, `formatPrice`) y `CoffeeCard` son
+  los reales. Por eso los tests del carrito son de integración: el clic llega
+  al botón de la tarjeta real, que llama al `add` del hook real, que usa
+  `addToCart`, y el texto final sale de `cartTotal` y `formatPrice`.
+
+### Por qué `findBy`
+
+El efecto llama a `getCoffees()` al montarse, pero la promesa se resuelve
+**después** del primer render. Ese primer render sólo pinta `<p>Cargando…</p>`.
+Los cafés, el campo Buscar, los botones y el resumen aparecen en un segundo
+render, cuando se ejecutan `setCoffees` y `setLoading(false)`. `findBy…`
+devuelve una promesa que reintenta la consulta (hasta 1000 ms) y se resuelve
+cuando aparece el elemento. Además envuelve la espera en `act`, así que las
+actualizaciones de estado de la promesa no dan el aviso `not wrapped in
+act(...)`. Una vez hay un `findBy` resuelto, lo demás ya está en el DOM y
+basta con `getBy`. `user.type` y `user.click` llevan `await` y actualizan el
+estado de forma síncrona (no hay más promesas), así que después tampoco hace
+falta `findBy` ni `waitFor`.
+
+### Los tests
+
+| Test | Mock | Act | Consulta y matcher |
+| --- | --- | --- | --- |
+| debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido | resuelve con 3 cafés | `render` | `getByText('Cargando…')` justo después del render → `toBeInTheDocument()`; al final, `await findAllByRole('listitem')` para que la carga termine dentro de `act` |
+| debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve | resuelve con 3 cafés | `render` + `await findAllByRole('listitem')` | `toHaveLength(3)`; `queryByText('Cargando…')` → `not.toBeInTheDocument()`; spy → `toHaveBeenCalledTimes(1)` |
+| debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza | rechaza con `Error('Servicio no disponible')` | `render` + `await findByRole('alert')` | `toHaveTextContent('Servicio no disponible')` |
+| debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar | resuelve | `await findByLabelText('Buscar')`, `user.type(…, 'bra')` | `getAllByRole('listitem')` → `toHaveLength(1)`; `within(item).getByRole('heading', { name: 'Brasil Cerrado' })` |
+| debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno | resuelve | "bra", `user.clear`, "zzz" | `getByText('Sin resultados')`; `queryAllByRole('listitem')` → `toHaveLength(0)` |
+| debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas | resuelve | `user.type(…, 'BRA')` | igual que el de "bra" |
+| debería tener "Vaciar carrito" desactivado cuando el carrito está vacío | resuelve | `await findByRole('button', { name: 'Vaciar carrito' })` | `toBeDisabled()` |
+| debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil | resuelve | `await findByRole` del botón de Etiopía, clic en Etiopía y en Brasil | `getByText('2 bolsas · 23.91 €')`; botón → `toBeEnabled()` |
+| debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" | resuelve | añade los dos cafés y pulsa "Vaciar carrito" | `getByText('0 bolsas · 0.00 €')` |
+
+Decisiones:
+
+- **El test de "Cargando…" acaba con un `await findAllByRole('listitem')`.**
+  El `render` lanza el efecto, pero la promesa del mock se resuelve en una
+  microtarea posterior, así que justo después del `render` todavía se ve
+  "Cargando…" y basta con `getByText`. Pero la promesa se resuelve **antes**
+  del `cleanup` automático, con el componente todavía montado: comprobado
+  con un spec temporal que apuntaba el orden en un fichero ("fin del test" →
+  "promesa resuelta" con `<p>Cargando…</p>` en el `body` → `afterEach`).
+  Sin la espera, `setCoffees` y `setLoading(false)` ocurren fuera de `act`,
+  y React avisa dos veces: `An update to CoffeeCatalog inside a test was not
+  wrapped in act(...)`
+  ([docs/o5-sin-esperar-carga.txt](docs/o5-sin-esperar-carga.txt)). Con la
+  espera, esas dos actualizaciones ocurren dentro del `act` de `findBy` y el
+  aviso desaparece. No es una aserción, sino la forma de que el test no
+  termine con trabajo pendiente; por eso lleva un comentario.
+- **Vitest 5 esconde la consola de los tests que pasan.** Con el reporter
+  por defecto, la salida de `npx vitest run` no enseña ningún `stderr` si el
+  test pasa, así que buscar "not wrapped in act" en esa salida no demuestra
+  nada (así me equivoqué la primera vez: bitácora, entrada 8). Para ver los
+  avisos hay que ejecutar con `--silent=false`. Así están hechos
+  [docs/o5-verde.txt](docs/o5-verde.txt) y
+  [docs/o5-sin-esperar-carga.txt](docs/o5-sin-esperar-carga.txt). Los
+  `o5-romper-*.txt` usan el comando de siempre: allí sólo interesa qué test
+  falla.
+- **`within(items[0])` + encabezado** en vez de `getByText('Brasil Cerrado')`.
+  El nombre sale dos veces en la tarjeta (`<h3>` y botón «Añadir Brasil
+  Cerrado al carrito»), pero `getByText` busca el texto exacto, así que no
+  habría ambigüedad. Aun así, con `within` se comprueba que el único
+  `listitem` que queda es el de Brasil, no sólo que "Brasil Cerrado" está en
+  algún sitio de la página.
+- **`"2 bolsas · 23.91 €"` con `getByText` y el texto tal cual, sin función
+  como matcher.** `{units} bolsas · {formatPrice(total)}` genera tres nodos
+  de texto (`"2"`, `" bolsas · "` y `"23.91 €"`) dentro del mismo `<p>`, y el
+  comparador por defecto junta los nodos de texto que son hijos directos de
+  cada elemento, como con el `-10 %` de O4. Comprobado: el test pasa. Las
+  cuentas: Etiopía 14.90 × 0.9 = 13.41, más Brasil 10.50, da 23.91.
+- **Separados en tres tests los casos del buscador y del carrito**: cada
+  test comprueba una cosa. El de vaciar repite los dos clics en su Arrange
+  en vez de depender del test anterior.
+- **El test de "BRA"** no está en el enunciado: es la respuesta al 🤔 (ver
+  la tabla de 💥).
+
+### Comprobado
+
+- [docs/o5-verde.txt](docs/o5-verde.txt) (con `--silent=false`): `Test
+  Files  4 passed (4)`, `Tests  31 passed (31)` (12 de O2 + 6 de O3 + 4 de
+  O4 + 9 de O5), sin ningún aviso `not wrapped in act(...)`. Sólo quedan dos
+  bloques `stderr`, uno en el primer test de O4 y otro en el primero de O5,
+  con el mismo aviso: `Your app (or one of its dependencies) is using an
+  outdated JSX transform`. React lo da en el primer render de cada fichero
+  porque el `tsconfig.json` del `.start-code` usa `"jsx": "react"` (el
+  runtime clásico); no tiene que ver con los tests. `npm run type-check`
+  limpio.
+- [docs/o5-sin-esperar-carga.txt](docs/o5-sin-esperar-carga.txt) (con
+  `--silent=false`): sólo el spec de O5, con el test de "Cargando…" sin la
+  espera final. Los 9 pasan, pero ese test imprime dos veces `An update to
+  CoffeeCatalog inside a test was not wrapped in act(...)`.
+- Los 💥 del enunciado, en la tabla de abajo. Entre los tres sólo ponen en
+  rojo 4 de los 9 tests. Para ver fallar los otros cinco se hicieron 6 💥
+  más, uno cada vez y deshecho después:
+  [docs/o5-romper-otros.txt](docs/o5-romper-otros.txt). Fueron estos:
+  "Cargando…" con tres puntos (falla el de "Cargando…"); sin `.finally(() =>
+  setLoading(false))` (fallan los 9: la carga no termina nunca);
+  `setError('Error')` (el de la alerta); `visible.length < 0` (el de "zzz");
+  sin `onClick={clear}` (el de vaciar); y `disabled` siempre (el de activar y
+  el de vaciar).
 
 ## Romper el código (💥)
 
@@ -504,6 +638,10 @@ comprueba que el diff vuelve a estar limpio y los tests en verde.
 | O2 | `cart.ts`, `finalPrice`: `coffee.price * (1 - (coffee.discount ?? 0))` → `coffee.price` | `finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)` (14.9) y `cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)` (40.3) | [docs/o2-romper-2.txt](docs/o2-romper-2.txt) |
 | O3 | `coffee.api.ts`, `case 503:` → `case 502:` | `getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503` (`expected [Function] to throw error including 'Servicio no disponible' but got 'Error inesperado'`: el 503 cae en el `default`) | [docs/o3-romper-1.txt](docs/o3-romper-1.txt) |
 | O4 | `coffee-card.tsx`, botón: `onAdd(coffee)` → `onAdd({ ...coffee, price: 0 })` | `CoffeeCard > debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir` (falla el `toHaveBeenCalledWith(colombia)`: el diff marca `- "price": 12.9,` / `+ "price": 0,`; `toHaveBeenCalledTimes(1)` sigue pasando) | [docs/o4-romper-1.txt](docs/o4-romper-1.txt) |
+| O5 | `coffee-catalog.tsx`, `c.name.toLowerCase().includes(…)` → `c.name.includes(…)` | `CoffeeCatalog > buscador > debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar` y `CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas` (`Unable to find an accessible element with the role "listitem"`: `"Brasil Cerrado".includes("bra")` es `false` y se pinta "Sin resultados") | [docs/o5-romper-1.txt](docs/o5-romper-1.txt) |
+| O5 🤔 | `coffee-catalog.tsx`, `includes(filter.toLowerCase())` → `includes(filter)`, **con el test de "BRA" saltado** (`it.skip`, temporal) | **Ninguno**: `Tests  30 passed \| 1 skipped (31)` | [docs/o5-romper-2-sin-test.txt](docs/o5-romper-2-sin-test.txt) |
+| O5 🤔 | el mismo cambio, con el test de "BRA" activo | `CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas` (`Unable to find an accessible element with the role "listitem"`: `"brasil cerrado".includes("BRA")` es `false`) | [docs/o5-romper-2.txt](docs/o5-romper-2.txt) |
+| O5 | `coffee-catalog.tsx`, botón: se quita `disabled={units === 0}` | `CoffeeCatalog > carrito (integración) > debería tener "Vaciar carrito" desactivado cuando el carrito está vacío` (`expect(element).toBeDisabled()` / `Received element is not disabled`) | [docs/o5-romper-3.txt](docs/o5-romper-3.txt) |
 
 Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
 en verde: el resultado es correcto, lo que está mal es que el original
@@ -513,6 +651,23 @@ descuento, `coffee.price` y la fórmula dan lo mismo. Con el 💥 de O3, el
 Con el 💥 de O4, los tres tests que sólo miran lo que se pinta siguen en
 verde: el HTML no cambia, sólo el objeto que recibe `onAdd`. Un snapshot de
 la tarjeta tampoco lo detectaría.
+
+Con el 💥 1 de O5, el test de "zzz" sigue en verde: "zzz" no coincide con
+ningún nombre, esté en minúsculas o no.
+
+**🤔 ¿Y si se quita el `.toLowerCase()` de `filter`?** Con los tests del
+enunciado no falla ninguno, porque el único texto que se escribe con letras
+que coinciden es "bra", que ya está en minúsculas: `filter` y
+`filter.toLowerCase()` valen lo mismo, y sobre "zzz" da igual. El código sólo
+se porta mal cuando la persona usuaria escribe con mayúsculas, y ningún test
+lo hacía. El test que lo detecta escribe "BRA" y espera Brasil Cerrado:
+antes del 💥 pasa (`"brasil cerrado".includes("bra")`), y con el 💥 no
+(`"brasil cerrado".includes("BRA")`). Así lo demuestran las dos filas de
+arriba.
+
+Con el 💥 3 de O5, el test `…activar "Vaciar carrito"…` sigue en verde: sin
+`disabled`, el botón siempre está activado. Sólo lo detecta el test del
+carrito vacío.
 
 ### 🪤 El test del try/catch
 
@@ -572,6 +727,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
             ├── coffee-card.spec.tsx ← O4: 4 tests de la tarjeta con render, screen y userEvent
             ├── use-cart.ts        ← useCart: estado del carrito, units, total, add, remove y clear
             ├── coffee-catalog.tsx ← CoffeeCatalog: carga, error, buscador y carrito (no se monta en index.tsx)
+            ├── coffee-catalog.spec.tsx ← O5: 9 tests del catálogo con getCoffees espiado (carga, error, buscador y carrito)
             └── test-data.ts       ← los tres cafés de prueba que usan todos los tests
 ```
 
@@ -582,7 +738,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
 - [x] O2 · Funciones puras: el carrito
 - [x] O3 · Código asíncrono: la llamada a la API
 - [x] O4 · Un componente presentacional: la tarjeta
-- [ ] O5 · Un componente con datos: el catálogo
+- [x] O5 · Un componente con datos: el catálogo
 - [ ] O6 · Un custom hook: useCart
 - [ ] O7 · README + bitácora de IA
 
@@ -806,3 +962,43 @@ lista de botones no sabría cuál es cuál.
 
 Los tres tienen su versión `All` (`getAllBy…`, `queryAllBy…`,
 `findAllBy…`) para cuando se esperan varios.
+
+### O5
+
+**¿Por qué aquí necesitáis `findBy…` (con `await`) y en O4 bastaba con `getBy…`?**
+
+Porque aquí lo que se busca no está en el primer render. `CoffeeCard` recibe
+el café por props y lo pinta todo en el primer render: cuando `render`
+vuelve, el `<h3>`, el precio y el botón ya están en el DOM, así que `getBy`
+los encuentra. `CoffeeCatalog` pide los cafés a `getCoffees()` en un
+`useEffect`, y esa promesa se resuelve **después**. En el primer render,
+`loading` es `true` y sólo existe `<p>Cargando…</p>`; los cafés, el campo
+Buscar y los botones aparecen en un render posterior, cuando la promesa se
+resuelve y se ejecutan `setCoffees` y `setLoading(false)`. Un `getBy` justo
+después del `render` lanzaría `Unable to find…`. `findBy` devuelve una
+promesa que reintenta la consulta hasta que aparece el elemento (o pasan
+1000 ms), y espera dentro de `act`, así que React aplica esas
+actualizaciones sin avisos. Lo único que se busca con `getBy` justo después
+del `render` es precisamente "Cargando…", que sí está en el primer render.
+
+**En el caso 4 no habéis mockeado ni el hook ni el carrito. ¿Qué ventaja tiene? ¿Y qué inconveniente?**
+
+- **Ventaja:** prueba lo que ve la persona usuaria: pulsa "Añadir Etiopía…"
+  y "Añadir Brasil…" y lee "2 bolsas · 23.91 €". Con eso se comprueba que
+  las piezas encajan de verdad: que la tarjeta llama a `onAdd` con el café,
+  que el catálogo le pasa el `add` del hook, que el hook usa `addToCart` y
+  `cartTotal` con los cafés cargados, y que `formatPrice` da el formato. Un
+  mock de `useCart` sólo comprobaría que se llama a una función, no que el
+  total sale bien. Además, el test sobrevive a refactorizar: se puede
+  cambiar cómo guarda el carrito el hook, renombrar funciones de `cart.ts` o
+  pasar el carrito a un Context, y si lo que se ve no cambia, el test sigue
+  en verde sin tocarlo. Un test con mocks se rompería con cada uno de esos
+  cambios.
+- **Inconveniente:** si falla, no dice cuál de las piezas tiene la culpa. Un
+  "2 bolsas · 26.81 €" puede venir de `finalPrice`, de `cartTotal`, del hook
+  o de la tarjeta, y hay que ir a los tests unitarios (O2, O4, O6) o
+  depurar para saberlo. Además es más lento: monta el componente entero,
+  espera a la promesa y simula clics con `userEvent`, frente a las llamadas
+  directas a funciones de O2. Por eso conviene tener los dos tipos: los
+  unitarios dicen dónde está el fallo, y el de integración dice que el
+  conjunto funciona.

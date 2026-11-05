@@ -179,3 +179,62 @@ ficheros de `src/` (`coffee-card.tsx` incluido), en vez de tocar el
 `tsconfig.json` o la config de test. Los 4 tests pasaron sin ningún otro
 cambio. No era un fallo del test sino del fichero: lo cuento porque lo dio
 por bueno sin mirar cómo compila el proyecto el JSX.
+
+## 8 · "No sale ningún aviso de act" (sí salía)
+
+### Prompt
+
+"Revisa que no salga ningún aviso "not wrapped in act(...)" en la salida; si
+sale, explícame de qué test viene y arréglalo esperando a lo que
+corresponda." (prompt 5 de `prompts.md`).
+
+### Qué me dio
+
+El test `debería mostrar "Cargando…" cuando getCoffees todavía no ha
+respondido` acababa con un `await screen.findAllByRole('listitem')` para
+evitar el aviso. Quise comprobar si hacía falta: lo quité, ejecuté
+`npx vitest run`, no vi ningún aviso en la salida y concluí que la espera
+sobraba. Lo justifiqué con que el `cleanup` desmontaba el componente antes de
+que llegara la promesa, y lo escribí así en el README y en esta bitácora.
+
+### Qué corregí y por qué
+
+Antes de darlo por bueno comprobé el orden con un spec temporal que apuntaba
+cada paso en un fichero: la promesa se resuelve **antes** del `afterEach`,
+con `<p>Cargando…</p>` todavía montado, y `console.error` se llamaba dos
+veces. La salida estaba limpia porque **Vitest 5 no enseña la consola de los
+tests que pasan**; con `--silent=false` aparecen los dos avisos `An update to
+CoffeeCatalog inside a test was not wrapped in act(...)` (`setCoffees` y
+`setLoading`), en [docs/o5-sin-esperar-carga.txt](docs/o5-sin-esperar-carga.txt).
+Volví a poner la espera, con un comentario que explica por qué está, y
+regeneré `docs/o5-verde.txt` con `--silent=false`: ya no sale el aviso de act.
+La lección: que no salga nada en la salida no prueba nada si la herramienta no
+enseña esa salida; hay que mirar primero si la enseña. Al ejecutar así la
+suite entera apareció también un aviso escondido en O4 (`outdated JSX
+transform`), que contradice el "sin avisos en consola" del README de O4.
+
+## 9 · "Sin avisos en consola" en O4, mirado donde no se veían
+
+### Prompt
+
+"Ejecuta en verde (docs/o4-verde.txt) y npm run type-check limpio." (prompt 4
+de `prompts.md`; el fallo salió al hacer el prompt 5).
+
+### Qué me dio
+
+En el README de O4 escribí que la ejecución "no muestra ningún bloque
+`stderr` ni aviso de `validateDOMNesting`" y que estaba "sin avisos en
+consola", apoyándome en `docs/o4-verde.txt`. Con eso justificaba que no
+hacía falta un `<ul>` alrededor de la tarjeta.
+
+### Qué corregí y por qué
+
+Al descubrir en O5 que Vitest 5 esconde la consola de los tests que pasan
+(entrada 8), repetí el spec de O4 con `--silent=false`
+([docs/o4-consola.txt](docs/o4-consola.txt)). Sí había un bloque `stderr`:
+`Your app (or one of its dependencies) is using an outdated JSX transform`,
+por el `"jsx": "react"` del `tsconfig.json`. La conclusión sobre el `<li>`
+sigue siendo cierta (no hay ningún `validateDOMNesting`), pero la prueba que
+di no demostraba nada. Corregí las dos frases del README de O4 para que
+digan lo que se ve de verdad y enlacen la salida buena; `o4-verde.txt` se
+queda como estaba, sólo como prueba de que los tests pasan.

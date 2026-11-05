@@ -1,0 +1,15 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+ Test Files  4 passed (4)
+      Tests  31 passed (31)
+   Start at  20:19:35
+   Duration  1.42s (environment 66%, setup 13%, tests 12%, import 5%, transform 4%, worker 1%)
+
