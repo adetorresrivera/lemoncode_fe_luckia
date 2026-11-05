@@ -152,3 +152,30 @@ jsdom), `ok` es `false` y `status` 503 con un 503, `json()` devuelve el
 cuerpo, y una segunda lectura rechaza con `Body is unusable`. Sólo con
 expects que pasan la comprobación vale de algo. Y la segunda lectura
 confirma por qué cada test crea su propio `Response`.
+
+## 7 · El spec de la tarjeta sin `import React`
+
+### Prompt
+
+"Escribe los tests: render de @testing-library/react y screen para buscar
+[…] Ejecuta en verde (docs/o4-verde.txt) y npm run type-check limpio."
+(prompt 4 de `prompts.md`).
+
+### Qué me dio
+
+Un `coffee-card.spec.tsx` que importaba `render`, `screen`, `userEvent`,
+`CoffeeCard` y los cafés, pero no `React`. Al ejecutarlo fallaron los 4 tests
+con `ReferenceError: React is not defined` en la línea del `render(<CoffeeCard
+… />)`. Había dado por hecho el runtime automático de JSX (React 17+), que no
+necesita el import.
+
+### Qué corregí y por qué
+
+El `tsconfig.json` del `.start-code` tiene `"jsx": "react"` (runtime clásico:
+`<CoffeeCard />` se convierte en `React.createElement(CoffeeCard, …)`), y la
+config de Vitest no carga `@vitejs/plugin-react`, así que en los tests nadie
+cambia eso. Añadí `import React from 'react'`, que es lo que hacen todos los
+ficheros de `src/` (`coffee-card.tsx` incluido), en vez de tocar el
+`tsconfig.json` o la config de test. Los 4 tests pasaron sin ningún otro
+cambio. No era un fallo del test sino del fichero: lo cuento porque lo dio
+por bueno sin mirar cómo compila el proyecto el JSX.

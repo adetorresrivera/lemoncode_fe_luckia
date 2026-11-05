@@ -392,6 +392,105 @@ Decisiones:
   [docs/o3-sin-await.txt](docs/o3-sin-await.txt) (ver la respuesta 📝 de
   O3).
 
+## O4 · La tarjeta
+
+Fichero `lab-testing/src/catalog/coffee-card.spec.tsx`: 4 tests. Cada uno
+hace su propio `render(<CoffeeCard coffee={…} onAdd={onAdd} />)` con un café
+de `test-data.ts` (`ethiopia` = `coffees[0]`, con `discount: 0.1`;
+`colombia` = `coffees[1]`, sin descuento) y busca con `screen`. Nada de
+`container.querySelector`, clases ni snapshots.
+
+| Test | Café | Consulta | Matcher |
+| --- | --- | --- | --- |
+| debería mostrar el nombre del café como encabezado de nivel 3 | Etiopía | `getByRole('heading', { level: 3, name: 'Etiopía Yirgacheffe' })` | `toBeInTheDocument()` |
+| debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento | Etiopía | `getByText('13.41 €')` y `getByText('-10 %')` | `toBeInTheDocument()` (×2) |
+| no debería mostrar ninguna etiqueta de descuento cuando el café no tiene descuento | Colombia | `queryByText(/%/)` | `not.toBeInTheDocument()` |
+| debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir | Colombia | `getByRole('button', { name: 'Añadir Colombia Huila al carrito' })` + `await user.click` | `toHaveBeenCalledTimes(1)` y `toHaveBeenCalledWith(colombia)` |
+
+Por qué cada consulta:
+
+- **El nombre, por rol `heading` + `level: 3` + `name`.** Así se comprueban
+  tres cosas a la vez: que es un encabezado, que es de nivel 3 y que su
+  nombre accesible es el del café. Con `getByText('Etiopía Yirgacheffe')`
+  el test seguiría en verde si el `<h3>` pasara a ser un `<p>`, y además
+  esa búsqueda no es única: el botón también contiene el nombre.
+- **El precio y el descuento, con `getByText` y el texto exacto.** Un `<p>`
+  no tiene ningún rol que lo distinga, así que se busca como lo lee una
+  persona, por su texto. Se busca el precio final (`13.41 €`), no el
+  original (`14.90 €`): si la tarjeta se saltara `finalPrice`, fallaría.
+  `0.1 * 100` da `10` exacto en JavaScript (comprobado con `node -e`), así
+  que React pinta `10` y no `10.000000000000002`. El `<p>` de la etiqueta
+  tiene **tres nodos de texto** (`"-"`, `"10"` y `" %"`), porque
+  `-{coffee.discount * 100} %` tiene una expresión entre dos textos. Aun así
+  `getByText('-10 %')` lo encuentra. El comparador por defecto junta los
+  nodos de texto que son hijos directos de cada elemento, y aquí los tres
+  cuelgan del mismo `<p>`. Sólo fallaría si el número fuera dentro de otra
+  etiqueta (`<span>10</span>`).
+- **Sin descuento, `queryByText(/%/)` + `not.toBeInTheDocument()`.**
+  `getBy…` lanza si no encuentra nada, así que no sirve para comprobar que
+  algo no está; `queryBy…` devuelve `null`. Se busca con la expresión
+  regular `/%/`, que casa con cualquier texto que contenga `%`. Así el test
+  vale para cualquier porcentaje (`-15 %`, `-0 %`…), no sólo para el `-10 %`
+  de Etiopía.
+- **El botón, por rol `button` + `name`.** Es como lo encuentran un usuario
+  y un lector de pantalla, y fija que el botón dice de qué café es (ver la
+  respuesta 📝 de O4). `userEvent.setup()` va en el Arrange y el `await
+  user.click(...)` es el Act: `user.click` devuelve una promesa porque
+  simula toda la secuencia de eventos del puntero (`pointerdown`,
+  `mousedown`, `pointerup`, `mouseup`, `click`) de forma asíncrona. Sin el
+  `await`, los `expect` se ejecutarían antes de que llegue el `click` y
+  `onAdd` todavía tendría 0 llamadas.
+- **`toHaveBeenCalledWith(colombia)` con el café entero**, no
+  `expect.objectContaining({ id: 2 })`. `toHaveBeenCalledWith` compara el
+  argumento por igualdad profunda (como `toEqual`), así que un `price`
+  cambiado se nota. Con `objectContaining({ id: 2 })` sólo se comprobaría el
+  `id`, y el 💥 del enunciado no se pondría rojo (comprobado: ver abajo).
+
+Decisiones:
+
+- **`import React from 'react'` en el spec.** El `tsconfig.json` del
+  `.start-code` tiene `"jsx": "react"` (el runtime clásico, que traduce
+  `<CoffeeCard />` a `React.createElement(...)`), y la config de Vitest no
+  carga `@vitejs/plugin-react`. Sin el import, los 4 tests fallan con
+  `ReferenceError: React is not defined`. Es lo mismo que hacen todos los
+  ficheros de `src/` (`coffee-card.tsx` incluido). No se ha tocado la
+  configuración.
+- **Sin `<ul>` alrededor.** `CoffeeCard` pinta un `<li>`, y `render` lo mete
+  en un `<div>` dentro de `document.body`. Lo comprobé: con React 19.2.7 la
+  ejecución no muestra ningún bloque `stderr` ni aviso de `validateDOMNesting`
+  ([docs/o4-verde.txt](docs/o4-verde.txt)). React sólo avisa de los
+  anidamientos que el parser de HTML corregiría (un `<div>` dentro de un
+  `<p>`, un `<tr>` fuera de `<tbody>`…), y un `<li>` dentro de un `<div>` no
+  es uno de ellos. Como no hay aviso, no hace falta la opción `container`
+  de `render` ni un `<ul>`, y ninguna consulta depende de que exista la lista.
+- **Cada test hace su propio `render`, sin `beforeEach`.** Con `globals:
+  true`, `@testing-library/react` encuentra un `afterEach` global al
+  importarse y registra él solo `afterEach(cleanup)`, que desmonta lo
+  renderizado y vacía el `document.body` después de cada test. Lo comprobé
+  desactivándolo con la variable de entorno que trae para eso
+  (`RTL_SKIP_AUTO_CLEANUP=true`,
+  [docs/o4-sin-cleanup.txt](docs/o4-sin-cleanup.txt)): fallan 3 de 4 con
+  `Found multiple elements with the text: 13.41 €`, `… with the text: /%/`
+  y `… with the role "button" and name "Añadir Colombia Huila al carrito"`,
+  porque las tarjetas de los tests anteriores siguen en el DOM. Sin la
+  limpieza, el test "sin descuento" encontraría el `-10 %` de Etiopía, y
+  dependería del orden de los tests.
+
+### Comprobado
+
+- [docs/o4-verde.txt](docs/o4-verde.txt): `Test Files  3 passed (3)`,
+  `Tests  22 passed (22)` (12 de O2 + 6 de O3 + 4 de O4), sin avisos en
+  consola. `npm run type-check` limpio.
+- [docs/o4-sin-cleanup.txt](docs/o4-sin-cleanup.txt): sólo el spec de O4 con
+  `RTL_SKIP_AUTO_CLEANUP=true`. `Tests  3 failed | 1 passed (4)`, el primero
+  pasa porque el DOM todavía está vacío.
+- [docs/o4-romper-objectcontaining.txt](docs/o4-romper-objectcontaining.txt):
+  con el 💥 aplicado, un spec temporal (`tmp-object-containing.spec.tsx`, ya
+  borrado) con `toHaveBeenCalledWith(expect.objectContaining({ id: 2 }))`
+  **pasa** (`Test Files  1 failed | 1 passed (2)`: el que falla es el spec
+  bueno). Por eso el spec bueno compara el café entero.
+- El 💥 del enunciado, en la tabla de abajo.
+
 ## Romper el código (💥)
 
 Cada 💥 es un único cambio en `src/catalog`, con `git diff --exit-code` limpio
@@ -404,12 +503,16 @@ comprueba que el diff vuelve a estar limpio y los tests en verde.
 | O2 | `cart.ts`, `addToCart`: `{ ...item, quantity: item.quantity + 1 }` → `((item.quantity += 1), item)` | `addToCart > no debería modificar el carrito que recibe cuando el café ya está en él` (falla el `toEqual`: `quantity` 3 en vez de 2) | [docs/o2-romper-1.txt](docs/o2-romper-1.txt) |
 | O2 | `cart.ts`, `finalPrice`: `coffee.price * (1 - (coffee.discount ?? 0))` → `coffee.price` | `finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)` (14.9) y `cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)` (40.3) | [docs/o2-romper-2.txt](docs/o2-romper-2.txt) |
 | O3 | `coffee.api.ts`, `case 503:` → `case 502:` | `getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503` (`expected [Function] to throw error including 'Servicio no disponible' but got 'Error inesperado'`: el 503 cae en el `default`) | [docs/o3-romper-1.txt](docs/o3-romper-1.txt) |
+| O4 | `coffee-card.tsx`, botón: `onAdd(coffee)` → `onAdd({ ...coffee, price: 0 })` | `CoffeeCard > debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir` (falla el `toHaveBeenCalledWith(colombia)`: el diff marca `- "price": 12.9,` / `+ "price": 0,`; `toHaveBeenCalledTimes(1)` sigue pasando) | [docs/o4-romper-1.txt](docs/o4-romper-1.txt) |
 
 Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
 en verde: el resultado es correcto, lo que está mal es que el original
 también cambia. Con el 💥 2, los dos tests de Colombia siguen en verde: sin
 descuento, `coffee.price` y la fórmula dan lo mismo. Con el 💥 de O3, el
 404 y el 500 siguen en verde: sus ramas no cambian.
+Con el 💥 de O4, los tres tests que sólo miran lo que se pinta siguen en
+verde: el HTML no cambia, sólo el objeto que recibe `onAdd`. Un snapshot de
+la tarjeta tampoco lo detectaría.
 
 ### 🪤 El test del try/catch
 
@@ -466,6 +569,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
             ├── coffee.api.ts      ← getCoffees: fetch a /api/coffees y un error por cada estado
             ├── coffee.api.spec.ts ← O3: 6 tests de getCoffees con fetch espiado
             ├── coffee-card.tsx    ← CoffeeCard: nombre, origen, precio, descuento y botón Añadir
+            ├── coffee-card.spec.tsx ← O4: 4 tests de la tarjeta con render, screen y userEvent
             ├── use-cart.ts        ← useCart: estado del carrito, units, total, add, remove y clear
             ├── coffee-catalog.tsx ← CoffeeCatalog: carga, error, buscador y carrito (no se monta en index.tsx)
             └── test-data.ts       ← los tres cafés de prueba que usan todos los tests
@@ -477,7 +581,7 @@ de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
 - [x] O1 · Configurar Vitest
 - [x] O2 · Funciones puras: el carrito
 - [x] O3 · Código asíncrono: la llamada a la API
-- [ ] O4 · Un componente presentacional: la tarjeta
+- [x] O4 · Un componente presentacional: la tarjeta
 - [ ] O5 · Un componente con datos: el catálogo
 - [ ] O6 · Un custom hook: useCart
 - [ ] O7 · README + bitácora de IA
@@ -650,3 +754,55 @@ not awaited``. Sale así incluso cuando la aserción se cumpliría (mock en
 test: en ese caso Vitest espera a la aserción pendiente y da los dos
 errores, el del 200 y el del `await` que falta. O sea, Vitest 5 lo detecta,
 pero el `await` sigue siendo obligatorio: sin él el test no pasa nunca.
+
+### O4
+
+**¿Por qué es mejor `getByRole('button', { name: 'Añadir Colombia Huila al carrito' })` que buscar "el primer button de la tarjeta"? ¿Qué tiene que ver con la accesibilidad?**
+
+"El primer button" (`container.querySelector('button')` o
+`getAllByRole('button')[0]`) depende de la **estructura** del HTML, no de lo
+que ve el usuario:
+
+- **Si cambia el orden**, por ejemplo con un botón "Ver detalle" antes de
+  "Añadir", el test pulsa el botón equivocado. Puede fallar por un motivo
+  que no tiene nada que ver con el carrito, o peor, pasar comprobando otra
+  cosa.
+- **Si hay más botones**, como en el catálogo de O5 (una tarjeta por café, más
+  "Vaciar carrito"), "el primero" ya no es el de Colombia. Con el nombre,
+  la consulta sigue siendo única: el de Colombia es el único que se llama
+  "Añadir Colombia Huila al carrito". Y si un día hay dos con el mismo
+  nombre, `getByRole` lanza `Found multiple elements`, que también avisa de
+  que algo no cuadra.
+- **Sólo se rompe cuando cambia lo que importa.** Se puede cambiar el
+  `<li>` por un `<article>`, añadir clases o envolver el botón en un `<div>`
+  y el test sigue en verde. Se pone rojo si el botón deja de ser un botón o
+  deja de decir de qué café es.
+
+Con la accesibilidad tiene que ver porque `getByRole` + `name` busca igual
+que un lector de pantalla. El rol (`button`) y el nombre accesible (aquí, el
+texto del botón; si no, su `aria-label` o el `<label>` asociado) son lo que
+se anuncia: "Añadir Colombia Huila al carrito, botón". Si un test no
+encuentra el botón por su nombre, un lector de pantalla tampoco puede
+ofrecerlo. Un `<div onClick>` no tiene rol `button`, y un botón con sólo un
+icono no tiene nombre. El test falla justo en esos casos, y obliga a
+arreglar la accesibilidad, no el test. También por eso el nombre lleva el
+café: con cinco botones "Añadir" iguales, una persona que navega por la
+lista de botones no sabría cuál es cuál.
+
+**¿Cuándo usáis `getBy…` y cuándo `queryBy…`?**
+
+- **`getBy…` para lo que tiene que estar** (el `<h3>`, el precio, el
+  `-10 %`, el botón). Si no lo encuentra, **lanza** un error, y además
+  imprime el DOM que tenía delante, así que el fallo se entiende enseguida.
+  También lanza si hay más de uno. El `expect(…).toBeInTheDocument()` de
+  detrás es casi redundante, pero deja claro en el Assert qué se comprueba.
+- **`queryBy…` para comprobar que algo no está** (la etiqueta de descuento
+  de Colombia). Si no lo encuentra, **devuelve `null`** sin lanzar, y
+  `expect(null).not.toBeInTheDocument()` pasa. Con `getByText(/%/)`, el test
+  sin descuento lanzaría justo cuando el código está bien.
+- **`findBy…`** (O5) para lo que **aparece después**, cuando se resuelve una
+  promesa: devuelve una promesa y reintenta hasta que aparece o se agota el
+  tiempo (1000 ms por defecto). Va siempre con `await`.
+
+Los tres tienen su versión `All` (`getAllBy…`, `queryAllBy…`,
+`findAllBy…`) para cuando se esperan varios.

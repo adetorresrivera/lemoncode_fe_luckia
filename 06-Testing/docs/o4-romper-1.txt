@@ -1,0 +1,45 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee-card.spec.tsx (4 tests | 1 failed) 104ms
+   ❯ CoffeeCard (4)
+     × debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir 37ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-card.spec.tsx > CoffeeCard > debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir
+AssertionError: expected "vi.fn()" to be called with arguments: [ { id: 2, …(3) } ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    {
+      "id": 2,
+      "name": "Colombia Huila",
+      "origin": "Colombia",
+-     "price": 12.9,
++     "price": 0,
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/catalog/coffee-card.spec.tsx:57:19
+     55|     // Assert
+     56|     expect(onAdd).toHaveBeenCalledTimes(1);
+     57|     expect(onAdd).toHaveBeenCalledWith(colombia);
+       |                   ^
+     58|   });
+     59| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 21 passed (22)
+   Start at  20:07:38
+   Duration  1.06s (environment 75%, setup 13%, tests 5%, import 4%, transform 2%, worker 1%)
+

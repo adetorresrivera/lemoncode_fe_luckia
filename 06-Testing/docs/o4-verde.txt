@@ -1,0 +1,9 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+
+ Test Files  3 passed (3)
+      Tests  22 passed (22)
+   Start at  20:07:30
+   Duration  986ms (environment 75%, setup 13%, tests 5%, import 4%, transform 2%, worker 1%)
+
