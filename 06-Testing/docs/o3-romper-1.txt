@@ -1,0 +1,32 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.spec.ts (6 tests | 1 failed) 17ms
+   ❯ getCoffees (6)
+     ❯ cuando la API responde con un error (3)
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+AssertionError: expected [Function] to throw error including 'Servicio no disponible' but got 'Error inesperado'
+
+Expected: "Servicio no disponible"
+Received: "Error inesperado"
+
+ ❯ src/catalog/coffee.api.spec.ts:52:27
+     50|
+     51|       // Assert
+     52|       await expect(result).rejects.toThrow(message);
+       |                           ^
+     53|     });
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  20:00:25
+   Duration  750ms (environment 80%, setup 11%, transform 5%, tests 3%, import 2%, worker 1%)
+

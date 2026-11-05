@@ -1,0 +1,71 @@
+🪤 d) para comparar: la versión rejects (la del fichero bueno) con el mock en 200 (fichero temporal src/catalog/zz-rejects-200.spec.ts, ya borrado):
+
+it('debería rechazar con "Servicio no disponible" cuando la API responde 503 (versión rejects, mock en 200)', async () => {
+  // Arrange
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(JSON.stringify({ data: coffees }), { status: 200 }),
+  );
+
+  // Act
+  const result = getCoffees();
+
+  // Assert
+  await expect(result).rejects.toThrow('Servicio no disponible');
+});
+
+Salida de NO_COLOR=1 npx vitest run -c ./config/test/config.ts src/catalog/zz-rejects-200.spec.ts:
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/zz-rejects-200.spec.ts (1 test | 1 failed) 11ms
+   × debería rechazar con "Servicio no disponible" cuando la API responde 503 (versión rejects, mock en 200) 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/zz-rejects-200.spec.ts > debería rechazar con "Servicio no disponible" cuando la API responde 503 (versión rejects, mock en 200)
+AssertionError: promise resolved "[ { id: 1, …(4) }, …(2) ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "discount": 0.1,
+    "id": 1,
+    "name": "Etiopía Yirgacheffe",
+    "origin": "Etiopía",
+    "price": 14.9,
+  },
+  {
+    "id": 2,
+    "name": "Colombia Huila",
+    "origin": "Colombia",
+    "price": 12.9,
+  },
+  {
+    "id": 3,
+    "name": "Brasil Cerrado",
+    "origin": "Brasil",
+    "price": 10.5,
+  },
+]
+
+ ❯ src/catalog/zz-rejects-200.spec.ts:14:23
+     12|
+     13|   // Assert
+     14|   await expect(result).rejects.toThrow('Servicio no disponible');
+       |                       ^
+     15| });
+     16|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  20:01:21
+   Duration  690ms (environment 75%, setup 15%, transform 5%, tests 2%, import 1%, worker 1%)
+

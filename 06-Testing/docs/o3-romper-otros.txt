@@ -1,0 +1,148 @@
+💥 extra de O3 (además de o3-romper-1), para ver en rojo cada test al menos una vez.
+Cada bloque: un único cambio en src/catalog/coffee.api.ts, deshecho después con git checkout -- y git diff --exit-code limpio.
+Ejecutado con NO_COLOR=1 npx vitest run -c ./config/test/config.ts src/catalog/coffee.api.spec.ts; la salida está filtrada con grep (líneas ✓/×, FAIL, AssertionError/TypeError, Expected/Received y Tests).
+Al final, otra vez 6 passed (6).
+
+==================================================================
+💥 return data → return [] (devuelve una lista vacía)
+
+@@ -19,3 +19,3 @@ export const getCoffees = async (): Promise<Coffee[]> => {
+   const { data } = await response.json();
+-  return data;
++  return [];
+ };
+
+       × debería devolver los cafés del campo data cuando la API responde 200 9ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde 200 > debería devolver los cafés del campo data cuando la API responde 200
+AssertionError: expected [] to deeply equal [ { id: 1, …(4) }, …(2) ]
+- Expected
++ Received
+- [
+-   {
+-     "discount": 0.1,
+-     "id": 1,
+-     "name": "Etiopía Yirgacheffe",
+-     "origin": "Etiopía",
+-     "price": 14.9,
+-   },
+-   {
+-     "id": 2,
+-     "name": "Colombia Huila",
+-     "origin": "Colombia",
+-     "price": 12.9,
+-   },
+-   {
+-     "id": 3,
+-     "name": "Brasil Cerrado",
+-     "origin": "Brasil",
+-     "price": 10.5,
+-   },
+- ]
++ []
+      Tests  1 failed | 5 passed (6)
+(deshecho: git diff --exit-code limpio)
+
+==================================================================
+💥 url '/api/coffees' → '/api/cafes'
+
+@@ -2,3 +2,3 @@ import type { Coffee } from './model';
+ 
+-export const url = '/api/coffees';
++export const url = '/api/cafes';
+ 
+
+       × debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde 200 > debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json
+AssertionError: expected "fetch" to be called with arguments: [ '/api/coffees', ObjectContaining{…} ]
+Received:
+-   "/api/coffees",
+-   ObjectContaining {
++   "/api/cafes",
++   {
+      Tests  1 failed | 5 passed (6)
+(deshecho: git diff --exit-code limpio)
+
+==================================================================
+💥 Accept: 'application/json' → 'text/html'
+
+@@ -5,3 +5,3 @@ export const url = '/api/coffees';
+ export const getCoffees = async (): Promise<Coffee[]> => {
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url, { headers: { Accept: 'text/html' } });
+ 
+
+       × debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde 200 > debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json
+AssertionError: expected "fetch" to be called with arguments: [ '/api/coffees', ObjectContaining{…} ]
+Received:
+-   ObjectContaining {
++   {
+-       "Accept": "application/json",
++       "Accept": "text/html",
+      Tests  1 failed | 5 passed (6)
+(deshecho: git diff --exit-code limpio)
+
+==================================================================
+💥 mensaje del 404: 'Catálogo no encontrado' → 'No encontrado'
+
+@@ -10,3 +10,3 @@ export const getCoffees = async (): Promise<Coffee[]> => {
+       case 404:
+-        throw new Error('Catálogo no encontrado');
++        throw new Error('No encontrado');
+       case 503:
+
+       × debería rechazar con "Catálogo no encontrado" cuando la API responde 404 6ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Catálogo no encontrado" cuando la API responde 404
+AssertionError: expected [Function] to throw error including 'Catálogo no encontrado' but got 'No encontrado'
+Expected: "Catálogo no encontrado"
+Received: "No encontrado"
+      Tests  1 failed | 5 passed (6)
+(deshecho: git diff --exit-code limpio)
+
+==================================================================
+💥 mensaje del default: 'Error inesperado' → 'Error'
+
+@@ -14,3 +14,3 @@ export const getCoffees = async (): Promise<Coffee[]> => {
+       default:
+-        throw new Error('Error inesperado');
++        throw new Error('Error');
+     }
+
+       × debería rechazar con "Error inesperado" cuando la API responde 500 5ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Error inesperado" cuando la API responde 500
+AssertionError: expected [Function] to throw error including 'Error inesperado' but got 'Error'
+Expected: "Error inesperado"
+Received: "Error"
+      Tests  1 failed | 5 passed (6)
+(deshecho: git diff --exit-code limpio)
+
+==================================================================
+💥 fetch(url, …) → fetch(url, …).catch(() => { throw new Error('Failed to fetch'); }) (el error de red deja de llegar tal cual)
+
+@@ -5,3 +5,3 @@ export const url = '/api/coffees';
+ export const getCoffees = async (): Promise<Coffee[]> => {
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url, { headers: { Accept: 'application/json' } }).catch(() => { throw new Error('Failed to fetch'); });
+ 
+
+       × debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando falla la red > debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza
+AssertionError: expected error to be instance of TypeError
+- Expected:
+[Function TypeError]
++ Received:
+Error {
+     65|       await expect(result).rejects.toThrow(TypeError);
+      Tests  1 failed | 5 passed (6)
+(deshecho: git diff --exit-code limpio)
+
+==================================================================
+Todo deshecho:
+
+      Tests  6 passed (6)

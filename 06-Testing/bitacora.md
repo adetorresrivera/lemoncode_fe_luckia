@@ -101,3 +101,54 @@ ha comprobado. `toBeCloseTo` se queda: no hace falta porque falle `toBe`,
 sino porque un resultado con decimales no tiene por qué ser exacto, y el
 test no puede depender de que el redondeo caiga bien. Lo mismo va en el
 README (O2).
+
+## 5 · Dos llamadas a `getCoffees` para dos `rejects`
+
+### Prompt
+
+"Error de red: mockRejectedValue(new TypeError('Failed to fetch')) → el error
+llega tal cual (comprueba el tipo y el mensaje)." (prompt 3 de `prompts.md`).
+
+### Qué me dio
+
+En la lista de casos que propuso (y que se aprobó), para el error de red
+dijo que haría dos `await expect(getCoffees()).rejects`, cada uno "con su
+propia llamada a `getCoffees()`", porque "cada `rejects` necesita su
+promesa".
+
+### Qué corregí y por qué
+
+Eso no es así: una promesa ya rechazada se puede esperar todas las veces
+que se quiera, y siempre da el mismo error. Al escribir el test, guardó una
+sola promesa en el Act (`const result = getCoffees()`) y pasó la misma a
+`rejects.toThrow(TypeError)` y a `rejects.toThrow('Failed to fetch')`. Así
+`fetch` se llama una vez, como en la vida real, y el test tiene el mismo
+Arrange / Act / Assert que los demás. Se avisó del cambio respecto a la lista
+aprobada. Que el `toThrow(TypeError)` hace falta se comprobó con un 💥 que
+envuelve el error de red en un `Error` con el mismo mensaje: sólo ese
+`expect` se pone rojo ([docs/o3-romper-otros.txt](docs/o3-romper-otros.txt)).
+
+## 6 · La prueba de `Response` sin la config de test
+
+### Prompt
+
+"Comprueba que en el entorno jsdom Response existe y funciona (lo da Node,
+no jsdom); si no, dímelo antes de buscar otra solución." (prompt 3 de
+`prompts.md`).
+
+### Qué me dio
+
+Un spec temporal ejecutado con `npx vitest run <fichero>`, sin `-c
+./config/test/config.ts`. Falló con `ReferenceError: it is not defined`. No
+era un problema de `Response`: sin la config no había `globals` ni jsdom.
+Después lo repitió con la config y un `console.log`, que no salió en la
+salida de `vitest run`, así que la prueba no demostraba nada.
+
+### Qué corregí y por qué
+
+Lo volvió a ejecutar con `-c ./config/test/config.ts` y cambió el
+`console.log` por expects: `typeof window` es `'object'` (el entorno es
+jsdom), `ok` es `false` y `status` 503 con un 503, `json()` devuelve el
+cuerpo, y una segunda lectura rechaza con `Body is unusable`. Sólo con
+expects que pasan la comprobación vale de algo. Y la segunda lectura
+confirma por qué cada test crea su propio `Response`.

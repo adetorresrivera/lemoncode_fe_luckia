@@ -1,0 +1,37 @@
+🪤 c) try/catch + expect.assertions(1), con el mock en 200 (fichero temporal src/catalog/coffee.api.trampa.spec.ts, ya borrado):
+
+  it('debería rechazar con "Servicio no disponible" cuando la API responde 503', async () => {
+    // Arrange
+    expect.assertions(1);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ data: coffees }), { status: 200 }),
+    );
+
+    // Act + Assert
+    try {
+      await getCoffees();
+    } catch (error) {
+      expect((error as Error).message).toBe('Servicio no disponible');
+    }
+  });
+
+Salida de NO_COLOR=1 npx vitest run -c ./config/test/config.ts src/catalog/coffee.api.trampa.spec.ts:
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.trampa.spec.ts (1 test | 1 failed) 9ms
+   ❯ getCoffees (🪤 trampa con try/catch) (1)
+     × debería rechazar con "Servicio no disponible" cuando la API responde 503 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee.api.trampa.spec.ts > getCoffees (🪤 trampa con try/catch) > debería rechazar con "Servicio no disponible" cuando la API responde 503
+Error: expected number of assertions to be 1, but got 0
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  20:01:20
+   Duration  663ms (environment 79%, setup 12%, transform 5%, tests 2%, import 1%, worker 1%)
+

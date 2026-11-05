@@ -314,6 +314,84 @@ test escribe su propio carrito literal, así que ninguno depende de otro.
   3 de los 12), se hicieron 8 💥 más, uno cada vez y deshecho después:
   [docs/o2-romper-otros.txt](docs/o2-romper-otros.txt).
 
+## O3 · La API
+
+Fichero `lab-testing/src/catalog/coffee.api.spec.ts`: 6 tests (2 + 3 del
+`it.each` + 1). No hay servidor. Cada test sustituye `fetch` con un spy sobre
+el objeto global y decide qué devuelve:
+
+```ts
+vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+  new Response(JSON.stringify({ data: coffees }), { status }),
+);
+```
+
+- **`globalThis`**, no `window`: `fetch` es una global de Node (Vitest corre
+  en Node). Con jsdom también existe `window`, pero `globalThis` funciona en
+  cualquier entorno.
+- **`new Response(...)`**: es el `Response` de Node (undici), no el de jsdom.
+  Antes de escribir los tests lo comprobé en el entorno jsdom con un spec
+  temporal: `window` existe, `ok` es `false` con un 503, `status` es 503,
+  `json()` devuelve `{ data: [1] }` y una segunda lectura rechaza con `Body
+  is unusable`. Por eso **cada test crea su propio `Response`** dentro de su
+  `it`: un cuerpo sólo se puede leer una vez.
+- **Sin `beforeEach` ni `beforeAll`**: el mock está en el Arrange de cada
+  test, y `restoreMocks: true` (O1) le devuelve a `globalThis` el `fetch`
+  original al acabar cada uno.
+- **Los rechazos** con `await expect(result).rejects.toThrow('…')`, donde
+  `result = getCoffees()` es la promesa (sin `await`) que se crea en el Act.
+  Nada de try/catch (ver 🪤 más abajo).
+
+| `describe` | Test | Mock de `fetch` | Qué comprueba |
+| --- | --- | --- | --- |
+| cuando la API responde 200 | debería devolver los cafés del campo data cuando la API responde 200 | `mockResolvedValue(Response 200 con { data: coffees })` | `toEqual(coffees)`: devuelve el `data` (los tres cafés), no el objeto `{ data }` entero |
+| cuando la API responde 200 | debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json | el mismo | `toHaveBeenCalledTimes(1)` y `toHaveBeenCalledWith('/api/coffees', expect.objectContaining({ headers: { Accept: 'application/json' } }))` |
+| cuando la API responde con un error | `it.each`: debería rechazar con "$message" cuando la API responde $status (×3) | `mockResolvedValue(Response con el status de la fila)` | `rejects.toThrow(message)` |
+| cuando falla la red | debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza | `mockRejectedValue(new TypeError('Failed to fetch'))` | `rejects.toThrow(TypeError)` y `rejects.toThrow('Failed to fetch')` |
+
+La tabla del `it.each` (con objetos, para que `$status` y `$message` se
+interpolen en el nombre):
+
+| `status` | `message` | Rama del `switch` |
+| --- | --- | --- |
+| 404 | Catálogo no encontrado | `case 404` |
+| 503 | Servicio no disponible | `case 503` |
+| 500 | Error inesperado | `default` (vale por cualquier otro estado) |
+
+Decisiones:
+
+- **El literal `'/api/coffees'`, no la constante `url` exportada.** Si
+  alguien cambia `url` por error, un test que use la constante seguiría en
+  verde, porque repetiría el error. El literal fija el contrato con el
+  servidor (el 💥 de `url` en
+  [docs/o3-romper-otros.txt](docs/o3-romper-otros.txt) lo pone en rojo).
+- **`expect.objectContaining` en el segundo argumento.** Hoy la llamada exacta
+  también casaría (`{ headers: { Accept: 'application/json' } }`). Con
+  `objectContaining`, el test sigue en verde si un día se añade un `signal`
+  (AbortController), pero se pone rojo si se quita o se cambia el `Accept`.
+  Lo que se comprueba es la cabecera, no que no haya otras opciones.
+- **Dos `toThrow` en el error de red.** `toThrow(TypeError)` comprueba el
+  tipo y `toThrow('Failed to fetch')` el mensaje. Los dos se hacen sobre la
+  misma promesa: una promesa ya rechazada se puede esperar varias veces, y
+  así `fetch` se llama una sola vez. Hace falta el del tipo. En el último 💥
+  de [docs/o3-romper-otros.txt](docs/o3-romper-otros.txt), el código
+  envuelve el error de red en un `Error` con el mismo mensaje: el del
+  mensaje seguiría en verde y sólo el del tipo lo detecta (`expected error to
+  be instance of TypeError`).
+
+### Comprobado
+
+- [docs/o3-verde.txt](docs/o3-verde.txt): `Tests  18 passed (18)` (12 de O2 +
+  6 de O3), con `--reporter=verbose`. `npm run type-check` limpio.
+- El 💥 del enunciado, en la tabla de abajo, sólo pone en rojo el test del
+  503. Para ver fallar los otros cinco, se hicieron 6 💥 más, uno cada vez y
+  deshecho después: [docs/o3-romper-otros.txt](docs/o3-romper-otros.txt)
+  (`return []`, `url`, `Accept`, mensaje del 404, mensaje del `default` y
+  error de red envuelto). Cada uno pone en rojo exactamente un test.
+- `expect(…).rejects` sin `await`:
+  [docs/o3-sin-await.txt](docs/o3-sin-await.txt) (ver la respuesta 📝 de
+  O3).
+
 ## Romper el código (💥)
 
 Cada 💥 es un único cambio en `src/catalog`, con `git diff --exit-code` limpio
@@ -325,11 +403,41 @@ comprueba que el diff vuelve a estar limpio y los tests en verde.
 | --- | --- | --- | --- |
 | O2 | `cart.ts`, `addToCart`: `{ ...item, quantity: item.quantity + 1 }` → `((item.quantity += 1), item)` | `addToCart > no debería modificar el carrito que recibe cuando el café ya está en él` (falla el `toEqual`: `quantity` 3 en vez de 2) | [docs/o2-romper-1.txt](docs/o2-romper-1.txt) |
 | O2 | `cart.ts`, `finalPrice`: `coffee.price * (1 - (coffee.discount ?? 0))` → `coffee.price` | `finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)` (14.9) y `cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)` (40.3) | [docs/o2-romper-2.txt](docs/o2-romper-2.txt) |
+| O3 | `coffee.api.ts`, `case 503:` → `case 502:` | `getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503` (`expected [Function] to throw error including 'Servicio no disponible' but got 'Error inesperado'`: el 503 cae en el `default`) | [docs/o3-romper-1.txt](docs/o3-romper-1.txt) |
 
 Con el 💥 1, el test `debería sumar 1 al café y dejar los demás igual…` sigue
 en verde: el resultado es correcto, lo que está mal es que el original
 también cambia. Con el 💥 2, los dos tests de Colombia siguen en verde: sin
-descuento, `coffee.price` y la fórmula dan lo mismo.
+descuento, `coffee.price` y la fórmula dan lo mismo. Con el 💥 de O3, el
+404 y el 500 siguen en verde: sus ramas no cambian.
+
+### 🪤 El test del try/catch
+
+Para no tocar el spec bueno, se hizo en un fichero temporal,
+`src/catalog/coffee.api.trampa.spec.ts`, que ya está borrado. El
+`(error as Error).message` del enunciado es la única excepción a "nada de
+`as`" y se fue con el fichero.
+
+```ts
+try {
+  await getCoffees();
+} catch (error) {
+  expect((error as Error).message).toBe('Servicio no disponible');
+}
+```
+
+| Paso | Mock de `fetch` | Resultado | Salida |
+| --- | --- | --- | --- |
+| a) try/catch | 503 | ✓ (`Tests  1 passed (1)`) | — |
+| b) try/catch | **200** | ✓ **sigue en verde** (`Tests  1 passed (1)`), aunque `getCoffees` ya no falla | [docs/o3-trampa-1.txt](docs/o3-trampa-1.txt) |
+| c) try/catch + `expect.assertions(1)` | 200 | × `Error: expected number of assertions to be 1, but got 0` | [docs/o3-trampa-2.txt](docs/o3-trampa-2.txt) |
+| d) `await expect(result).rejects.toThrow('Servicio no disponible')` (la del spec bueno) | 200 | × `AssertionError: promise resolved "[ { id: 1, …(4) }, …(2) ]" instead of rejecting` | [docs/o3-trampa-3.txt](docs/o3-trampa-3.txt) |
+
+El mensaje de c) es el de Vitest 5.1.0. El "expected one assertion to be
+called but received zero assertion calls" es el de Jest. Por qué pasa lo de
+b) y qué arregla c), en la respuesta 📝 de O3. Nos quedamos con la versión
+de `rejects` (d): sin añadir nada, se pone en rojo y explica qué ha pasado
+(la promesa se resolvió con los cafés).
 
 ## Estructura
 
@@ -356,6 +464,7 @@ descuento, `coffee.price` y la fórmula dan lo mismo.
             ├── cart.ts            ← funciones puras: formatPrice, finalPrice, addToCart, removeFromCart, cartTotal
             ├── cart.spec.ts       ← O2: 12 tests de las funciones del carrito
             ├── coffee.api.ts      ← getCoffees: fetch a /api/coffees y un error por cada estado
+            ├── coffee.api.spec.ts ← O3: 6 tests de getCoffees con fetch espiado
             ├── coffee-card.tsx    ← CoffeeCard: nombre, origen, precio, descuento y botón Añadir
             ├── use-cart.ts        ← useCart: estado del carrito, units, total, add, remove y clear
             ├── coffee-catalog.tsx ← CoffeeCatalog: carga, error, buscador y carrito (no se monta en index.tsx)
@@ -367,7 +476,7 @@ descuento, `coffee.price` y la fórmula dan lo mismo.
 ### Obligatorios
 - [x] O1 · Configurar Vitest
 - [x] O2 · Funciones puras: el carrito
-- [ ] O3 · Código asíncrono: la llamada a la API
+- [x] O3 · Código asíncrono: la llamada a la API
 - [ ] O4 · Un componente presentacional: la tarjeta
 - [ ] O5 · Un componente con datos: el catálogo
 - [ ] O6 · Un custom hook: useCart
@@ -475,3 +584,69 @@ Lo único que hay que preparar en el Arrange son las entradas:
 - **La copia para la mutación**: `structuredClone(cart)` antes del Act. Tiene
   que ser profunda, porque el 💥 1 muta el item, no el array, y una copia
   con `[...cart]` compartiría ese item y cambiaría con él (ver O2 arriba).
+
+### O3
+
+**¿Por qué no queremos que los tests llamen a la API de verdad? Dad al menos dos motivos.**
+
+- **Resultados que no dependen de nada externo.** Con la API real, el test
+  depende de que el servidor esté levantado, de la red y de los datos que
+  tenga ese día. Si alguien añade un café, el `toEqual(coffees)` falla
+  aunque `getCoffees` esté bien. Con el spy, la respuesta es siempre la que
+  escribe el test, y si falla es porque `getCoffees` ha cambiado.
+- **Poder provocar cualquier caso cuando queremos.** Un servidor que
+  funciona no da un 503 ni un 500 cuando queremos, y un fallo de red no se
+  provoca desde un test. Con `mockResolvedValue(new Response(..., { status:
+  503 }))` o `mockRejectedValue(new TypeError('Failed to fetch'))`, cada rama
+  del `switch` y el `TypeError` se prueban en una línea. Sin eso, la mitad de
+  la tabla de O3 no se podría probar.
+- **Velocidad.** Los 6 tests de O3 tardan entre 0 y 4 ms cada uno
+  ([docs/o3-verde.txt](docs/o3-verde.txt)): no hay red, ni espera, ni
+  servidor que arrancar. Con peticiones reales, cada test tardaría lo que
+  tarde la red, y en un `npm test` en modo vigilancia eso se nota.
+- **No tocar datos reales.** Un test de `createCoffee` o `deleteCoffee`
+  contra la API real crearía o borraría datos de verdad (en el lab 5, los
+  hoteles del servidor en memoria quedaban cambiados después de cada prueba).
+  Y no hacen falta credenciales ni un servidor en la CI.
+
+Lo que se pierde es comprobar que el servidor de verdad responde lo que
+creemos (`{ data: [...] }`, esos estados). Eso es trabajo de un test de
+integración o de contrato, no de este test unitario.
+
+**¿Qué pasaba en el test del try/catch y qué hace `expect.assertions(1)`?**
+
+El único `expect` del test estaba dentro del `catch`. Con el mock en 200,
+`getCoffees()` se resuelve con los tres cafés, el `await` no lanza nada y el
+`catch` **no se ejecuta**. El test termina sin haber ejecutado ningún
+`expect`, y para Vitest un test que no lanza ningún error es un test que
+pasa: `✓ … debería rechazar con "Servicio no disponible" cuando la API
+responde 503` y `Tests  1 passed (1)`
+([docs/o3-trampa-1.txt](docs/o3-trampa-1.txt)). El nombre dice que rechaza,
+el código ya no rechaza, y el test sigue en verde: no comprueba nada.
+
+`expect.assertions(1)` le dice a Vitest que, al acabar el test, tiene que
+haberse ejecutado **exactamente un** `expect`. Si no, el test falla aunque no
+se haya lanzado nada. Con el 200, el `catch` sigue sin ejecutarse, se han
+hecho 0 aserciones, y el test se pone rojo con `Error: expected number of
+assertions to be 1, but got 0`
+([docs/o3-trampa-2.txt](docs/o3-trampa-2.txt)). Arregla la trampa, pero hay
+que acordarse de ponerlo y de cambiar el número si se añade otro `expect`.
+
+La versión de `rejects` no necesita nada de eso. `await
+expect(result).rejects.toThrow('Servicio no disponible')` falla siempre que
+la promesa se resuelva, y además explica qué ha pasado: `promise resolved
+"[ { id: 1, …(4) }, …(2) ]" instead of rejecting`
+([docs/o3-trampa-3.txt](docs/o3-trampa-3.txt)). Por eso nos quedamos con
+ella.
+
+El `await` delante de `expect(...).rejects` también hace falta.
+`rejects.toThrow` devuelve una promesa, y sin `await` el test no la espera.
+Ese es el riesgo clásico (en Jest, por ejemplo): el test puede acabar antes de
+que la aserción falle y quedar en verde (eso no lo he probado aquí). En
+Vitest 5.1.0 sí lo he probado ([docs/o3-sin-await.txt](docs/o3-sin-await.txt)) y siempre sale rojo, con
+``Error: Promise returned by `expect(actual).rejects.toThrow(expected)` was
+not awaited``. Sale así incluso cuando la aserción se cumpliría (mock en
+503), y también cuando el 200 llega 50 ms después de que acabe el cuerpo del
+test: en ese caso Vitest espera a la aserción pendiente y da los dos
+errores, el del 200 y el del `await` que falta. O sea, Vitest 5 lo detecta,
+pero el `await` sigue siendo obligatorio: sin él el test no pasa nunca.
