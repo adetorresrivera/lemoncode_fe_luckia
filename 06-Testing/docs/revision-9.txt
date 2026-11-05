@@ -1,0 +1,98 @@
+# 💥 R9
+$ git diff src/catalog/cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/cart.ts b/06-Testing/lab-testing/src/catalog/cart.ts
+index 957fa25..cc51b10 100644
+--- a/06-Testing/lab-testing/src/catalog/cart.ts
++++ b/06-Testing/lab-testing/src/catalog/cart.ts
+@@ -12,8 +12,11 @@ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+       )
+     : [...cart, { coffeeId, quantity: 1 }];
+ 
+-export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+-  cart.filter((item) => item.coffeeId !== coffeeId);
++export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] => {
++  const index = cart.findIndex((item) => item.coffeeId === coffeeId);
++  if (index >= 0) cart.splice(index, 1);
++  return [...cart];
++};
+ 
+ export const cartTotal = (cart: CartItem[], coffees: Coffee[]): number =>
+   cart.reduce((total, item) => {
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 32ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 75ms
+ ❯ src/catalog/cart.spec.ts (13 tests | 1 failed) 33ms
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 2ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 1ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 1ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 1ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 1ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 2ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 3ms
+   ❯ removeFromCart (2)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+     × no debería modificar el carrito que recibe cuando quita un café 15ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 1ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un café cuando su coffeeId no existe en el catálogo 0ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 181ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 216ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 313ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 511ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:19:47
+   Duration  2.03s (environment 65%, tests 13%, setup 12%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > removeFromCart > no debería modificar el carrito que recibe cuando quita un café
+AssertionError: expected [ { coffeeId: 1, quantity: 1 } ] to deeply equal [ { coffeeId: 1, quantity: 1 }, …(1) ]
+
+- Expected
++ Received
+
+  [
+    {
+      "coffeeId": 1,
+      "quantity": 1,
+    },
+-   {
+-     "coffeeId": 2,
+-     "quantity": 2,
+-   },
+  ]
+
+ ❯ src/catalog/cart.spec.ts:150:18
+    148|
+    149|     // Assert
+    150|     expect(cart).toEqual(original);
+       |                  ^
+    151|     expect(result).not.toBe(cart);
+    152|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/cart.ts; git diff --exit-code: limpio

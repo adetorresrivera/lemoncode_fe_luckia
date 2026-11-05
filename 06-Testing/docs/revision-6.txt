@@ -1,0 +1,90 @@
+# 💥 R6
+$ git diff src/catalog/coffee-card.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-card.tsx b/06-Testing/lab-testing/src/catalog/coffee-card.tsx
+index 399ca46..a05212d 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-card.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-card.tsx
+@@ -12,7 +12,6 @@ export const CoffeeCard: React.FC<Props> = ({ coffee, onAdd }) => (
+     <h3>{coffee.name}</h3>
+     <p>{coffee.origin}</p>
+     <p>{formatPrice(finalPrice(coffee))}</p>
+-    {coffee.discount ? <p>-{coffee.discount * 100} %</p> : null}
+     <button onClick={() => onAdd(coffee)}>Añadir {coffee.name} al carrito</button>
+   </li>
+ );
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (13 tests) 30ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 95ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 32ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 203ms
+ ❯ src/catalog/coffee-card.spec.tsx (4 tests | 1 failed) 267ms
+   ❯ CoffeeCard (4)
+     ✓ debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta 163ms
+     × debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento 28ms
+     ✓ no debería mostrar ninguna etiqueta de descuento cuando el café no tiene descuento 11ms
+     ✓ debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir 57ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 365ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 583ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:19:36
+   Duration  2.35s (environment 64%, tests 13%, setup 13%, import 8%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento
+TestingLibraryElementError: Unable to find an element with the text: -10 %. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<li>[39m
+      [36m<h3>[39m
+        [0mEtiopía Yirgacheffe[0m
+      [36m</h3>[39m
+      [36m<p>[39m
+        [0mEtiopía[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m13.41 €[0m
+      [36m</p>[39m
+      [36m<button>[39m
+        [0mAñadir [0m
+        [0mEtiopía Yirgacheffe[0m
+        [0m al carrito[0m
+      [36m</button>[39m
+    [36m</li>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-card.spec.tsx:32:19
+     30|     // Assert
+     31|     expect(screen.getByText('13.41 €')).toBeInTheDocument();
+     32|     expect(screen.getByText('-10 %')).toBeInTheDocument();
+       |                   ^
+     33|   });
+     34|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-card.tsx; git diff --exit-code: limpio

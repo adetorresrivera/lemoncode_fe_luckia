@@ -134,6 +134,22 @@ describe('removeFromCart', () => {
       { coffeeId: brazil.id, quantity: 1 },
     ]);
   });
+
+  it('no debería modificar el carrito que recibe cuando quita un café', () => {
+    // Arrange
+    const cart: CartItem[] = [
+      { coffeeId: ethiopia.id, quantity: 1 },
+      { coffeeId: colombia.id, quantity: 2 },
+    ];
+    const original = structuredClone(cart);
+
+    // Act
+    const result = removeFromCart(cart, colombia.id);
+
+    // Assert
+    expect(cart).toEqual(original);
+    expect(result).not.toBe(cart);
+  });
 });
 
 describe('cartTotal', () => {
@@ -164,7 +180,7 @@ describe('cartTotal', () => {
     expect(result).toBeCloseTo(37.32, 2);
   });
 
-  it('debería contar como 0 un coffeeId que no existe en el catálogo', () => {
+  it('debería contar como 0 un café cuando su coffeeId no existe en el catálogo', () => {
     // Arrange
     const cart: CartItem[] = [
       { coffeeId: 99, quantity: 3 },

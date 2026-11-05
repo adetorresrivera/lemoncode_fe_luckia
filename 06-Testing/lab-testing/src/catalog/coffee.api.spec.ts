@@ -16,7 +16,7 @@ describe('getCoffees', () => {
       expect(result).toEqual(coffees);
     });
 
-    it('debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json', async () => {
+    it('debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json cuando se piden los cafés', async () => {
       // Arrange
       const fetchSpy = vi
         .spyOn(globalThis, 'fetch')

@@ -1,0 +1,359 @@
+# 💥 R1
+$ git diff src/catalog/cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/cart.ts b/06-Testing/lab-testing/src/catalog/cart.ts
+index 957fa25..2d3c9b0 100644
+--- a/06-Testing/lab-testing/src/catalog/cart.ts
++++ b/06-Testing/lab-testing/src/catalog/cart.ts
+@@ -1,6 +1,6 @@
+ import type { CartItem, Coffee } from './model';
+ 
+-export const formatPrice = (price: number): string => `${price.toFixed(2)} €`;
++export const formatPrice = (price: number): string => `${price.toFixed(1)} €`;
+ 
+ export const finalPrice = (coffee: Coffee): number =>
+   coffee.price * (1 - (coffee.discount ?? 0));
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/cart.spec.ts (13 tests | 2 failed) 31ms
+   ❯ formatPrice (2)
+     × debería devolver "14.90 €" cuando el precio es 14.9 15ms
+     × debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 2ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 1ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 1ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 1ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 2ms
+   ✓ removeFromCart (2)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando quita un café 1ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un café cuando su coffeeId no existe en el catálogo 0ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 26ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 56ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 116ms
+ ❯ src/catalog/coffee-card.spec.tsx (4 tests | 1 failed) 168ms
+   ❯ CoffeeCard (4)
+     ✓ debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta 95ms
+     × debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento 22ms
+     ✓ no debería mostrar ninguna etiqueta de descuento cuando el café no tiene descuento 9ms
+     ✓ debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir 38ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 233ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 2 failed) 380ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 132ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 19ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 8ms
+     ✓ buscador (3)
+       ✓ debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 56ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 45ms
+       ✓ debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 25ms
+     ❯ carrito (integración) (3)
+       ✓ debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 13ms
+       × debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 32ms
+       × debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 46ms
+
+ Test Files  3 failed | 4 passed (7)
+      Tests  5 failed | 43 passed (48)
+   Start at  21:19:21
+   Duration  1.86s (environment 67%, setup 12%, tests 10%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > formatPrice > debería devolver "14.90 €" cuando el precio es 14.9
+AssertionError: expected '14.9 €' to be '14.90 €' // Object.is equality
+
+Expected: "14.90 €"
+Received: "14.9 €"
+
+ ❯ src/catalog/cart.spec.ts:16:20
+     14|
+     15|     // Assert
+     16|     expect(result).toBe('14.90 €');
+       |                    ^
+     17|   });
+     18|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/catalog/cart.spec.ts > formatPrice > debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €")
+AssertionError: expected '10.0 €' to be '10.00 €' // Object.is equality
+
+Expected: "10.00 €"
+Received: "10.0 €"
+
+ ❯ src/catalog/cart.spec.ts:27:20
+     25|
+     26|     // Assert
+     27|     expect(result).toBe('10.00 €');
+       |                    ^
+     28|   });
+     29| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento
+TestingLibraryElementError: Unable to find an element with the text: 13.41 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<li>[39m
+      [36m<h3>[39m
+        [0mEtiopía Yirgacheffe[0m
+      [36m</h3>[39m
+      [36m<p>[39m
+        [0mEtiopía[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m13.4 €[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m-[0m
+        [0m10[0m
+        [0m %[0m
+      [36m</p>[39m
+      [36m<button>[39m
+        [0mAñadir [0m
+        [0mEtiopía Yirgacheffe[0m
+        [0m al carrito[0m
+      [36m</button>[39m
+    [36m</li>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-card.spec.tsx:31:19
+     29|
+     30|     // Assert
+     31|     expect(screen.getByText('13.41 €')).toBeInTheDocument();
+       |                   ^
+     32|     expect(screen.getByText('-10 %')).toBeInTheDocument();
+     33|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil
+TestingLibraryElementError: Unable to find an element with the text: 2 bolsas · 23.91 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mEtiopía Yirgacheffe[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mEtiopía[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m13.4 €[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m-[0m
+            [0m10[0m
+            [0m %[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mEtiopía Yirgacheffe[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mColombia Huila[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mColombia[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m12.9 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mColombia Huila[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mBrasil Cerrado[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mBrasil[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m10.5 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mBrasil Cerrado[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<p>[39m
+        [0m2[0m
+        [0m bolsas · [0m
+        [0m23.9 €[0m
+      [36m</p>[39m
+      [36m<button>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-catalog.spec.tsx:131:21
+    129|
+    130|       // Assert
+    131|       expect(screen.getByText('2 bolsas · 23.91 €')).toBeInTheDocument…
+       |                     ^
+    132|       expect(screen.getByRole('button', { name: 'Vaciar carrito' })).t…
+    133|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito"
+TestingLibraryElementError: Unable to find an element with the text: 0 bolsas · 0.00 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mEtiopía Yirgacheffe[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mEtiopía[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m13.4 €[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m-[0m
+            [0m10[0m
+            [0m %[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mEtiopía Yirgacheffe[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mColombia Huila[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mColombia[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m12.9 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mColombia Huila[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mBrasil Cerrado[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mBrasil[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m10.5 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mBrasil Cerrado[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.0 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-catalog.spec.tsx:149:21
+    147|
+    148|       // Assert
+    149|       expect(screen.getByText('0 bolsas · 0.00 €')).toBeInTheDocument(…
+       |                     ^
+    150|     });
+    151|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/cart.ts; git diff --exit-code: limpio

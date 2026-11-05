@@ -1,0 +1,25 @@
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 32ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 17ms
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 56ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 173ms
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 133ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 219ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 435ms
+
+ Test Files  7 passed (7)
+      Tests  48 passed (48)
+   Start at  21:20:02
+   Duration  1.87s (environment 65%, setup 14%, tests 11%, import 7%, transform 2%, worker 1%)
+

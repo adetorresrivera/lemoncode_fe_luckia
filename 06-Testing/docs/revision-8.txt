@@ -1,0 +1,187 @@
+# 💥 R8
+$ git diff src/catalog/use-cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/use-cart.ts b/06-Testing/lab-testing/src/catalog/use-cart.ts
+index 0d364bd..074eb02 100644
+--- a/06-Testing/lab-testing/src/catalog/use-cart.ts
++++ b/06-Testing/lab-testing/src/catalog/use-cart.ts
+@@ -7,7 +7,7 @@ export const useCart = (coffees: Coffee[]) => {
+ 
+   const add = (coffee: Coffee) => setCart((previous) => addToCart(previous, coffee.id));
+   const remove = (coffeeId: number) => setCart((previous) => removeFromCart(previous, coffeeId));
+-  const clear = () => setCart([]);
++  const clear = () => setCart((previous) => previous);
+ 
+   const units = cart.reduce((sum, item) => sum + item.quantity, 0);
+   const total = cartTotal(cart, coffees);
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 23ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 18ms
+ ❯ src/catalog/use-cart.spec.ts (6 tests | 1 failed) 59ms
+   ❯ useCart (6)
+     ✓ debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 25ms
+     ✓ debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 5ms
+     × debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 14ms
+     ✓ debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 3ms
+     ✓ debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 5ms
+     ✓ debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 2ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 131ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 149ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 262ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 1 failed) 407ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 126ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 24ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 10ms
+     ✓ buscador (3)
+       ✓ debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 52ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 60ms
+       ✓ debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 28ms
+     ❯ carrito (integración) (3)
+       ✓ debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 14ms
+       ✓ debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 31ms
+       × debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 54ms
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  2 failed | 46 passed (48)
+   Start at  21:19:44
+   Duration  1.84s (environment 69%, setup 12%, tests 11%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito"
+TestingLibraryElementError: Unable to find an element with the text: 0 bolsas · 0.00 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mEtiopía Yirgacheffe[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mEtiopía[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m13.41 €[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m-[0m
+            [0m10[0m
+            [0m %[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mEtiopía Yirgacheffe[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mColombia Huila[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mColombia[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m12.90 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mColombia Huila[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mBrasil Cerrado[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mBrasil[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m10.50 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mBrasil Cerrado[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<p>[39m
+        [0m2[0m
+        [0m bolsas · [0m
+        [0m23.91 €[0m
+      [36m</p>[39m
+      [36m<button>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-catalog.spec.tsx:149:21
+    147|
+    148|       // Assert
+    149|       expect(screen.getByText('0 bolsas · 0.00 €')).toBeInTheDocument(…
+       |                     ^
+    150|     });
+    151|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/catalog/use-cart.spec.ts:57:34
+     55|
+     56|     // Assert
+     57|     expect(result.current.units).toBe(0);
+       |                                  ^
+     58|   });
+     59|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/use-cart.ts; git diff --exit-code: limpio

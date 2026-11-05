@@ -1,0 +1,73 @@
+$ npx vitest run -c ./config/test/config.ts --sequence.shuffle --sequence.seed=1
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Running tests with seed "1"
+ ✓ src/catalog/cart.spec.ts (13 tests) 16ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 36ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 55ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 135ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 145ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 218ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 384ms
+ Test Files  7 passed (7)
+      Tests  48 passed (48)
+   Start at  21:20:05
+   Duration  1.90s (environment 69%, setup 12%, tests 10%, import 7%, transform 1%, worker 1%)
+
+$ npx vitest run -c ./config/test/config.ts --sequence.shuffle --sequence.seed=2
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Running tests with seed "2"
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 25ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 20ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 80ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 136ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 153ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 221ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 369ms
+ Test Files  7 passed (7)
+      Tests  48 passed (48)
+   Start at  21:20:07
+   Duration  1.84s (environment 66%, setup 13%, tests 11%, import 7%, transform 2%, worker 1%)
+
+$ npx vitest run -c ./config/test/config.ts --sequence.shuffle --sequence.seed=3
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+      Running tests with seed "3"
+ ✓ src/catalog/cart.spec.ts (13 tests) 16ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 23ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 49ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 122ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 135ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 226ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 378ms
+ Test Files  7 passed (7)
+      Tests  48 passed (48)
+   Start at  21:20:10
+   Duration  1.80s (environment 68%, setup 12%, tests 10%, import 7%, transform 2%, worker 1%)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/cart.spec.ts
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/coffee-card.spec.tsx
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/coffee-catalog.msw.spec.tsx
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/coffee-catalog.spec.tsx
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/coffee.api.msw.spec.ts
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/coffee.api.spec.ts
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+
+$ npx vitest run -c ./config/test/config.ts src/catalog/use-cart.spec.ts
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+

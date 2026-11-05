@@ -7,7 +7,7 @@ import { coffees } from './test-data';
 const [ethiopia, colombia] = coffees;
 
 describe('CoffeeCard', () => {
-  it('debería mostrar el nombre del café como encabezado de nivel 3', () => {
+  it('debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta', () => {
     // Arrange
     const onAdd = vi.fn();
 

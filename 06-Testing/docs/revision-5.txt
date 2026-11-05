@@ -1,0 +1,115 @@
+# 💥 R5
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..22d1db3 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -3,7 +3,7 @@ import type { Coffee } from './model';
+ export const url = '/api/coffees';
+ 
+ export const getCoffees = async (): Promise<Coffee[]> => {
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url, { headers: {} });
+ 
+   if (!response.ok) {
+     switch (response.status) {
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (13 tests) 22ms
+ ❯ src/catalog/coffee.api.spec.ts (6 tests | 1 failed) 57ms
+   ❯ getCoffees (6)
+     ❯ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 16ms
+       × debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json cuando se piden los cafés 25ms
+     ✓ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 5ms
+       ✓ debería rechazar con "Servicio no disponible" cuando la API responde 503 2ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 2ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza 2ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 85ms
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 1 failed) 226ms
+   ❯ getCoffees (MSW) (6)
+     ❯ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 110ms
+       × debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 31ms
+     ✓ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 18ms
+       ✓ debería rechazar con "Servicio no disponible" cuando la API responde 503 13ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 16ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "fetch failed" de Node cuando la red falla 14ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 267ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 398ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 662ms
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  2 failed | 46 passed (48)
+   Start at  21:19:33
+   Duration  2.39s (environment 62%, tests 14%, setup 14%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees
+AssertionError: expected '*/*' to be 'application/json' // Object.is equality
+
+Expected: "application/json"
+Received: "*/*"
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:37:22
+     35|
+     36|       // Assert
+     37|       expect(accept).toBe('application/json');
+       |                      ^
+     38|     });
+     39|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde 200 > debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json cuando se piden los cafés
+AssertionError: expected "fetch" to be called with arguments: [ '/api/coffees', ObjectContaining{…} ]
+
+Received:
+
+  1st fetch call:
+
+  [
+    "/api/coffees",
+-   ObjectContaining {
+-     "headers": {
+-       "Accept": "application/json",
+-     },
++   {
++     "headers": {},
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/catalog/coffee.api.spec.ts:30:24
+     28|       // Assert
+     29|       expect(fetchSpy).toHaveBeenCalledTimes(1);
+     30|       expect(fetchSpy).toHaveBeenCalledWith(
+       |                        ^
+     31|         '/api/coffees',
+     32|         expect.objectContaining({ headers: { Accept: 'application/json…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio

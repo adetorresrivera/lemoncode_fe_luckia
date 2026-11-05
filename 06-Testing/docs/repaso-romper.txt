@@ -1,0 +1,2308 @@
+# Repaso de todos los 💥 (O7, paso 3) con el código y los tests finales
+# Resumen: id, fichero, código de salida, diff tras deshacer, totales y tests en rojo
+== O2-1 (cart.ts) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  1 failed | 47 passed (48)
+    src/catalog/cart.spec.ts > addToCart > no debería modificar el carrito que recibe cuando el café ya está en él
+== O2-2 (cart.ts) exit=1 diff=limpio | Test Files  3 failed | 4 passed (7) | Tests  4 failed | 44 passed (48)
+    src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)
+    src/catalog/cart.spec.ts > finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)
+    src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento
+    src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil
+== O3 (coffee.api.ts) exit=1 diff=limpio | Test Files  3 failed | 4 passed (7) | Tests  3 failed | 45 passed (48)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+    src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+== O4 (coffee-card.tsx) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  1 failed | 47 passed (48)
+    src/catalog/coffee-card.spec.tsx > CoffeeCard > debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir
+== O5-1 (coffee-catalog.tsx) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  2 failed | 46 passed (48)
+    src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas
+    src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar
+== O5-2 (coffee-catalog.tsx) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  1 failed | 47 passed (48)
+    src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas
+== O5-3 (coffee-catalog.tsx) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  1 failed | 47 passed (48)
+    src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería tener "Vaciar carrito" desactivado cuando el carrito está vacío
+== O6 (use-cart.ts) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  1 failed | 47 passed (48)
+    src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act
+== P1-1 (use-cart.ts) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  2 failed | 46 passed (48)
+    src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil
+    src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita
+== P1-2 (use-cart.ts) exit=1 diff=limpio | Test Files  1 failed | 6 passed (7) | Tests  1 failed | 47 passed (48)
+    src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil
+== D2-1 (coffee.api.ts) exit=1 diff=limpio | Test Files  2 failed (2) | Tests  3 failed | 7 passed (10)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería devolver los cafés del campo data cuando la API responde 200
+== D2-2 (coffee.api.ts) exit=1 diff=limpio | Test Files  1 failed | 1 passed (2) | Tests  1 failed | 9 passed (10)
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees
+== D2-3 (coffee.api.ts) exit=1 diff=limpio | Test Files  2 failed (2) | Tests  4 failed | 6 passed (10)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Catálogo no encontrado" cuando la API responde 404
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Error inesperado" cuando la API responde 500
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+== D2-4 (coffee.api.ts) exit=1 diff=limpio | Test Files  2 failed (2) | Tests  2 failed | 8 passed (10)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando falla la red > debería propagar el TypeError "fetch failed" de Node cuando la red falla
+== D2-5 (coffee.api.ts) exit=1 diff=limpio | Test Files  2 failed (2) | Tests  2 failed | 8 passed (10)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+    src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+== D2-6 (coffee-catalog.tsx) exit=1 diff=limpio | Test Files  1 failed | 1 passed (2) | Tests  1 failed | 9 passed (10)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+== D2-7 (coffee-catalog.tsx) exit=1 diff=limpio | Test Files  1 failed | 1 passed (2) | Tests  2 failed | 8 passed (10)
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+    src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla
+
+################################################################
+# 💥 O2-1
+$ git diff src/catalog/cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/cart.ts b/06-Testing/lab-testing/src/catalog/cart.ts
+index 957fa25..466d59c 100644
+--- a/06-Testing/lab-testing/src/catalog/cart.ts
++++ b/06-Testing/lab-testing/src/catalog/cart.ts
+@@ -8,7 +8,7 @@ export const finalPrice = (coffee: Coffee): number =>
+ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.some((item) => item.coffeeId === coffeeId)
+     ? cart.map((item) =>
+-        item.coffeeId === coffeeId ? { ...item, quantity: item.quantity + 1 } : item
++        item.coffeeId === coffeeId ? ((item.quantity += 1), item) : item
+       )
+     : [...cart, { coffeeId, quantity: 1 }];
+ 
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/cart.spec.ts (13 tests | 1 failed) 29ms
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 3ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 0ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 1ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 0ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 0ms
+   ❯ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 1ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     × no debería modificar el carrito que recibe cuando el café ya está en él 14ms
+   ✓ removeFromCart (2)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando quita un café 1ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 0ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un café cuando su coffeeId no existe en el catálogo 0ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 32ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 57ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 158ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 119ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 216ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 358ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:18:40
+   Duration  1.82s (environment 69%, setup 12%, tests 10%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > addToCart > no debería modificar el carrito que recibe cuando el café ya está en él
+AssertionError: expected [ { coffeeId: 1, quantity: 3 }, …(1) ] to deeply equal [ { coffeeId: 1, quantity: 2 }, …(1) ]
+
+- Expected
++ Received
+
+@@ -1,9 +1,9 @@
+  [
+    {
+      "coffeeId": 1,
+-     "quantity": 2,
++     "quantity": 3,
+    },
+    {
+      "coffeeId": 3,
+      "quantity": 1,
+    },
+
+ ❯ src/catalog/cart.spec.ts:114:18
+    112|
+    113|     // Assert
+    114|     expect(cart).toEqual(original);
+       |                  ^
+    115|     expect(result).not.toBe(cart);
+    116|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/cart.ts; git diff --exit-code: limpio
+################################################################
+# 💥 O2-2
+$ git diff src/catalog/cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/cart.ts b/06-Testing/lab-testing/src/catalog/cart.ts
+index 957fa25..36eea4f 100644
+--- a/06-Testing/lab-testing/src/catalog/cart.ts
++++ b/06-Testing/lab-testing/src/catalog/cart.ts
+@@ -3,7 +3,7 @@ import type { CartItem, Coffee } from './model';
+ export const formatPrice = (price: number): string => `${price.toFixed(2)} €`;
+ 
+ export const finalPrice = (coffee: Coffee): number =>
+-  coffee.price * (1 - (coffee.discount ?? 0));
++  coffee.price;
+ 
+ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.some((item) => item.coffeeId === coffeeId)
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/cart.spec.ts (13 tests | 2 failed) 31ms
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 5ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 1ms
+   ❯ finalPrice (3)
+     × debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 8ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 1ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 1ms
+   ✓ addToCart (3)
+     ✓ debería añadir el café con cantidad 1 cuando el carrito está vacío 2ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 2ms
+   ✓ removeFromCart (2)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 1ms
+     ✓ no debería modificar el carrito que recibe cuando quita un café 1ms
+   ❯ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 1ms
+     × debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 1ms
+     ✓ debería contar como 0 un café cuando su coffeeId no existe en el catálogo 0ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 24ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 45ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 123ms
+ ❯ src/catalog/coffee-card.spec.tsx (4 tests | 1 failed) 156ms
+   ❯ CoffeeCard (4)
+     ✓ debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta 93ms
+     × debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento 21ms
+     ✓ no debería mostrar ninguna etiqueta de descuento cuando el café no tiene descuento 5ms
+     ✓ debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir 34ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 222ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 1 failed) 357ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 104ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 19ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 11ms
+     ✓ buscador (3)
+       ✓ debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 58ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 50ms
+       ✓ debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 27ms
+     ❯ carrito (integración) (3)
+       ✓ debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 10ms
+       × debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 38ms
+       ✓ debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 37ms
+
+ Test Files  3 failed | 4 passed (7)
+      Tests  4 failed | 44 passed (48)
+   Start at  21:18:42
+   Duration  1.78s (environment 68%, setup 12%, tests 10%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > finalPrice > debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41)
+AssertionError: expected 14.9 to be close to 13.41, received difference is 1.4900000000000002, but expected 0.005
+ ❯ src/catalog/cart.spec.ts:44:20
+     42|     // Un resultado con decimales no tiene por qué ser exacto, así que…
+     43|     // (…, 2): acepta una diferencia menor que 0.005 y no depende de e…
+     44|     expect(result).toBeCloseTo(13.41, 2);
+       |                    ^
+     45|   });
+     46|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/catalog/cart.spec.ts > cartTotal > debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32)
+AssertionError: expected 40.3 to be close to 37.32, received difference is 2.979999999999997, but expected 0.005
+ ❯ src/catalog/cart.spec.ts:180:20
+    178|     // Decimales, igual que en finalPrice: toBeCloseTo (con node -e da…
+    179|     // pero sería casualidad).
+    180|     expect(result).toBeCloseTo(37.32, 2);
+       |                    ^
+    181|   });
+    182|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento
+TestingLibraryElementError: Unable to find an element with the text: 13.41 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<li>[39m
+      [36m<h3>[39m
+        [0mEtiopía Yirgacheffe[0m
+      [36m</h3>[39m
+      [36m<p>[39m
+        [0mEtiopía[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m14.90 €[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m-[0m
+        [0m10[0m
+        [0m %[0m
+      [36m</p>[39m
+      [36m<button>[39m
+        [0mAñadir [0m
+        [0mEtiopía Yirgacheffe[0m
+        [0m al carrito[0m
+      [36m</button>[39m
+    [36m</li>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-card.spec.tsx:31:19
+     29|
+     30|     // Assert
+     31|     expect(screen.getByText('13.41 €')).toBeInTheDocument();
+       |                   ^
+     32|     expect(screen.getByText('-10 %')).toBeInTheDocument();
+     33|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil
+TestingLibraryElementError: Unable to find an element with the text: 2 bolsas · 23.91 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mEtiopía Yirgacheffe[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mEtiopía[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m14.90 €[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m-[0m
+            [0m10[0m
+            [0m %[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mEtiopía Yirgacheffe[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mColombia Huila[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mColombia[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m12.90 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mColombia Huila[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mBrasil Cerrado[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mBrasil[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m10.50 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mBrasil Cerrado[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<p>[39m
+        [0m2[0m
+        [0m bolsas · [0m
+        [0m25.40 €[0m
+      [36m</p>[39m
+      [36m<button>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-catalog.spec.tsx:131:21
+    129|
+    130|       // Assert
+    131|       expect(screen.getByText('2 bolsas · 23.91 €')).toBeInTheDocument…
+       |                     ^
+    132|       expect(screen.getByRole('button', { name: 'Vaciar carrito' })).t…
+    133|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/cart.ts; git diff --exit-code: limpio
+################################################################
+# 💥 O3
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..e7ada7c 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -9,7 +9,7 @@ export const getCoffees = async (): Promise<Coffee[]> => {
+     switch (response.status) {
+       case 404:
+         throw new Error('Catálogo no encontrado');
+-      case 503:
++      case 502:
+         throw new Error('Servicio no disponible');
+       default:
+         throw new Error('Error inesperado');
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (13 tests) 17ms
+ ❯ src/catalog/coffee.api.spec.ts (6 tests | 1 failed) 32ms
+   ❯ getCoffees (6)
+     ✓ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 9ms
+       ✓ debería llamar a fetch una vez con "/api/coffees" y la cabecera Accept: application/json cuando se piden los cafés 2ms
+     ❯ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 3ms
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 11ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 1ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "Failed to fetch" tal cual cuando fetch rechaza 1ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 50ms
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 1 failed) 140ms
+   ❯ getCoffees (MSW) (6)
+     ✓ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 62ms
+       ✓ debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 10ms
+     ❯ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 15ms
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 20ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 12ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "fetch failed" de Node cuando la red falla 11ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 169ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 1 failed) 236ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando la API todavía no ha respondido 169ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 23ms
+     ❯ error (2)
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 21ms
+       ✓ debería mostrar una alerta con "fetch failed" cuando la red falla 11ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 405ms
+
+ Test Files  3 failed | 4 passed (7)
+      Tests  3 failed | 45 passed (48)
+   Start at  21:18:45
+   Duration  1.92s (environment 69%, setup 12%, tests 10%, import 6%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Servicio no disponible
+Received:
+  Error inesperado
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:50:21
+     48|
+     49|       // Assert
+     50|       expect(alert).toHaveTextContent('Servicio no disponible');
+       |                     ^
+     51|     });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+AssertionError: expected [Function] to throw error including 'Servicio no disponible' but got 'Error inesperado'
+
+Expected: "Servicio no disponible"
+Received: "Error inesperado"
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:54:27
+     52|
+     53|       // Assert
+     54|       await expect(result).rejects.toThrow(message);
+       |                           ^
+     55|     });
+     56|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/catalog/coffee.api.spec.ts > getCoffees > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+AssertionError: expected [Function] to throw error including 'Servicio no disponible' but got 'Error inesperado'
+
+Expected: "Servicio no disponible"
+Received: "Error inesperado"
+
+ ❯ src/catalog/coffee.api.spec.ts:52:27
+     50|
+     51|       // Assert
+     52|       await expect(result).rejects.toThrow(message);
+       |                           ^
+     53|     });
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio
+################################################################
+# 💥 O4
+$ git diff src/catalog/coffee-card.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-card.tsx b/06-Testing/lab-testing/src/catalog/coffee-card.tsx
+index 399ca46..548c9fd 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-card.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-card.tsx
+@@ -13,6 +13,6 @@ export const CoffeeCard: React.FC<Props> = ({ coffee, onAdd }) => (
+     <p>{coffee.origin}</p>
+     <p>{formatPrice(finalPrice(coffee))}</p>
+     {coffee.discount ? <p>-{coffee.discount * 100} %</p> : null}
+-    <button onClick={() => onAdd(coffee)}>Añadir {coffee.name} al carrito</button>
++    <button onClick={() => onAdd({ ...coffee, price: 0 })}>Añadir {coffee.name} al carrito</button>
+   </li>
+ );
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (13 tests) 16ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 22ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 52ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 119ms
+ ❯ src/catalog/coffee-card.spec.tsx (4 tests | 1 failed) 163ms
+   ❯ CoffeeCard (4)
+     ✓ debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta 85ms
+     ✓ debería mostrar el precio final con el descuento aplicado y la etiqueta "-10 %" cuando el café tiene descuento 14ms
+     ✓ no debería mostrar ninguna etiqueta de descuento cuando el café no tiene descuento 10ms
+     × debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir 49ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 245ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 370ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:18:47
+   Duration  1.82s (environment 67%, setup 13%, tests 11%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-card.spec.tsx > CoffeeCard > debería llamar a onAdd una vez y con ese café cuando se pulsa el botón de añadir
+AssertionError: expected "vi.fn()" to be called with arguments: [ { id: 2, …(3) } ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    {
+      "id": 2,
+      "name": "Colombia Huila",
+      "origin": "Colombia",
+-     "price": 12.9,
++     "price": 0,
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/catalog/coffee-card.spec.tsx:57:19
+     55|     // Assert
+     56|     expect(onAdd).toHaveBeenCalledTimes(1);
+     57|     expect(onAdd).toHaveBeenCalledWith(colombia);
+       |                   ^
+     58|   });
+     59| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-card.tsx; git diff --exit-code: limpio
+################################################################
+# 💥 O5-1
+$ git diff src/catalog/coffee-catalog.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+index bddf2b2..a360b48 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+@@ -22,7 +22,7 @@ export const CoffeeCatalog: React.FC = () => {
+   if (loading) return <p>Cargando…</p>;
+   if (error) return <p role="alert">{error}</p>;
+ 
+-  const visible = coffees.filter((c) => c.name.toLowerCase().includes(filter.toLowerCase()));
++  const visible = coffees.filter((c) => c.name.includes(filter.toLowerCase()));
+ 
+   return (
+     <section>
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (13 tests) 15ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 27ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 57ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 118ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 151ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 235ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 2 failed) 378ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 122ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 17ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 8ms
+     ❯ buscador (3)
+       × debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 74ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 42ms
+       × debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 29ms
+     ✓ carrito (integración) (3)
+       ✓ debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 11ms
+       ✓ debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 30ms
+       ✓ debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 41ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  2 failed | 46 passed (48)
+   Start at  21:18:50
+   Duration  1.88s (environment 68%, setup 12%, tests 10%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar
+TestingLibraryElementError: Unable to find an accessible element with the role "listitem"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Cafés del mes":
+  [36m<h2 />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Buscar":
+  [36m<input[39m
+    [33mid[39m=[32m"filter"[39m
+    [33mvalue[39m=[32m"bra"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Vaciar carrito":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m"bra"[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/catalog/coffee-catalog.spec.tsx:65:28
+     63|
+     64|       // Assert
+     65|       const items = screen.getAllByRole('listitem');
+       |                            ^
+     66|       expect(items).toHaveLength(1);
+     67|       expect(within(items[0]).getByRole('heading', { name: 'Brasil Cer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas
+TestingLibraryElementError: Unable to find an accessible element with the role "listitem"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Cafés del mes":
+  [36m<h2 />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Buscar":
+  [36m<input[39m
+    [33mid[39m=[32m"filter"[39m
+    [33mvalue[39m=[32m"BRA"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Vaciar carrito":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m"BRA"[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/catalog/coffee-catalog.spec.tsx:98:28
+     96|
+     97|       // Assert
+     98|       const items = screen.getAllByRole('listitem');
+       |                            ^
+     99|       expect(items).toHaveLength(1);
+    100|       expect(within(items[0]).getByRole('heading', { name: 'Brasil Cer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-catalog.tsx; git diff --exit-code: limpio
+################################################################
+# 💥 O5-2
+$ git diff src/catalog/coffee-catalog.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+index bddf2b2..ea4de55 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+@@ -22,7 +22,7 @@ export const CoffeeCatalog: React.FC = () => {
+   if (loading) return <p>Cargando…</p>;
+   if (error) return <p role="alert">{error}</p>;
+ 
+-  const visible = coffees.filter((c) => c.name.toLowerCase().includes(filter.toLowerCase()));
++  const visible = coffees.filter((c) => c.name.toLowerCase().includes(filter));
+ 
+   return (
+     <section>
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 24ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 14ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 59ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 118ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 150ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 225ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 1 failed) 367ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 119ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 16ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 8ms
+     ❯ buscador (3)
+       ✓ debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 57ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 44ms
+       × debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 35ms
+     ✓ carrito (integración) (3)
+       ✓ debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 11ms
+       ✓ debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 31ms
+       ✓ debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 39ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:18:52
+   Duration  1.86s (environment 68%, setup 13%, tests 10%, import 6%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > buscador > debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas
+TestingLibraryElementError: Unable to find an accessible element with the role "listitem"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Cafés del mes":
+  [36m<h2 />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Buscar":
+  [36m<input[39m
+    [33mid[39m=[32m"filter"[39m
+    [33mvalue[39m=[32m"BRA"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Vaciar carrito":
+  [36m<button[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m"BRA"[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ src/catalog/coffee-catalog.spec.tsx:98:28
+     96|
+     97|       // Assert
+     98|       const items = screen.getAllByRole('listitem');
+       |                            ^
+     99|       expect(items).toHaveLength(1);
+    100|       expect(within(items[0]).getByRole('heading', { name: 'Brasil Cer…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-catalog.tsx; git diff --exit-code: limpio
+################################################################
+# 💥 O5-3
+$ git diff src/catalog/coffee-catalog.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+index bddf2b2..b534363 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+@@ -41,7 +41,7 @@ export const CoffeeCatalog: React.FC = () => {
+       <p>
+         {units} bolsas · {formatPrice(total)}
+       </p>
+-      <button onClick={clear} disabled={units === 0}>Vaciar carrito</button>
++      <button onClick={clear}>Vaciar carrito</button>
+     </section>
+   );
+ };
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 23ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 19ms
+ ✓ src/catalog/use-cart.spec.ts (6 tests) 59ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 118ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 158ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 209ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 1 failed) 371ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 113ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 22ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 11ms
+     ✓ buscador (3)
+       ✓ debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 55ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 50ms
+       ✓ debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 24ms
+     ❯ carrito (integración) (3)
+       × debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 16ms
+       ✓ debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 33ms
+       ✓ debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 41ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:18:55
+   Duration  1.95s (environment 71%, setup 11%, tests 9%, import 6%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería tener "Vaciar carrito" desactivado cuando el carrito está vacío
+Error: expect(element).toBeDisabled()
+
+Received element is not disabled:
+  <button />
+ ❯ src/catalog/coffee-catalog.spec.tsx:114:27
+    112|
+    113|       // Assert
+    114|       expect(clearButton).toBeDisabled();
+       |                           ^
+    115|     });
+    116|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-catalog.tsx; git diff --exit-code: limpio
+################################################################
+# 💥 O6
+$ git diff src/catalog/use-cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/use-cart.ts b/06-Testing/lab-testing/src/catalog/use-cart.ts
+index 0d364bd..c998dce 100644
+--- a/06-Testing/lab-testing/src/catalog/use-cart.ts
++++ b/06-Testing/lab-testing/src/catalog/use-cart.ts
+@@ -5,7 +5,7 @@ import { addToCart, cartTotal, removeFromCart } from './cart';
+ export const useCart = (coffees: Coffee[]) => {
+   const [cart, setCart] = React.useState<CartItem[]>([]);
+ 
+-  const add = (coffee: Coffee) => setCart((previous) => addToCart(previous, coffee.id));
++  const add = (coffee: Coffee) => setCart(addToCart(cart, coffee.id));
+   const remove = (coffeeId: number) => setCart((previous) => removeFromCart(previous, coffeeId));
+   const clear = () => setCart([]);
+ 
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/cart.spec.ts (13 tests) 19ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 27ms
+ ❯ src/catalog/use-cart.spec.ts (6 tests | 1 failed) 70ms
+   ❯ useCart (6)
+     ✓ debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 29ms
+     ✓ debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 10ms
+     ✓ debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 7ms
+     × debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 12ms
+     ✓ debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 3ms
+     ✓ debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 3ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 126ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 146ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 220ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 375ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:18:58
+   Duration  1.84s (environment 67%, setup 13%, tests 10%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/catalog/use-cart.spec.ts:73:34
+     71|
+     72|     // Assert
+     73|     expect(result.current.units).toBe(2);
+       |                                  ^
+     74|   });
+     75|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/use-cart.ts; git diff --exit-code: limpio
+################################################################
+# 💥 P1-1
+$ git diff src/catalog/use-cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/use-cart.ts b/06-Testing/lab-testing/src/catalog/use-cart.ts
+index 0d364bd..5599373 100644
+--- a/06-Testing/lab-testing/src/catalog/use-cart.ts
++++ b/06-Testing/lab-testing/src/catalog/use-cart.ts
+@@ -6,7 +6,7 @@ export const useCart = (coffees: Coffee[]) => {
+   const [cart, setCart] = React.useState<CartItem[]>([]);
+ 
+   const add = (coffee: Coffee) => setCart((previous) => addToCart(previous, coffee.id));
+-  const remove = (coffeeId: number) => setCart((previous) => removeFromCart(previous, coffeeId));
++  const remove = (coffeeId: number) => setCart((previous) => previous);
+   const clear = () => setCart([]);
+ 
+   const units = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 27ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 18ms
+ ❯ src/catalog/use-cart.spec.ts (6 tests | 2 failed) 83ms
+   ❯ useCart (6)
+     ✓ debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 34ms
+     ✓ debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 8ms
+     ✓ debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 8ms
+     ✓ debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 5ms
+     × debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 17ms
+     × debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 7ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 118ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 145ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 226ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 384ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  2 failed | 46 passed (48)
+   Start at  21:19:00
+   Duration  1.87s (environment 69%, setup 12%, tests 10%, import 6%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita
+AssertionError: expected [ { coffeeId: 3, quantity: 1 } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "coffeeId": 3,
++     "quantity": 1,
++   },
++ ]
+
+ ❯ src/catalog/use-cart.spec.ts:89:33
+     87|
+     88|     // Assert
+     89|     expect(result.current.cart).toEqual([]);
+       |                                 ^
+     90|     expect(result.current.units).toBe(0);
+     91|     expect(result.current.total).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil
+AssertionError: expected [ { coffeeId: 2, quantity: 1 }, …(1) ] to deeply equal [ { coffeeId: 2, quantity: 1 } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "coffeeId": 2,
+      "quantity": 1,
+    },
++   {
++     "coffeeId": 3,
++     "quantity": 1,
++   },
+  ]
+
+ ❯ src/catalog/use-cart.spec.ts:110:33
+    108|
+    109|     // Assert
+    110|     expect(result.current.cart).toEqual([{ coffeeId: colombia.id, quan…
+       |                                 ^
+    111|     expect(result.current.units).toBe(1);
+    112|     expect(result.current.total).toBeCloseTo(12.9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/use-cart.ts; git diff --exit-code: limpio
+################################################################
+# 💥 P1-2
+$ git diff src/catalog/use-cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/use-cart.ts b/06-Testing/lab-testing/src/catalog/use-cart.ts
+index 0d364bd..597a8e4 100644
+--- a/06-Testing/lab-testing/src/catalog/use-cart.ts
++++ b/06-Testing/lab-testing/src/catalog/use-cart.ts
+@@ -6,7 +6,7 @@ export const useCart = (coffees: Coffee[]) => {
+   const [cart, setCart] = React.useState<CartItem[]>([]);
+ 
+   const add = (coffee: Coffee) => setCart((previous) => addToCart(previous, coffee.id));
+-  const remove = (coffeeId: number) => setCart((previous) => removeFromCart(previous, coffeeId));
++  const remove = (coffeeId: number) => setCart([]);
+   const clear = () => setCart([]);
+ 
+   const units = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 27ms
+ ✓ src/catalog/cart.spec.ts (13 tests) 21ms
+ ❯ src/catalog/use-cart.spec.ts (6 tests | 1 failed) 67ms
+   ❯ useCart (6)
+     ✓ debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 25ms
+     ✓ debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 8ms
+     ✓ debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 5ms
+     ✓ debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 3ms
+     ✓ debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 4ms
+     × debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 15ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 122ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 154ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 229ms
+ ✓ src/catalog/coffee-catalog.spec.tsx (9 tests) 363ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 47 passed (48)
+   Start at  21:19:03
+   Duration  1.86s (environment 67%, setup 12%, tests 10%, import 7%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil
+AssertionError: expected [] to deeply equal [ { coffeeId: 2, quantity: 1 } ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "coffeeId": 2,
+-     "quantity": 1,
+-   },
+- ]
++ []
+
+ ❯ src/catalog/use-cart.spec.ts:110:33
+    108|
+    109|     // Assert
+    110|     expect(result.current.cart).toEqual([{ coffeeId: colombia.id, quan…
+       |                                 ^
+    111|     expect(result.current.units).toBe(1);
+    112|     expect(result.current.total).toBeCloseTo(12.9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/use-cart.ts; git diff --exit-code: limpio
+################################################################
+# 💥 D2-1
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..8da82ab 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -17,5 +17,5 @@ export const getCoffees = async (): Promise<Coffee[]> => {
+   }
+ 
+   const { data } = await response.json();
+-  return data;
++  return [];
+ };
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 1 failed) 91ms
+   ❯ getCoffees (MSW) (6)
+     ❯ cuando la API responde 200 (2)
+       × debería devolver los cafés del campo data cuando la API responde 200 47ms
+       ✓ debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 9ms
+     ✓ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 8ms
+       ✓ debería rechazar con "Servicio no disponible" cuando la API responde 503 6ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 5ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "fetch failed" de Node cuando la red falla 6ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 2 failed) 2176ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ❯ carga (2)
+       × debería mostrar "Cargando…" cuando la API todavía no ha respondido 1044ms
+       × debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 1015ms
+     ✓ error (2)
+       ✓ debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 92ms
+       ✓ debería mostrar una alerta con "fetch failed" cuando la red falla 17ms
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 7 passed (10)
+   Start at  21:19:05
+   Duration  3.01s (tests 61%, environment 28%, setup 5%, import 4%, transform 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+TestingLibraryElementError: Unable to find role="listitem"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:24:20
+     22|       expect(screen.getByText('Cargando…')).toBeInTheDocument();
+     23|       // Esperamos a que termine la carga para que no haya setState fu…
+     24|       await screen.findAllByRole('listitem');
+       |                    ^
+     25|     });
+     26|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200
+TestingLibraryElementError: Unable to find role="listitem"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:32:34
+     30|       // Act
+     31|       render(<CoffeeCatalog />);
+     32|       const items = await screen.findAllByRole('listitem');
+       |                                  ^
+     33|
+     34|       // Assert
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería devolver los cafés del campo data cuando la API responde 200
+AssertionError: expected [] to deeply equal [ { id: 1, …(4) }, …(2) ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "discount": 0.1,
+-     "id": 1,
+-     "name": "Etiopía Yirgacheffe",
+-     "origin": "Etiopía",
+-     "price": 14.9,
+-   },
+-   {
+-     "id": 2,
+-     "name": "Colombia Huila",
+-     "origin": "Colombia",
+-     "price": 12.9,
+-   },
+-   {
+-     "id": 3,
+-     "name": "Brasil Cerrado",
+-     "origin": "Brasil",
+-     "price": 10.5,
+-   },
+- ]
++ []
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:20:22
+     18|
+     19|       // Assert
+     20|       expect(result).toEqual(coffees);
+       |                      ^
+     21|     });
+     22|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio
+################################################################
+# 💥 D2-2
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..db0fdd9 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -3,7 +3,7 @@ import type { Coffee } from './model';
+ export const url = '/api/coffees';
+ 
+ export const getCoffees = async (): Promise<Coffee[]> => {
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url);
+ 
+   if (!response.ok) {
+     switch (response.status) {
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 1 failed) 75ms
+   ❯ getCoffees (MSW) (6)
+     ❯ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 35ms
+       × debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 9ms
+     ✓ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 7ms
+       ✓ debería rechazar con "Servicio no disponible" cuando la API responde 503 4ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 5ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "fetch failed" de Node cuando la red falla 6ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 171ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:19:09
+   Duration  932ms (environment 59%, tests 16%, setup 11%, import 10%, transform 3%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde 200 > debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees
+AssertionError: expected '*/*' to be 'application/json' // Object.is equality
+
+Expected: "application/json"
+Received: "*/*"
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:37:22
+     35|
+     36|       // Assert
+     37|       expect(accept).toBe('application/json');
+       |                      ^
+     38|     });
+     39|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio
+################################################################
+# 💥 D2-3
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..075f2e6 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -5,7 +5,7 @@ export const url = '/api/coffees';
+ export const getCoffees = async (): Promise<Coffee[]> => {
+   const response = await fetch(url, { headers: { Accept: 'application/json' } });
+ 
+-  if (!response.ok) {
++  if (false) {
+     switch (response.status) {
+       case 404:
+         throw new Error('Catálogo no encontrado');
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 3 failed) 90ms
+   ❯ getCoffees (MSW) (6)
+     ✓ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 39ms
+       ✓ debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 8ms
+     ❯ cuando la API responde con un error (3)
+       × debería rechazar con "Catálogo no encontrado" cuando la API responde 404 13ms
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 5ms
+       × debería rechazar con "Error inesperado" cuando la API responde 500 8ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "fetch failed" de Node cuando la red falla 10ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 1 failed) 182ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando la API todavía no ha respondido 131ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 18ms
+     ❯ error (2)
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 16ms
+       ✓ debería mostrar una alerta con "fetch failed" cuando la red falla 10ms
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 6 passed (10)
+   Start at  21:19:10
+   Duration  966ms (environment 59%, tests 17%, import 10%, setup 10%, transform 3%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Servicio no disponible
+Received:
+  Cannot destructure property 'data' of '(intermediate value)' as it is null.
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:50:21
+     48|
+     49|       // Assert
+     50|       expect(alert).toHaveTextContent('Servicio no disponible');
+       |                     ^
+     51|     });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Catálogo no encontrado" cuando la API responde 404
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Error inesperado" cuando la API responde 500
+AssertionError: promise resolved "[ { id: 1, …(4) }, …(2) ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  {
+    "discount": 0.1,
+    "id": 1,
+    "name": "Etiopía Yirgacheffe",
+    "origin": "Etiopía",
+    "price": 14.9,
+  },
+  {
+    "id": 2,
+    "name": "Colombia Huila",
+    "origin": "Colombia",
+    "price": 12.9,
+  },
+  {
+    "id": 3,
+    "name": "Brasil Cerrado",
+    "origin": "Brasil",
+    "price": 10.5,
+  },
+]
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:54:27
+     52|
+     53|       // Assert
+     54|       await expect(result).rejects.toThrow(message);
+       |                           ^
+     55|     });
+     56|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio
+################################################################
+# 💥 D2-4
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..47f06d4 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -3,7 +3,7 @@ import type { Coffee } from './model';
+ export const url = '/api/coffees';
+ 
+ export const getCoffees = async (): Promise<Coffee[]> => {
+-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
++  const response = await fetch(url, { headers: { Accept: 'application/json' } }).catch(() => { throw new Error('Error inesperado'); });
+ 
+   if (!response.ok) {
+     switch (response.status) {
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 1 failed) 81ms
+   ❯ getCoffees (MSW) (6)
+     ✓ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 37ms
+       ✓ debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 7ms
+     ✓ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 10ms
+       ✓ debería rechazar con "Servicio no disponible" cuando la API responde 503 4ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 5ms
+     ❯ cuando falla la red (1)
+       × debería propagar el TypeError "fetch failed" de Node cuando la red falla 11ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 1 failed) 168ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando la API todavía no ha respondido 120ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 19ms
+     ❯ error (2)
+       ✓ debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 13ms
+       × debería mostrar una alerta con "fetch failed" cuando la red falla 10ms
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 8 passed (10)
+   Start at  21:19:12
+   Duration  931ms (environment 58%, tests 17%, setup 11%, import 11%, transform 4%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  fetch failed
+Received:
+  Error inesperado
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:62:21
+     60|
+     61|       // Assert
+     62|       expect(alert).toHaveTextContent('fetch failed');
+       |                     ^
+     63|     });
+     64|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando falla la red > debería propagar el TypeError "fetch failed" de Node cuando la red falla
+AssertionError: expected error to be instance of TypeError
+
+- Expected:
+[Function TypeError]
+
++ Received:
+Error {
+  "message": "Error inesperado",
+}
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:67:27
+     65|
+     66|       // Assert
+     67|       await expect(result).rejects.toThrow(TypeError);
+       |                           ^
+     68|       await expect(result).rejects.toThrow('fetch failed');
+     69|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio
+################################################################
+# 💥 D2-5
+$ git diff src/catalog/coffee.api.ts
+diff --git a/06-Testing/lab-testing/src/catalog/coffee.api.ts b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+index b3c823f..a9475d2 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee.api.ts
++++ b/06-Testing/lab-testing/src/catalog/coffee.api.ts
+@@ -10,7 +10,7 @@ export const getCoffees = async (): Promise<Coffee[]> => {
+       case 404:
+         throw new Error('Catálogo no encontrado');
+       case 503:
+-        throw new Error('Servicio no disponible');
++        throw new Error('Servicio caído');
+       default:
+         throw new Error('Error inesperado');
+     }
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/coffee.api.msw.spec.ts (6 tests | 1 failed) 92ms
+   ❯ getCoffees (MSW) (6)
+     ✓ cuando la API responde 200 (2)
+       ✓ debería devolver los cafés del campo data cuando la API responde 200 37ms
+       ✓ debería mandar la cabecera Accept: application/json cuando pide GET /api/coffees 8ms
+     ❯ cuando la API responde con un error (3)
+       ✓ debería rechazar con "Catálogo no encontrado" cuando la API responde 404 10ms
+       × debería rechazar con "Servicio no disponible" cuando la API responde 503 11ms
+       ✓ debería rechazar con "Error inesperado" cuando la API responde 500 7ms
+     ✓ cuando falla la red (1)
+       ✓ debería propagar el TypeError "fetch failed" de Node cuando la red falla 10ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 1 failed) 164ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando la API todavía no ha respondido 119ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 17ms
+     ❯ error (2)
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 14ms
+       ✓ debería mostrar una alerta con "fetch failed" cuando la red falla 8ms
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 8 passed (10)
+   Start at  21:19:14
+   Duration  940ms (environment 59%, tests 16%, setup 10%, import 10%, transform 4%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+Error: expect(element).toHaveTextContent()
+
+Expected element to have text content:
+  Servicio no disponible
+Received:
+  Servicio caído
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:50:21
+     48|
+     49|       // Assert
+     50|       expect(alert).toHaveTextContent('Servicio no disponible');
+       |                     ^
+     51|     });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/coffee.api.msw.spec.ts > getCoffees (MSW) > cuando la API responde con un error > debería rechazar con "Servicio no disponible" cuando la API responde 503
+AssertionError: expected [Function] to throw error including 'Servicio no disponible' but got 'Servicio caído'
+
+Expected: "Servicio no disponible"
+Received: "Servicio caído"
+
+ ❯ src/catalog/coffee.api.msw.spec.ts:54:27
+     52|
+     53|       // Assert
+     54|       await expect(result).rejects.toThrow(message);
+       |                           ^
+     55|     });
+     56|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee.api.ts; git diff --exit-code: limpio
+################################################################
+# 💥 D2-6
+$ git diff src/catalog/coffee-catalog.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+index bddf2b2..1b60920 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+@@ -7,7 +7,7 @@ import { useCart } from './use-cart';
+ 
+ export const CoffeeCatalog: React.FC = () => {
+   const [coffees, setCoffees] = React.useState<Coffee[]>([]);
+-  const [loading, setLoading] = React.useState(true);
++  const [loading, setLoading] = React.useState(false);
+   const [error, setError] = React.useState('');
+   const [filter, setFilter] = React.useState('');
+   const { units, total, add, clear } = useCart(coffees);
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 104ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 1 failed) 199ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ❯ carga (2)
+       × debería mostrar "Cargando…" cuando la API todavía no ha respondido 58ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 111ms
+     ✓ error (2)
+       ✓ debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 13ms
+       ✓ debería mostrar una alerta con "fetch failed" cuando la red falla 10ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:19:15
+   Duration  1.05s (environment 56%, tests 17%, setup 12%, import 11%, transform 3%, worker 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+TestingLibraryElementError: Unable to find an element with the text: Cargando…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:22:21
+     20|
+     21|       // Assert
+     22|       expect(screen.getByText('Cargando…')).toBeInTheDocument();
+       |                     ^
+     23|       // Esperamos a que termine la carga para que no haya setState fu…
+     24|       await screen.findAllByRole('listitem');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-catalog.tsx; git diff --exit-code: limpio
+################################################################
+# 💥 D2-7
+$ git diff src/catalog/coffee-catalog.tsx
+diff --git a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+index bddf2b2..79f3063 100644
+--- a/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
++++ b/06-Testing/lab-testing/src/catalog/coffee-catalog.tsx
+@@ -15,7 +15,7 @@ export const CoffeeCatalog: React.FC = () => {
+   React.useEffect(() => {
+     getCoffees()
+       .then(setCoffees)
+-      .catch((e: Error) => setError(e.message))
++      
+       .finally(() => setLoading(false));
+   }, []);
+ 
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts msw
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 95ms
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx (4 tests | 2 failed) 2194ms
+   ❯ CoffeeCatalog (MSW) (4)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando la API todavía no ha respondido 147ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando la API responde 200 16ms
+     ❯ error (2)
+       × debería mostrar la alerta "Servicio no disponible" cuando la API responde 503 1010ms
+       × debería mostrar una alerta con "fetch failed" cuando la red falla 1008ms
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 8 passed (10)
+     Errors  2 errors
+   Start at  21:19:17
+   Duration  3.05s (tests 62%, environment 27%, import 5%, setup 5%, transform 1%)
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar la alerta "Servicio no disponible" cuando la API responde 503
+TestingLibraryElementError: Unable to find role="alert"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:47:34
+     45|       // Act
+     46|       render(<CoffeeCatalog />);
+     47|       const alert = await screen.findByRole('alert');
+       |                                  ^
+     48|
+     49|       // Assert
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > error > debería mostrar una alerta con "fetch failed" cuando la red falla
+TestingLibraryElementError: Unable to find role="alert"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<p>[39m
+        [0mSin resultados[0m
+      [36m</p>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/catalog/coffee-catalog.msw.spec.tsx:59:34
+     57|       // Act
+     58|       render(<CoffeeCatalog />);
+     59|       const alert = await screen.findByRole('alert');
+       |                                  ^
+     60|
+     61|       // Assert
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: Servicio no disponible
+ ❯ getCoffees src/catalog/coffee.api.ts:13:15
+     11|         throw new Error('Catálogo no encontrado');
+     12|       case 503:
+     13|         throw new Error('Servicio no disponible');
+       |               ^
+     14|       default:
+     15|         throw new Error('Error inesperado');
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+
+This error originated in "src/catalog/coffee-catalog.msw.spec.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "debería mostrar la alerta "Servicio no disponible" cuando la API responde 503". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: fetch failed
+ ❯ node:internal/deps/undici/undici:15456:13
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ getCoffees src/catalog/coffee.api.ts:6:20
+      4|
+      5| export const getCoffees = async (): Promise<Coffee[]> => {
+      6|   const response = await fetch(url, { headers: { Accept: 'application/…
+       |                    ^
+      7|
+      8|   if (!response.ok) {
+
+This error originated in "src/catalog/coffee-catalog.msw.spec.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "debería mostrar una alerta con "fetch failed" cuando la red falla". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+{
+  constructor: 'Function<Response>',
+  type: 'error',
+  url: '',
+  redirected: false,
+  status: 0,
+  ok: false,
+  statusText: '',
+  headers: {
+    constructor: 'Function<Headers>',
+    append: 'Function<append>',
+    delete: 'Function<delete>',
+    get: 'Function<get>',
+    has: 'Function<has>',
+    set: 'Function<set>',
+    getSetCookie: 'Function<getSetCookie>',
+    keys: 'Function<keys>',
+    values: 'Function<values>',
+    entries: 'Function<entries>',
+    forEach: 'Function<forEach>'
+  },
+  body: null,
+  bodyUsed: false,
+  clone: 'Function<clone>',
+  blob: 'Function<blob>',
+  arrayBuffer: 'Function<arrayBuffer>',
+  text: 'Function<text>',
+  json: 'Function<json>',
+  formData: 'Function<formData>',
+  bytes: 'Function<bytes>',
+  name: 'Caused by',
+  stacks: []
+}
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { url: '', redirected: false, status: 0, statusText: '', headers: { constructor: 'Function<Headers>', append: 'Function<append>', delete: 'Function<delete>', get: 'Function<get>', has: 'Function<has>', set: 'Function<set>', getSetCookie: 'Function<getSetCookie>', keys: 'Function<keys>', values: 'Function<values>', entries: 'Function<entries>', forEach: 'Function<forEach>' }, body: null, bodyUsed: false, clone: 'Function<clone>', blob: 'Function<blob>', arrayBuffer: 'Function<arrayBuffer>', text: 'Function<text>', json: 'Function<json>', formData: 'Function<formData>', bytes: 'Function<bytes>' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/coffee-catalog.tsx; git diff --exit-code: limpio

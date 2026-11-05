@@ -1,0 +1,277 @@
+# 💥 R4
+$ git diff src/catalog/cart.ts
+diff --git a/06-Testing/lab-testing/src/catalog/cart.ts b/06-Testing/lab-testing/src/catalog/cart.ts
+index 957fa25..843b695 100644
+--- a/06-Testing/lab-testing/src/catalog/cart.ts
++++ b/06-Testing/lab-testing/src/catalog/cart.ts
+@@ -10,7 +10,7 @@ export const addToCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+     ? cart.map((item) =>
+         item.coffeeId === coffeeId ? { ...item, quantity: item.quantity + 1 } : item
+       )
+-    : [...cart, { coffeeId, quantity: 1 }];
++    : [...cart, { coffeeId, quantity: 0 }];
+ 
+ export const removeFromCart = (cart: CartItem[], coffeeId: number): CartItem[] =>
+   cart.filter((item) => item.coffeeId !== coffeeId);
+
+$ NO_COLOR=1 npx vitest run -c ./config/test/config.ts
+
+ RUN  v5.1.0 /workspaces/lemoncode_fe_luckia/06-Testing/lab-testing
+
+ ❯ src/catalog/cart.spec.ts (13 tests | 1 failed) 52ms
+   ✓ formatPrice (2)
+     ✓ debería devolver "14.90 €" cuando el precio es 14.9 3ms
+     ✓ debería añadir los dos decimales cuando el precio es entero (10 → "10.00 €") 1ms
+   ✓ finalPrice (3)
+     ✓ debería aplicar el descuento cuando el café tiene discount (Etiopía → 13.41) 1ms
+     ✓ debería devolver el precio tal cual cuando el café no tiene discount (Colombia → 12.9) 1ms
+     ✓ debería devolver el precio tal cual cuando el discount es 0 1ms
+   ❯ addToCart (3)
+     × debería añadir el café con cantidad 1 cuando el carrito está vacío 25ms
+     ✓ debería sumar 1 al café y dejar los demás igual cuando el café ya está en el carrito 4ms
+     ✓ no debería modificar el carrito que recibe cuando el café ya está en él 2ms
+   ✓ removeFromCart (2)
+     ✓ debería quitar el café indicado y dejar los demás cuando está en el carrito 3ms
+     ✓ no debería modificar el carrito que recibe cuando quita un café 2ms
+   ✓ cartTotal (3)
+     ✓ debería devolver 0 cuando el carrito está vacío 1ms
+     ✓ debería sumar los precios finales por cantidad cuando hay 2 × Etiopía y 1 × Brasil (37.32) 0ms
+     ✓ debería contar como 0 un café cuando su coffeeId no existe en el catálogo 0ms
+ ✓ src/catalog/coffee.api.spec.ts (6 tests) 42ms
+ ❯ src/catalog/use-cart.spec.ts (6 tests | 3 failed) 121ms
+   ❯ useCart (6)
+     ✓ debería empezar con el carrito vacío, 0 unidades y total 0 cuando se monta el hook 51ms
+     × debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos 27ms
+     ✓ debería quedarse con 0 unidades cuando se añade un café y después se vacía el carrito 8ms
+     × debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act 7ms
+     ✓ debería quedarse con 0 unidades, carrito vacío y total 0 cuando se añade Brasil y después se quita 6ms
+     × debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil 12ms
+ ✓ src/catalog/coffee-card.spec.tsx (4 tests) 254ms
+ ✓ src/catalog/coffee.api.msw.spec.ts (6 tests) 214ms
+ ✓ src/catalog/coffee-catalog.msw.spec.tsx (4 tests) 414ms
+   ✓ CoffeeCatalog (MSW) (4)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando la API todavía no ha respondido 303ms
+ ❯ src/catalog/coffee-catalog.spec.tsx (9 tests | 1 failed) 581ms
+   ❯ CoffeeCatalog (9)
+     ✓ carga (2)
+       ✓ debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido 199ms
+       ✓ debería mostrar los 3 cafés y quitar "Cargando…" cuando getCoffees resuelve 23ms
+     ✓ error (1)
+       ✓ debería mostrar una alerta con el mensaje del error cuando getCoffees rechaza 14ms
+     ✓ buscador (3)
+       ✓ debería mostrar sólo Brasil Cerrado cuando se escribe "bra" en Buscar 84ms
+       ✓ debería mostrar "Sin resultados" y ningún café cuando el texto no coincide con ninguno 83ms
+       ✓ debería encontrar Brasil Cerrado cuando se escribe "BRA" en mayúsculas 36ms
+     ❯ carrito (integración) (3)
+       ✓ debería tener "Vaciar carrito" desactivado cuando el carrito está vacío 19ms
+       × debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil 52ms
+       ✓ debería volver a "0 bolsas · 0.00 €" cuando se pulsa "Vaciar carrito" 62ms
+
+ Test Files  3 failed | 4 passed (7)
+      Tests  5 failed | 43 passed (48)
+   Start at  21:19:30
+   Duration  2.49s (environment 61%, setup 15%, tests 13%, import 8%, transform 2%, worker 1%)
+
+stderr | src/catalog/coffee-card.spec.tsx > CoffeeCard > debería mostrar el nombre del café como encabezado de nivel 3 cuando se pinta la tarjeta
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carga > debería mostrar "Cargando…" cuando getCoffees todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+stderr | src/catalog/coffee-catalog.msw.spec.tsx > CoffeeCatalog (MSW) > carga > debería mostrar "Cargando…" cuando la API todavía no ha respondido
+Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/catalog/cart.spec.ts > addToCart > debería añadir el café con cantidad 1 cuando el carrito está vacío
+AssertionError: expected [ { coffeeId: 1, quantity: +0 } ] to deeply equal [ { coffeeId: 1, quantity: 1 } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "coffeeId": 1,
+-     "quantity": 1,
++     "quantity": 0,
+    },
+  ]
+
+ ❯ src/catalog/cart.spec.ts:80:20
+     78|
+     79|     // Assert
+     80|     expect(result).toEqual([{ coffeeId: ethiopia.id, quantity: 1 }]);
+       |                    ^
+     81|   });
+     82|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/catalog/coffee-catalog.spec.tsx > CoffeeCatalog > carrito (integración) > debería mostrar "2 bolsas · 23.91 €" y activar "Vaciar carrito" cuando se añaden Etiopía y Brasil
+TestingLibraryElementError: Unable to find an element with the text: 2 bolsas · 23.91 €. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section>[39m
+      [36m<h2>[39m
+        [0mCafés del mes[0m
+      [36m</h2>[39m
+      [36m<label[39m
+        [33mfor[39m=[32m"filter"[39m
+      [36m>[39m
+        [0mBuscar[0m
+      [36m</label>[39m
+      [36m<input[39m
+        [33mid[39m=[32m"filter"[39m
+        [33mvalue[39m=[32m""[39m
+      [36m/>[39m
+      [36m<ul>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mEtiopía Yirgacheffe[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mEtiopía[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m13.41 €[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m-[0m
+            [0m10[0m
+            [0m %[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mEtiopía Yirgacheffe[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mColombia Huila[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mColombia[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m12.90 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mColombia Huila[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+        [36m<li>[39m
+          [36m<h3>[39m
+            [0mBrasil Cerrado[0m
+          [36m</h3>[39m
+          [36m<p>[39m
+            [0mBrasil[0m
+          [36m</p>[39m
+          [36m<p>[39m
+            [0m10.50 €[0m
+          [36m</p>[39m
+          [36m<button>[39m
+            [0mAñadir [0m
+            [0mBrasil Cerrado[0m
+            [0m al carrito[0m
+          [36m</button>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+      [36m<p>[39m
+        [0m0[0m
+        [0m bolsas · [0m
+        [0m0.00 €[0m
+      [36m</p>[39m
+      [36m<button[39m
+        [33mdisabled[39m=[32m""[39m
+      [36m>[39m
+        [0mVaciar carrito[0m
+      [36m</button>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/catalog/coffee-catalog.spec.tsx:131:21
+    129|
+    130|       // Assert
+    131|       expect(screen.getByText('2 bolsas · 23.91 €')).toBeInTheDocument…
+       |                     ^
+    132|       expect(screen.getByRole('button', { name: 'Vaciar carrito' })).t…
+    133|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades y un total de 21 cuando se añade Brasil dos veces en dos act seguidos
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/catalog/use-cart.spec.ts:40:34
+     38|     // Assert
+     39|     // Se lee result.current otra vez, ahora que los dos act han termi…
+     40|     expect(result.current.units).toBe(2);
+       |                                  ^
+     41|     expect(result.current.total).toBeCloseTo(21);
+     42|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería tener 2 unidades cuando se añade Brasil dos veces dentro del mismo act
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/catalog/use-cart.spec.ts:73:34
+     71|
+     72|     // Assert
+     73|     expect(result.current.units).toBe(2);
+       |                                  ^
+     74|   });
+     75|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/catalog/use-cart.spec.ts > useCart > debería dejar sólo Colombia (1 unidad, total 12,90) cuando hay Colombia y Brasil y se quita Brasil
+AssertionError: expected [ { coffeeId: 2, quantity: +0 } ] to deeply equal [ { coffeeId: 2, quantity: 1 } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "coffeeId": 2,
+-     "quantity": 1,
++     "quantity": 0,
+    },
+  ]
+
+ ❯ src/catalog/use-cart.spec.ts:110:33
+    108|
+    109|     // Assert
+    110|     expect(result.current.cart).toEqual([{ coffeeId: colombia.id, quan…
+       |                                 ^
+    111|     expect(result.current.units).toBe(1);
+    112|     expect(result.current.total).toBeCloseTo(12.9);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+# exit 1
+# deshecho con git checkout -- src/catalog/cart.ts; git diff --exit-code: limpio
